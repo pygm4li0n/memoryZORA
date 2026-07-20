@@ -6,7 +6,7 @@
     <title>NITRO CHAT // Epic Full‑Screen</title>
     <style>
         /* =========================================================
-           NITRO CHAT – EPIC UI (completo, mismo estilo de antes)
+           NITRO CHAT – EPIC UI (estilo completo)
         ========================================================= */
         :root {
             --bg-deep: #040410;
@@ -586,12 +586,11 @@
             const SUPABASE_URL = 'https://uxrpjfsouwxnlcbhjilz.supabase.co';
             const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
             const STORAGE_BUCKET = 'chat-images';
+            const AVATAR_BUCKET = 'chat-avatars';
 
-            // ── State & DOM ──────────────────────────────────
             const STORAGE_KEY_NAME = 'nitro_chat_username';
             const CLIENT_ID_KEY = 'nitro_chat_client_id';
             const PRIVATE_PARTNERS_KEY = 'nitro_chat_private_partners';
-            const PROFILE_PIC_KEY = 'nitro_chat_profile_pic';
 
             let username = localStorage.getItem(STORAGE_KEY_NAME) || '';
             let clientId = localStorage.getItem(CLIENT_ID_KEY) || '';
@@ -601,11 +600,12 @@
             }
             let privatePartners = [];
             try { privatePartners = JSON.parse(localStorage.getItem(PRIVATE_PARTNERS_KEY) || '[]'); } catch(e) { privatePartners = []; }
-            let profilePic = localStorage.getItem(PROFILE_PIC_KEY) || '';
+
+            let avatarCache = {};
 
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // DOM elements
+            // DOM elements (all unchanged)
             const publicMessagesContainer = document.getElementById('publicMessagesContainer');
             const privateMessagesContainer = document.getElementById('privateMessagesContainer');
             const messageInput = document.getElementById('messageInput');
@@ -652,7 +652,7 @@
             const chatTabs = document.getElementById('chatTabs');
 
             let replyingTo = null;
-            let activePrivateChat = null;          // partner username
+            let activePrivateChat = null;
             let currentTab = 'public';
             let onlineUsers = new Map();
             let isConnected = false;
@@ -667,8 +667,9 @@
             const EMOJIS = ['❤️','😂','😮','😢','😡'];
             let pendingImageUrl = null;
             let pendingImageName = '';
+            let profilePicFile = null; // Para subir la foto de perfil
 
-            // ── Particles (unchanged) ───────────────────────
+            // ── Particles (identical) ──
             const particleCanvas = document.getElementById('particleCanvas');
             const pCtx = particleCanvas.getContext('2d');
             let particles = [];
@@ -752,12 +753,54 @@
                     sidebarStatusText.textContent = 'Connecting…';
                 }
             }
-            function getAvatarHTML(dataUrl, name) {
-                if(dataUrl) return `<img src="${dataUrl}" alt="${escapeHtml(name)}">`;
-                return (name || '?')[0].toUpperCase();
+
+            // ── Avatar helpers ──
+            async function fetchAvatars(usernames) {
+                const unique = [...new Set(usernames.filter(u => u && !avatarCache[u]))];
+                if (unique.length === 0) return;
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('username, avatar_url')
+                    .in('username', unique);
+                if (error) { console.warn('Error fetching avatars:', error); return; }
+                (data||[]).forEach(p => {
+                    avatarCache[p.username] = p.avatar_url;
+                });
             }
 
-            // ── Image upload helpers ──
+            function getAvatarURL(user) {
+                return avatarCache[user] || null;
+            }
+
+            function renderAvatarHTML(user) {
+                const url = getAvatarURL(user);
+                if (url) return `<img src="${escapeHtml(url)}" alt="${escapeHtml(user)}" style="width:100%;height:100%;object-fit:cover;">`;
+                return (user || '?')[0].toUpperCase();
+            }
+
+            // ── Upload profile picture to Supabase ──
+            async function uploadAvatar(file) {
+                const resized = await resizeImage(file, 300); // smaller for avatars
+                const filename = `avatar_${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`;
+                const { data, error } = await supabase.storage.from(AVATAR_BUCKET).upload(filename, resized, {
+                    cacheControl: '3600', upsert: false, contentType: 'image/jpeg'
+                });
+                if (error) {
+                    if (error.message?.includes('Bucket') || error.message?.includes('not found'))
+                        throw new Error('Avatar bucket not found. Create "chat-avatars" public bucket.');
+                    throw error;
+                }
+                const { data: urlData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filename);
+                return urlData.publicUrl;
+            }
+
+            async function saveAvatarToProfile(avatarUrl) {
+                const { error } = await supabase.from('profiles').upsert({ username, avatar_url: avatarUrl });
+                if (error) console.warn('Failed to save profile:', error);
+                avatarCache[username] = avatarUrl;
+            }
+
+            // ── Image helpers (for chat images) ──
             function resizeImage(file, maxDim=750) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
@@ -783,11 +826,7 @@
                 const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, resized, {
                     cacheControl: '3600', upsert: false, contentType: 'image/jpeg'
                 });
-                if (error) {
-                    if (error.message?.includes('Bucket') || error.message?.includes('not found'))
-                        throw new Error('Bucket "chat-images" no encontrado. Crea el bucket en Supabase Storage.');
-                    throw error;
-                }
+                if (error) throw error;
                 const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename);
                 return urlData.publicUrl;
             }
@@ -815,7 +854,7 @@
                 fileInput.value = '';
             }
 
-            // ── Reactions ──
+            // ── Reactions (unchanged) ──
             async function loadReactionsForMessages() {
                 const { data, error } = await supabase.from('message_reactions').select('*');
                 if(error) return;
@@ -874,16 +913,21 @@
                 }
             }
 
-            // ── Render message into appropriate container ──
-            function renderMessage(msg) {
+            // ── Render message ──
+            async function renderMessage(msg) {
                 if(knownMessageIds.has(msg.id)) return;
                 knownMessageIds.add(msg.id);
                 const isPrivate = msg.is_private;
-                // Filter private messages based on active partner (only show if we are participant)
                 if(isPrivate && msg.username !== username && msg.recipient !== username) return;
                 const container = isPrivate ? privateMessagesContainer : publicMessagesContainer;
                 const emptyHint = isPrivate ? privateEmptyHint : publicEmptyHint;
                 if(emptyHint) emptyHint.style.display = 'none';
+
+                // Ensure we have avatar for this user
+                if (!getAvatarURL(msg.username)) {
+                    await fetchAvatars([msg.username]);
+                }
+
                 const isOwn = msg.username === username;
                 const wrapper = document.createElement('div');
                 wrapper.className = 'msg-wrapper' + (isOwn ? ' own' : '');
@@ -905,7 +949,7 @@
                         </div>
                     </div>`;
                 }
-                innerHTML += `<div class="msg-username"><span class="msg-avatar">${getAvatarHTML(isOwn ? profilePic : '', msg.username)}</span> ${escapeHtml(msg.username)}${isPrivate?' <span style="font-size:0.6rem;opacity:0.6;">🔒</span>':''}</div>`;
+                innerHTML += `<div class="msg-username"><span class="msg-avatar">${renderAvatarHTML(msg.username)}</span> ${escapeHtml(msg.username)}${isPrivate?' <span style="font-size:0.6rem;opacity:0.6;">🔒</span>':''}</div>`;
                 if(msg.message) innerHTML += `<div class="msg-text">${escapeHtml(msg.message)}</div>`;
                 if(msg.image_url) innerHTML += `<div class="msg-image-wrap" data-img-src="${escapeHtml(msg.image_url)}"><img src="${escapeHtml(msg.image_url)}" alt="shared image" loading="lazy"></div>`;
                 innerHTML += `<button class="reply-btn" data-msg-id="${msg.id}" data-username="${escapeHtml(msg.username)}" data-message="${escapeHtml(msg.message||'')}" data-imageurl="${msg.image_url || ''}">↩ Reply</button>`;
@@ -915,7 +959,6 @@
                 container.appendChild(wrapper);
                 container.scrollTop = container.scrollHeight;
 
-                // Reply button listener
                 const replyBtn = bubble.querySelector('.reply-btn');
                 if(replyBtn) {
                     replyBtn.addEventListener('click', (e) => {
@@ -929,7 +972,6 @@
                         });
                     });
                 }
-                // Image lightbox
                 const imgWrap = bubble.querySelector('.msg-image-wrap');
                 if(imgWrap) {
                     imgWrap.addEventListener('click', (e) => {
@@ -938,7 +980,6 @@
                         if(src) { lightboxImg.src = src; lightboxOverlay.classList.remove('hidden'); }
                     });
                 }
-                // Click on reply ref to scroll to original
                 const replyRef = bubble.querySelector('.reply-ref-block');
                 if(replyRef && msg.reply_to_id) {
                     replyRef.addEventListener('click', (e) => {
@@ -1001,7 +1042,6 @@
                 switchTab(tabName);
             });
 
-            // ── Private chat management ──
             function setActivePrivateChat(partnerUsername) {
                 activePrivateChat = partnerUsername;
                 if(partnerUsername) {
@@ -1021,7 +1061,13 @@
             }
 
             // ── Sidebar ──
-            function updateSidebarUI() {
+            async function updateSidebarUI() {
+                const usersToFetch = [];
+                if (username) usersToFetch.push(username);
+                onlineUsers.forEach(u => usersToFetch.push(u.username));
+                privatePartners.forEach(p => usersToFetch.push(p));
+                await fetchAvatars(usersToFetch);
+
                 if(onlineUsers.size === 0 && privatePartners.length === 0) {
                     sidebarUsers.innerHTML = '<div class="no-users-sidebar">No one else online</div>';
                 } else {
@@ -1059,14 +1105,16 @@
                 onlineCountNumber.textContent = onlineUsers.size;
             }
             function buildSidebarItem(userName, isOnline, isPrivatePartner, isSelf=false) {
-                const initial = (userName.charAt(0)||'?').toUpperCase();
+                const avatarURL = getAvatarURL(userName);
+                const avatarHTML = avatarURL
+                    ? `<img src="${escapeHtml(avatarURL)}" alt="${escapeHtml(userName)}">`
+                    : (userName.charAt(0)||'?').toUpperCase();
                 let btnClass = 'private-btn', btnText = 'Request';
                 if(isPrivatePartner) { btnClass += ' accepted'; btnText = 'Chat ✓'; }
                 else if(pendingPrivateRequests.has(userName)) {
                     const req = pendingPrivateRequests.get(userName);
                     if(req.status==='pending' && req.from_user===userName) { btnClass += ' pending'; btnText = 'Accept?'; }
                 }
-                const avatarHTML = isSelf && profilePic ? `<img src="${profilePic}" alt="${escapeHtml(userName)}">` : initial;
                 return `<div class="sidebar-user-item${isSelf?' you-tag':''}${isPrivatePartner?' private-partner':''}" data-username="${escapeHtml(userName)}">
                   <div class="user-avatar">${avatarHTML}${isOnline?'<span class="online-indicator"></span>':''}</div>
                   <div class="user-info"><div class="user-name">${escapeHtml(userName)}</div><div class="user-status-text">${isSelf?'You':(isOnline?'Online':(isPrivatePartner?'Partner':'Offline'))}</div></div>
@@ -1161,7 +1209,11 @@
                         publicMessagesContainer.innerHTML = '<div class="empty-chat-hint" id="publicEmptyHint">No messages yet. Spark the conversation ⚡</div>';
                         privateMessagesContainer.innerHTML = '<div class="empty-chat-hint" id="privateEmptyHint">No private messages with this user.</div>';
                     } else {
-                        data.forEach(msg => renderMessage(msg));
+                        const users = [...new Set(data.map(m => m.username))];
+                        await fetchAvatars(users);
+                        for (const msg of data) {
+                            await renderMessage(msg);
+                        }
                     }
                     setConnectionState('connected');
                     messagesLoaded = true;
@@ -1275,35 +1327,44 @@
                 setTimeout(() => refreshBtn.classList.remove('spinning'), 700);
             }
 
-            function applyUsername(name) {
+            // ── Profile picture upload flow ──
+            profilePicPreview.addEventListener('click', () => profilePicInput.click());
+            profilePicInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                profilePicFile = file;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    profilePicPreview.innerHTML = `<img src="${ev.target.result}" alt="Profile">`;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            async function applyUsername(name) {
                 username = name;
                 localStorage.setItem(STORAGE_KEY_NAME, name);
-                localStorage.setItem(PROFILE_PIC_KEY, profilePic);
                 displayNamePill.textContent = name;
-                headerAvatar.innerHTML = profilePic ? `<img src="${profilePic}" style="width:100%;height:100%;object-fit:cover;">` : (name[0]||'?').toUpperCase();
+
+                if (profilePicFile) {
+                    try {
+                        const url = await uploadAvatar(profilePicFile);
+                        await saveAvatarToProfile(url);
+                        headerAvatar.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+                    } catch (err) {
+                        showErrorToast('Avatar upload failed: ' + err.message);
+                    }
+                } else {
+                    headerAvatar.innerHTML = (name[0]||'?').toUpperCase();
+                }
+
                 userPill.style.display = 'flex';
                 inputAreaBar.style.display = 'flex';
                 nameOverlay.classList.add('hidden');
                 setReplyingTo(null);
                 setActivePrivateChat(null);
                 switchTab('public');
-                updateSidebarUI();
+                await updateSidebarUI();
             }
-
-            function checkScrollPosition() {
-                const container = currentTab === 'public' ? publicMessagesContainer : privateMessagesContainer;
-                if (container.scrollTop + container.clientHeight < container.scrollHeight - 30) {
-                    scrollBottomBtn.classList.add('visible');
-                } else {
-                    scrollBottomBtn.classList.remove('visible');
-                }
-            }
-            publicMessagesContainer.addEventListener('scroll', checkScrollPosition);
-            privateMessagesContainer.addEventListener('scroll', checkScrollPosition);
-            scrollBottomBtn.addEventListener('click', () => {
-                const container = currentTab === 'public' ? publicMessagesContainer : privateMessagesContainer;
-                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
-            });
 
             // ── Event listeners ──
             sendBtn.addEventListener('click', sendMessage);
@@ -1318,7 +1379,6 @@
                 fileInput.value = '';
             });
             imagePreviewRemove.addEventListener('click', clearAttachedImage);
-            // Drag & drop on both containers
             [publicMessagesContainer, privateMessagesContainer].forEach(container => {
                 container.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); });
                 container.addEventListener('drop', async e => {
@@ -1340,11 +1400,16 @@
                 }
             });
             lightboxOverlay.addEventListener('click', () => lightboxOverlay.classList.add('hidden'));
-            nameSubmitBtn.addEventListener('click', () => {
+            nameSubmitBtn.addEventListener('click', async () => {
                 const newName = nameInput.value.trim(); if(!newName) return;
-                applyUsername(newName);
-                if(!messagesLoaded) loadMessages().then(() => { messagesLoaded = true; });
-                subscribeToRealtime(); setupPresence(); subscribeToPrivateRequests(); loadPendingRequests();
+                await applyUsername(newName);
+                if(!messagesLoaded) {
+                    await loadMessages().then(() => { messagesLoaded = true; });
+                }
+                subscribeToRealtime();
+                setupPresence();
+                subscribeToPrivateRequests();
+                loadPendingRequests();
                 loadReactionsForMessages();
                 subscribeToReactions();
             });
@@ -1363,23 +1428,28 @@
                     sidebar.classList.remove('open');
                 }
             });
-            profilePicPreview.addEventListener('click', () => profilePicInput.click());
-            profilePicInput.addEventListener('change', (e) => {
-                const file = e.target.files[0]; if(!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    profilePic = ev.target.result;
-                    profilePicPreview.innerHTML = `<img src="${profilePic}" alt="Profile">`;
-                };
-                reader.readAsDataURL(file);
-            });
 
             // ── Init ──
-            function init() {
+            async function init() {
                 if(window.innerWidth<=768) sidebarToggle.classList.remove('hidden');
                 if(username) {
-                    applyUsername(username);
-                    loadMessages().then(() => { messagesLoaded = true; checkScrollPosition(); });
+                    const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('username', username).single();
+                    if (profile && profile.avatar_url) {
+                        avatarCache[username] = profile.avatar_url;
+                        headerAvatar.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
+                    } else {
+                        headerAvatar.innerHTML = (username[0]||'?').toUpperCase();
+                    }
+                    displayNamePill.textContent = username;
+                    userPill.style.display = 'flex';
+                    inputAreaBar.style.display = 'flex';
+                    nameOverlay.classList.add('hidden');
+                    setReplyingTo(null);
+                    setActivePrivateChat(null);
+                    switchTab('public');
+                    await updateSidebarUI();
+
+                    await loadMessages().then(() => { messagesLoaded = true; });
                     subscribeToRealtime(); setupPresence(); subscribeToPrivateRequests(); loadPendingRequests();
                     loadReactionsForMessages();
                     subscribeToReactions();
