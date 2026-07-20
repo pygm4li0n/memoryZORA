@@ -588,6 +588,7 @@
             const STORAGE_BUCKET = 'chat-images';
             const AVATAR_BUCKET = 'chat-avatars';
 
+            // ── State & DOM ──────────────────────────────────
             const STORAGE_KEY_NAME = 'nitro_chat_username';
             const CLIENT_ID_KEY = 'nitro_chat_client_id';
             const PRIVATE_PARTNERS_KEY = 'nitro_chat_private_partners';
@@ -605,7 +606,7 @@
 
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // DOM elements (all unchanged)
+            // DOM elements
             const publicMessagesContainer = document.getElementById('publicMessagesContainer');
             const privateMessagesContainer = document.getElementById('privateMessagesContainer');
             const messageInput = document.getElementById('messageInput');
@@ -652,7 +653,7 @@
             const chatTabs = document.getElementById('chatTabs');
 
             let replyingTo = null;
-            let activePrivateChat = null;
+            let activePrivateChat = null;          // username of current private partner
             let currentTab = 'public';
             let onlineUsers = new Map();
             let isConnected = false;
@@ -666,10 +667,9 @@
             let messageReactions = {};
             const EMOJIS = ['❤️','😂','😮','😢','😡'];
             let pendingImageUrl = null;
-            let pendingImageName = '';
-            let profilePicFile = null; // Para subir la foto de perfil
+            let profilePicFile = null; // Para la foto de perfil antes de guardar
 
-            // ── Particles (identical) ──
+            // ── Particles (unchanged) ───────────────────────
             const particleCanvas = document.getElementById('particleCanvas');
             const pCtx = particleCanvas.getContext('2d');
             let particles = [];
@@ -778,29 +778,7 @@
                 return (user || '?')[0].toUpperCase();
             }
 
-            // ── Upload profile picture to Supabase ──
-            async function uploadAvatar(file) {
-                const resized = await resizeImage(file, 300); // smaller for avatars
-                const filename = `avatar_${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`;
-                const { data, error } = await supabase.storage.from(AVATAR_BUCKET).upload(filename, resized, {
-                    cacheControl: '3600', upsert: false, contentType: 'image/jpeg'
-                });
-                if (error) {
-                    if (error.message?.includes('Bucket') || error.message?.includes('not found'))
-                        throw new Error('Avatar bucket not found. Create "chat-avatars" public bucket.');
-                    throw error;
-                }
-                const { data: urlData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filename);
-                return urlData.publicUrl;
-            }
-
-            async function saveAvatarToProfile(avatarUrl) {
-                const { error } = await supabase.from('profiles').upsert({ username, avatar_url: avatarUrl });
-                if (error) console.warn('Failed to save profile:', error);
-                avatarCache[username] = avatarUrl;
-            }
-
-            // ── Image helpers (for chat images) ──
+            // ── Upload helpers ──
             function resizeImage(file, maxDim=750) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
@@ -820,22 +798,24 @@
                     img.src = URL.createObjectURL(file);
                 });
             }
-            async function uploadImageToStorage(file) {
-                const resized = await resizeImage(file, 750);
+
+            async function uploadToStorage(file, bucket, maxDim=750) {
+                const resized = await resizeImage(file, maxDim);
                 const filename = `public/${Date.now()}_${Math.random().toString(36).substr(2,6)}.jpg`;
-                const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, resized, {
+                const { data, error } = await supabase.storage.from(bucket).upload(filename, resized, {
                     cacheControl: '3600', upsert: false, contentType: 'image/jpeg'
                 });
                 if (error) throw error;
-                const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(filename);
+                const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filename);
                 return urlData.publicUrl;
             }
-            async function attachImage(file) {
+
+            // Attach image for chat
+            async function attachChatImage(file) {
                 uploadImgBtn.classList.add('uploading');
                 try {
-                    const url = await uploadImageToStorage(file);
+                    const url = await uploadToStorage(file, STORAGE_BUCKET);
                     pendingImageUrl = url;
-                    pendingImageName = file.name;
                     imagePreviewThumb.src = url;
                     imagePreviewName.textContent = file.name;
                     imagePreviewRow.classList.remove('hidden');
@@ -846,15 +826,15 @@
                     uploadImgBtn.classList.remove('uploading');
                 }
             }
+
             function clearAttachedImage() {
                 pendingImageUrl = null;
-                pendingImageName = '';
                 imagePreviewRow.classList.add('hidden');
                 uploadImgBtn.classList.remove('has-image');
                 fileInput.value = '';
             }
 
-            // ── Reactions (unchanged) ──
+            // ── Reactions ──
             async function loadReactionsForMessages() {
                 const { data, error } = await supabase.from('message_reactions').select('*');
                 if(error) return;
@@ -923,7 +903,7 @@
                 const emptyHint = isPrivate ? privateEmptyHint : publicEmptyHint;
                 if(emptyHint) emptyHint.style.display = 'none';
 
-                // Ensure we have avatar for this user
+                // Fetch avatar if missing
                 if (!getAvatarURL(msg.username)) {
                     await fetchAvatars([msg.username]);
                 }
@@ -1042,6 +1022,7 @@
                 switchTab(tabName);
             });
 
+            // ── Private chat management ──
             function setActivePrivateChat(partnerUsername) {
                 activePrivateChat = partnerUsername;
                 if(partnerUsername) {
@@ -1131,7 +1112,11 @@
             }
             async function sendPrivateRequest(toUser) {
                 try {
-                    const { error } = await supabase.from('private_chat_requests').insert({ from_user:username, to_user:toUser, status:'pending' });
+                    const { error } = await supabase.from('private_chat_requests').insert({
+                        from_user: username,
+                        to_user: toUser,
+                        status: 'pending'
+                    });
                     if(error) { showErrorToast('Request failed: ' + error.message); return; }
                     showErrorToast('📩 Request sent to ' + toUser);
                     updateSidebarUI();
@@ -1139,11 +1124,16 @@
             }
             async function acceptPrivateRequest(fromUser, requestId) {
                 try {
-                    const { error } = await supabase.from('private_chat_requests').update({status:'accepted'}).eq('id', requestId);
+                    const { error } = await supabase.from('private_chat_requests')
+                        .update({status:'accepted'})
+                        .eq('id', requestId);
                     if(error) throw error;
                     pendingPrivateRequests.delete(fromUser);
-                    if(!privatePartners.includes(fromUser)) { privatePartners.push(fromUser); localStorage.setItem(PRIVATE_PARTNERS_KEY, JSON.stringify(privatePartners)); }
-                    setActivePrivateChat(fromUser);
+                    if(!privatePartners.includes(fromUser)) {
+                        privatePartners.push(fromUser);
+                        localStorage.setItem(PRIVATE_PARTNERS_KEY, JSON.stringify(privatePartners));
+                    }
+                    setActivePrivateChat(fromUser);   // This opens the private tab
                     updateSidebarUI();
                     showErrorToast('✅ Chat with ' + fromUser + ' active!');
                 } catch(err) { showErrorToast('Accept error: '+err.message); }
@@ -1151,11 +1141,15 @@
             async function loadPendingRequests() {
                 if(!username) return;
                 try {
-                    const { data, error } = await supabase.from('private_chat_requests').select('*').or(`to_user.eq.${username},from_user.eq.${username}`).order('created_at', {ascending:false});
+                    const { data, error } = await supabase.from('private_chat_requests')
+                        .select('*')
+                        .or(`to_user.eq.${username},from_user.eq.${username}`)
+                        .order('created_at', {ascending:false});
                     if(error) return;
                     pendingPrivateRequests.clear();
                     (data||[]).forEach(req => {
-                        if(req.status==='pending' && req.to_user===username) pendingPrivateRequests.set(req.from_user, {status:'pending', id:req.id, from_user:req.from_user});
+                        if(req.status==='pending' && req.to_user===username)
+                            pendingPrivateRequests.set(req.from_user, {status:'pending', id:req.id, from_user:req.from_user});
                         if(req.status==='accepted') {
                             const partner = req.from_user===username ? req.to_user : req.from_user;
                             if(!privatePartners.includes(partner)) privatePartners.push(partner);
@@ -1206,8 +1200,8 @@
                     privateMessagesContainer.innerHTML = '';
                     knownMessageIds.clear();
                     if(data.length===0) {
-                        publicMessagesContainer.innerHTML = '<div class="empty-chat-hint" id="publicEmptyHint">No messages yet. Spark the conversation ⚡</div>';
-                        privateMessagesContainer.innerHTML = '<div class="empty-chat-hint" id="privateEmptyHint">No private messages with this user.</div>';
+                        publicMessagesContainer.innerHTML = '<div class="empty-chat-hint" id="publicEmptyHint">No messages yet. ⚡</div>';
+                        privateMessagesContainer.innerHTML = '<div class="empty-chat-hint" id="privateEmptyHint">No private messages.</div>';
                     } else {
                         const users = [...new Set(data.map(m => m.username))];
                         await fetchAvatars(users);
@@ -1217,46 +1211,77 @@
                     }
                     setConnectionState('connected');
                     messagesLoaded = true;
-                    return true;
                 } catch(err) {
                     clearTimeout(timeoutId);
                     showErrorToast('Load failed: ' + err.message);
                     setConnectionState('disconnected');
-                    return false;
                 }
             }
 
-            // ── Send message ──
+            // ── Send message (THE CRUCIAL FUNCTION) ──
             async function sendMessage() {
-                const message = messageInput.value.trim();
-                if(!message && !pendingImageUrl) return;
+                const messageText = messageInput.value.trim();
+                if(!messageText && !pendingImageUrl) return;
                 if(!username) return;
+
+                const isPrivate = (currentTab === 'private' && activePrivateChat);
+                if(isPrivate && !activePrivateChat) {
+                    showErrorToast('No private partner selected.');
+                    return;
+                }
+
                 sendBtn.disabled = true;
-                const isPrivate = currentTab === 'private' && activePrivateChat;
                 const payload = {
-                    username,
-                    message: message || null,
+                    username: username,
+                    message: messageText || null,
                     image_url: pendingImageUrl || null,
                     is_private: isPrivate,
                     recipient: isPrivate ? activePrivateChat : null
                 };
+
                 if(replyingTo && replyingTo.id) {
                     payload.reply_to_id = replyingTo.id;
                     payload.reply_to_username = replyingTo.username;
                     payload.reply_to_message = replyingTo.message;
                     if(replyingTo.imageUrl) payload.reply_to_image_url = replyingTo.imageUrl;
                 }
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
                 try {
                     let response = await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
                         method: 'POST',
-                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-                        body: JSON.stringify(payload),
-                        signal: controller.signal
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=minimal'
+                        },
+                        body: JSON.stringify(payload)
                     });
-                    clearTimeout(timeoutId);
-                    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    if(!response.ok) {
+                        // Retry without reply fields if they caused the error
+                        if(payload.reply_to_id) {
+                            const fallback = { ...payload };
+                            delete fallback.reply_to_id;
+                            delete fallback.reply_to_username;
+                            delete fallback.reply_to_message;
+                            delete fallback.reply_to_image_url;
+                            response = await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
+                                method: 'POST',
+                                headers: {
+                                    'apikey': SUPABASE_ANON_KEY,
+                                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                                    'Content-Type': 'application/json',
+                                    'Prefer': 'return=minimal'
+                                },
+                                body: JSON.stringify(fallback)
+                            });
+                            if(!response.ok) throw new Error(`HTTP ${response.status}`);
+                        } else {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                    }
+
                     messageInput.value = '';
                     setReplyingTo(null);
                     clearAttachedImage();
@@ -1327,34 +1352,24 @@
                 setTimeout(() => refreshBtn.classList.remove('spinning'), 700);
             }
 
-            // ── Profile picture upload flow ──
-            profilePicPreview.addEventListener('click', () => profilePicInput.click());
-            profilePicInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                profilePicFile = file;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    profilePicPreview.innerHTML = `<img src="${ev.target.result}" alt="Profile">`;
-                };
-                reader.readAsDataURL(file);
-            });
+            // ── Apply username (called from nameSubmitBtn) ──
+            async function applyUsername(newName) {
+                username = newName;
+                localStorage.setItem(STORAGE_KEY_NAME, newName);
+                displayNamePill.textContent = newName;
 
-            async function applyUsername(name) {
-                username = name;
-                localStorage.setItem(STORAGE_KEY_NAME, name);
-                displayNamePill.textContent = name;
-
-                if (profilePicFile) {
+                // Upload and save avatar if a file was selected
+                if(profilePicFile) {
                     try {
-                        const url = await uploadAvatar(profilePicFile);
-                        await saveAvatarToProfile(url);
+                        const url = await uploadToStorage(profilePicFile, AVATAR_BUCKET, 300);
+                        await supabase.from('profiles').upsert({ username: newName, avatar_url: url });
+                        avatarCache[newName] = url;
                         headerAvatar.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
-                    } catch (err) {
+                    } catch(err) {
                         showErrorToast('Avatar upload failed: ' + err.message);
                     }
                 } else {
-                    headerAvatar.innerHTML = (name[0]||'?').toUpperCase();
+                    headerAvatar.innerHTML = (newName[0]||'?').toUpperCase();
                 }
 
                 userPill.style.display = 'flex';
@@ -1375,7 +1390,7 @@
             uploadImgBtn.addEventListener('click', () => fileInput.click());
             fileInput.addEventListener('change', async () => {
                 const file = fileInput.files[0]; if(!file) return;
-                await attachImage(file);
+                await attachChatImage(file);
                 fileInput.value = '';
             });
             imagePreviewRemove.addEventListener('click', clearAttachedImage);
@@ -1385,7 +1400,7 @@
                     e.preventDefault(); e.stopPropagation();
                     const file = e.dataTransfer.files[0];
                     if(!file || !file.type.startsWith('image/')) return;
-                    await attachImage(file);
+                    await attachChatImage(file);
                 });
             });
             document.addEventListener('paste', async e => {
@@ -1394,18 +1409,31 @@
                     if(item.type.startsWith('image/')) {
                         e.preventDefault();
                         const file = item.getAsFile();
-                        await attachImage(file);
+                        await attachChatImage(file);
                         break;
                     }
                 }
             });
             lightboxOverlay.addEventListener('click', () => lightboxOverlay.classList.add('hidden'));
+
+            // Profile picture upload
+            profilePicPreview.addEventListener('click', () => profilePicInput.click());
+            profilePicInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if(!file) return;
+                profilePicFile = file;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    profilePicPreview.innerHTML = `<img src="${ev.target.result}" alt="Profile">`;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Name submission
             nameSubmitBtn.addEventListener('click', async () => {
                 const newName = nameInput.value.trim(); if(!newName) return;
                 await applyUsername(newName);
-                if(!messagesLoaded) {
-                    await loadMessages().then(() => { messagesLoaded = true; });
-                }
+                if(!messagesLoaded) await loadMessages();
                 subscribeToRealtime();
                 setupPresence();
                 subscribeToPrivateRequests();
@@ -1433,8 +1461,9 @@
             async function init() {
                 if(window.innerWidth<=768) sidebarToggle.classList.remove('hidden');
                 if(username) {
+                    // Load existing avatar from profile
                     const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('username', username).single();
-                    if (profile && profile.avatar_url) {
+                    if(profile && profile.avatar_url) {
                         avatarCache[username] = profile.avatar_url;
                         headerAvatar.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
                     } else {
@@ -1449,12 +1478,16 @@
                     switchTab('public');
                     await updateSidebarUI();
 
-                    await loadMessages().then(() => { messagesLoaded = true; });
-                    subscribeToRealtime(); setupPresence(); subscribeToPrivateRequests(); loadPendingRequests();
+                    await loadMessages();
+                    subscribeToRealtime();
+                    setupPresence();
+                    subscribeToPrivateRequests();
+                    loadPendingRequests();
                     loadReactionsForMessages();
                     subscribeToReactions();
                 } else {
-                    nameOverlay.classList.remove('hidden'); nameInput.focus();
+                    nameOverlay.classList.remove('hidden');
+                    nameInput.focus();
                     subscribeToRealtime();
                 }
                 document.addEventListener('visibilitychange', () => {
