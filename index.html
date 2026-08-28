@@ -6,7 +6,6 @@
     <title>Meme Social Network // MSN</title>
     <style>
         :root {
-            /* Retro MSN inspired but modernized with softer palette */
             --bg-deep: #0a0f1a;
             --bg-panel: rgba(16, 22, 36, 0.92);
             --metal-dark: #141c2b;
@@ -72,16 +71,64 @@
             box-shadow: 4px 0 30px rgba(0,0,0,0.4);
             transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
         }
-        .sidebar-header {
-            padding: 18px 16px; border-bottom: 1px solid var(--border-subtle);
-            display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        /* New user profile block at top (bigger) */
+        .sidebar-user-profile-big {
+            padding: 20px 16px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-subtle);
             background: linear-gradient(135deg, #1a2740 0%, #141c2b 100%);
+            flex-shrink: 0;
         }
-        .sidebar-header .s-icon { font-size: 1.6rem; filter: drop-shadow(0 0 6px rgba(45,212,191,0.4)); }
-        .sidebar-header .s-title {
-            font-weight: 800; letter-spacing: 0.06em;
-            color: #fff; font-size: 1.2rem; text-transform: uppercase;
+        .sidebar-user-profile-big .big-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #1e2a3a;
+            border: 3px solid var(--accent-purple);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #e2e8f0;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(167,139,250,0.3);
+        }
+        .sidebar-user-profile-big .big-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .sidebar-user-profile-big .big-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .sidebar-user-profile-big .big-name {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             text-shadow: 0 0 10px rgba(45,212,191,0.3);
+        }
+        .sidebar-user-profile-big .big-status {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .sidebar-user-profile-big .big-status .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 6px rgba(74,222,128,0.6);
         }
         .sidebar-section-label {
             font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -551,6 +598,8 @@
             .conn-text-full { display: none; }
             .user-pill-name { display: none; }
             .typing-indicator { font-size: 0.9rem; }
+            .sidebar-user-profile-big .big-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
+            .sidebar-user-profile-big .big-name { font-size: 1rem; }
         }
     </style>
 </head>
@@ -589,9 +638,13 @@
 
     <div class="app-shell" id="appShell">
         <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <span class="s-icon">💬</span>
-                <span class="s-title">MSN</span>
+            <!-- REPLACED HEADER WITH USER PROFILE -->
+            <div class="sidebar-user-profile-big" id="sidebarUserProfileBig">
+                <div class="big-avatar" id="sidebarBigAvatar">?</div>
+                <div class="big-info">
+                    <div class="big-name" id="sidebarBigName">You</div>
+                    <div class="big-status"><span class="status-dot"></span> Online</div>
+                </div>
             </div>
             <div class="sidebar-section-label">
                 🔵 ACTIVE USERS <span class="active-users-count" id="sidebarActiveUsersCount">0</span>
@@ -742,6 +795,8 @@
             const requestAcceptBtn = document.getElementById('requestAcceptBtn');
             const requestDeclineBtn = document.getElementById('requestDeclineBtn');
             const sidebarActiveUsersCount = document.getElementById('sidebarActiveUsersCount');
+            const sidebarBigAvatar = document.getElementById('sidebarBigAvatar');
+            const sidebarBigName = document.getElementById('sidebarBigName');
             let currentRequestData = null;
 
             let replyingTo = null;
@@ -1636,10 +1691,14 @@
                         avatarCache[name] = url;
                         headerAvatar.innerHTML =
                             `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
+                        sidebarBigAvatar.innerHTML =
+                            `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
                     } catch (err) { showError('Avatar upload failed: ' + err.message); }
                 } else {
                     headerAvatar.innerHTML = (name[0] || '?').toUpperCase();
+                    sidebarBigAvatar.innerHTML = (name[0] || '?').toUpperCase();
                 }
+                sidebarBigName.textContent = name;
 
                 userPill.style.display = 'flex';
                 inputAreaBar.style.display = 'flex';
@@ -1749,10 +1808,14 @@
                         avatarCache[username] = profile.avatar_url;
                         headerAvatar.innerHTML =
                             `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
+                        sidebarBigAvatar.innerHTML =
+                            `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
                     } else {
                         headerAvatar.innerHTML = (username[0] || '?').toUpperCase();
+                        sidebarBigAvatar.innerHTML = (username[0] || '?').toUpperCase();
                     }
                     displayNamePill.textContent = username;
+                    sidebarBigName.textContent = username;
                     userPill.style.display = 'flex';
                     inputAreaBar.style.display = 'flex';
                     nameOverlay.classList.add('hidden');
