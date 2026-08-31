@@ -92,6 +92,50 @@
 
     let acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
 
+    // ============================================================
+    // NEW: Scroll to bottom helper functions
+    // ============================================================
+    function scrollContainerToBottom(container) {
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function updateScrollButtonVisibility(container) {
+        if (!scrollBottomBtn) return;
+        const threshold = 80; // pixels from bottom
+        const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+        if (isNearBottom) {
+            scrollBottomBtn.classList.remove('visible');
+        } else {
+            scrollBottomBtn.classList.add('visible');
+        }
+    }
+
+    // Scroll event listeners for both containers
+    [publicContainer, privateContainer].forEach(container => {
+        container.addEventListener('scroll', () => {
+            if (container === publicContainer && currentTab === 'public') {
+                updateScrollButtonVisibility(container);
+            } else if (container === privateContainer && currentTab === 'private') {
+                updateScrollButtonVisibility(container);
+            }
+        });
+    });
+
+    // Click handler for the scroll-to-bottom button
+    scrollBottomBtn.addEventListener('click', () => {
+        const container = currentTab === 'public' ? publicContainer : privateContainer;
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+        });
+        setTimeout(() => {
+            updateScrollButtonVisibility(container);
+        }, 300);
+    });
+    // ============================================================
+
     function saveAcceptedChats() {
         localStorage.setItem('msn_accepted_chats', JSON.stringify([...acceptedPrivateChats]));
     }
@@ -684,6 +728,11 @@
             privateContainer.classList.add('hidden');
             privateIndicatorBar.classList.add('hidden');
             messageInput.placeholder = 'Type a message...';
+            // NEW: scroll to bottom and update button after showing
+            setTimeout(() => {
+                scrollContainerToBottom(publicContainer);
+                updateScrollButtonVisibility(publicContainer);
+            }, 100);
         } else {
             publicContainer.classList.add('hidden');
             privateContainer.classList.remove('hidden');
@@ -695,6 +744,11 @@
                 privateIndicatorBar.classList.add('hidden');
                 messageInput.placeholder = 'Select a partner from the sidebar first.';
             }
+            // NEW: scroll to bottom and update button after showing
+            setTimeout(() => {
+                scrollContainerToBottom(privateContainer);
+                updateScrollButtonVisibility(privateContainer);
+            }, 100);
         }
         updateTypingIndicator();
         if (messageInput.value.length > 0) startTyping();
@@ -755,6 +809,9 @@
             }
         }
         loadReactions('private_message_reactions', true);
+        // NEW: scroll to bottom and update button
+        scrollContainerToBottom(privateContainer);
+        updateScrollButtonVisibility(privateContainer);
     }
 
     async function updateSidebarUI() {
@@ -959,6 +1016,9 @@
                 }
             }
             setConnection('connected');
+            // NEW: scroll to bottom and update button
+            scrollContainerToBottom(publicContainer);
+            updateScrollButtonVisibility(publicContainer);
         } catch (err) {
             showError('Load failed: ' + err.message);
             setConnection('disconnected');
@@ -1017,6 +1077,11 @@
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages' }, payload => {
                 renderMessage(payload.new, false);
                 setConnection('connected');
+                // NEW: auto scroll to bottom when new message arrives (if near bottom)
+                const isNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 80;
+                if (isNearBottom) {
+                    scrollContainerToBottom(publicContainer);
+                }
             })
             .subscribe();
 
@@ -1026,6 +1091,11 @@
                 const msg = payload.new;
                 if (activePrivateChat && ((msg.from_user === username && msg.to_user === activePrivateChat) || (msg.from_user === activePrivateChat && msg.to_user === username))) {
                     renderMessage(msg, true);
+                    // NEW: auto scroll to bottom for private messages if near bottom
+                    const isNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 80;
+                    if (isNearBottom) {
+                        scrollContainerToBottom(privateContainer);
+                    }
                 }
             })
             .subscribe();
