@@ -740,6 +740,10 @@
             .or(`and(from_user.eq.${username},to_user.eq.${partner}),and(from_user.eq.${partner},to_user.eq.${username})`)
             .order('created_at', { ascending: true });
         if (error) { showError('Failed to load private messages'); return; }
+        
+        // Safety sort by created_at ascending
+        data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        
         privateContainer.innerHTML = '';
         if (data.length === 0) {
             privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
@@ -937,6 +941,10 @@
                 .order('created_at', { ascending: true })
                 .limit(80);
             if (error) throw error;
+            
+            // Safety sort by created_at ascending
+            data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            
             publicContainer.innerHTML = '';
             knownMessageIds.clear();
             if (data.length === 0) {
@@ -969,11 +977,12 @@
         let payload = {
             message: text || null,
             image_url: pendingImageUrl || null,
+            created_at: new Date().toISOString()   // 👈 added explicit timestamp
         };
         if (replyingTo?.id) {
             payload.reply_to_id = replyingTo.id;
             payload.reply_to_username = replyingTo.username;
-            payload.reply_to_message = replyingTo.message || null; // CHANGED: null if no text
+            payload.reply_to_message = replyingTo.message || null;
             if (replyingTo.imageUrl) payload.reply_to_image_url = replyingTo.imageUrl;
         }
         if (isPrivate) {
