@@ -192,7 +192,22 @@
     }
     function formatTime(iso) {
         if (!iso) return '';
-        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const date = new Date(iso);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        const msgDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        
+        const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        if (msgDate.getTime() === today.getTime()) {
+            return `Today ${timeStr}`;
+        } else if (msgDate.getTime() === yesterday.getTime()) {
+            return `Yesterday ${timeStr}`;
+        } else {
+            return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
+        }
     }
 
     async function fetchAvatars(usernames) {
