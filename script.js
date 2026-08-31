@@ -938,7 +938,7 @@
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .order('created_at', { ascending: true })
+                .order('created_at', { ascending: false })
                 .limit(80);
             if (error) throw error;
             
