@@ -217,6 +217,14 @@ body {
     color: #fff; text-transform: uppercase;
     text-shadow: 0 0 10px rgba(45,212,191,0.3);
 }
+/* NEW: Logo replaces text */
+.header-logo {
+    height: 40px;                /* fits within 60px header */
+    width: auto;
+    object-fit: contain;
+    display: block;
+    max-width: 200px;           /* prevent overflow */
+}
 .chat-header-bar .header-right { display: flex; align-items: center; gap: 8px; z-index: 1; flex-wrap: wrap; }
 .badge-pill {
     display: flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 20px;
@@ -644,4 +652,5 @@ button.send-btn-main:disabled { background: #3a4a60; box-shadow: none; cursor: n
     .typing-indicator { font-size: 0.9rem; }
     .sidebar-user-profile-big .big-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
     .sidebar-user-profile-big .big-name { font-size: 1rem; }
+    .header-logo { height: 30px; }
 }
