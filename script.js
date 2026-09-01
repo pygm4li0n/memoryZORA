@@ -93,14 +93,15 @@
     let acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
 
     // ============================================================
-    // Token Tracker (DexScreener)
+    // Token Tracker (DexScreener) – using token address, shows name and logo
     // ============================================================
     const TOKEN_ADDRESS = '3ZMNoxKjdybeyfKWnK8esKQGw42MCsBkMTzrfzzTyhbX';
 
     async function updateTokenInfo() {
+        const logoEl = document.getElementById('tokenLogo');
+        const nameEl = document.getElementById('tokenName');
         const priceEl = document.getElementById('tokenPrice');
         const changeEl = document.getElementById('tokenChange');
-        const symbolEl = document.querySelector('.token-symbol');
         if (!priceEl || !changeEl) return;
 
         try {
@@ -110,19 +111,26 @@
                 const pair = data.pairs[0];
                 const price = parseFloat(pair.priceUsd);
                 const change = parseFloat(pair.priceChange.h24);
-                const symbol = pair.baseToken.symbol || 'TOKEN';
+                const tokenName = pair.baseToken.name || pair.baseToken.symbol || 'TOKEN';
+                const logoUrl = pair.info?.imageUrl || pair.baseToken?.imageUrl || '';
 
-                if (symbolEl) symbolEl.textContent = `$${symbol}`;
+                if (nameEl) nameEl.textContent = tokenName;
+                if (logoEl) {
+                    logoEl.src = logoUrl;
+                    logoEl.style.display = logoUrl ? 'block' : 'none';
+                }
                 priceEl.textContent = price ? `$${price.toFixed(4)}` : '--';
                 changeEl.textContent = change ? `${change.toFixed(2)}%` : '--';
                 changeEl.className = 'token-change ' + (change >= 0 ? 'positive' : 'negative');
             } else {
+                if (logoEl) logoEl.style.display = 'none';
                 priceEl.textContent = '--';
                 changeEl.textContent = '--';
                 changeEl.className = 'token-change';
             }
         } catch (err) {
             console.warn('Token fetch failed:', err);
+            if (logoEl) logoEl.style.display = 'none';
             priceEl.textContent = '--';
             changeEl.textContent = '--';
         }
