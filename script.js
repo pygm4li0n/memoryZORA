@@ -95,7 +95,7 @@
     // ============================================================
     // Token Tracker (DexScreener) – using token address, shows name and logo
     // ============================================================
-    const TOKEN_ADDRESS = '3ZMNoxKjdybeyfKWnK8esKQGw42MCsBkMTzrfzzTyhbX';
+    const TOKEN_ADDRESS = '3C6nz382qU71aDiEvk5xsmJrzd5Ey6iNXdpTgrjVpump';
 
     async function updateTokenInfo() {
         const logoEl = document.getElementById('tokenLogo');
