@@ -598,6 +598,19 @@ button.send-btn-main:disabled { background: #3a4a60; box-shadow: none; cursor: n
     white-space: nowrap;
     color: var(--text-primary);
 }
+.token-logo {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+}
+.token-name {
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+}
 .token-symbol {
     color: #ffffff;
     font-weight: 700;
