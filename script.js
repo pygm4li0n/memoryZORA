@@ -93,6 +93,46 @@
     let acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
 
     // ============================================================
+    // Token Tracker (DexScreener)
+    // ============================================================
+    const TOKEN_ADDRESS = '3ZMNoxKjdybeyfKWnK8esKQGw42MCsBkMTzrfzzTyhbX';
+
+    async function updateTokenInfo() {
+        const priceEl = document.getElementById('tokenPrice');
+        const changeEl = document.getElementById('tokenChange');
+        const symbolEl = document.querySelector('.token-symbol');
+        if (!priceEl || !changeEl) return;
+
+        try {
+            const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_ADDRESS}`);
+            const data = await response.json();
+            if (data.pairs && data.pairs.length > 0) {
+                const pair = data.pairs[0];
+                const price = parseFloat(pair.priceUsd);
+                const change = parseFloat(pair.priceChange.h24);
+                const symbol = pair.baseToken.symbol || 'TOKEN';
+
+                if (symbolEl) symbolEl.textContent = `$${symbol}`;
+                priceEl.textContent = price ? `$${price.toFixed(4)}` : '--';
+                changeEl.textContent = change ? `${change.toFixed(2)}%` : '--';
+                changeEl.className = 'token-change ' + (change >= 0 ? 'positive' : 'negative');
+            } else {
+                priceEl.textContent = '--';
+                changeEl.textContent = '--';
+                changeEl.className = 'token-change';
+            }
+        } catch (err) {
+            console.warn('Token fetch failed:', err);
+            priceEl.textContent = '--';
+            changeEl.textContent = '--';
+        }
+    }
+
+    // Start token updates
+    updateTokenInfo();
+    setInterval(updateTokenInfo, 60000); // update every 60 seconds
+
+    // ============================================================
     // Scroll to bottom helper functions
     // ============================================================
     function scrollContainerToBottom(container) {
