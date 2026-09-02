@@ -73,6 +73,125 @@
     const sidebarBigName = document.getElementById('sidebarBigName');
     let currentRequestData = null;
 
+    // ===== Phantom Wallet Integration =====
+    const phantomConnectBtn = document.getElementById('phantomConnectBtn');
+    const walletAddressSpan = document.getElementById('walletAddress');
+    let phantomWalletPublicKey = null;
+    let phantomConnected = false;
+
+    // Token configuration – replace with your actual token mint and threshold
+    const TOKEN_MINT_ADDRESS = 'YOUR_TOKEN_MINT_ADDRESS_HERE'; // Replace!
+    const REQUIRED_BALANCE = 100; // Adjust as needed
+    const SOLANA_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
+
+    const solanaConnection = new solanaWeb3.Connection(SOLANA_RPC_ENDPOINT);
+
+    function getPhantomProvider() {
+        if ('phantom' in window) {
+            const provider = window.phantom?.solana;
+            if (provider?.isPhantom) return provider;
+        }
+        if (window.solana?.isPhantom) return window.solana;
+        return null;
+    }
+
+    function updatePhantomUI() {
+        if (phantomConnected && phantomWalletPublicKey) {
+            const addr = phantomWalletPublicKey.toBase58();
+            walletAddressSpan.textContent = `👻 ${addr.slice(0,4)}...${addr.slice(-4)}`;
+            phantomConnectBtn.title = 'Disconnect Phantom';
+        } else {
+            walletAddressSpan.textContent = '';
+            phantomConnectBtn.title = 'Connect Phantom Wallet';
+        }
+    }
+
+    async function connectPhantom() {
+        const provider = getPhantomProvider();
+        if (!provider) {
+            showError('Phantom wallet not installed. Please install it from phantom.app');
+            return;
+        }
+
+        try {
+            const resp = await provider.connect({ onlyIfTrusted: false });
+            phantomWalletPublicKey = resp.publicKey;
+            phantomConnected = true;
+            updatePhantomUI();
+            showError('✅ Phantom connected: ' + phantomWalletPublicKey.toBase58());
+            await checkTokenBalance();
+        } catch (err) {
+            console.error('Phantom connection error:', err);
+            showError('Could not connect Phantom: ' + err.message);
+        }
+    }
+
+    function disconnectPhantom() {
+        const provider = getPhantomProvider();
+        if (provider && phantomConnected) {
+            provider.disconnect().catch(console.warn);
+        }
+        phantomWalletPublicKey = null;
+        phantomConnected = false;
+        updatePhantomUI();
+    }
+
+    async function checkTokenBalance() {
+        if (!phantomWalletPublicKey) {
+            console.warn('No wallet connected');
+            return 0;
+        }
+
+        try {
+            const tokenAccounts = await solanaConnection.getParsedTokenAccountsByOwner(
+                phantomWalletPublicKey,
+                { mint: new solanaWeb3.PublicKey(TOKEN_MINT_ADDRESS) }
+            );
+
+            let totalBalance = 0;
+            for (const accountInfo of tokenAccounts.value) {
+                const tokenAmount = accountInfo.account.data.parsed.info.tokenAmount;
+                totalBalance += parseFloat(tokenAmount.uiAmountString);
+            }
+
+            console.log(`Token balance: ${totalBalance}`);
+            if (totalBalance > REQUIRED_BALANCE) {
+                showError(`✅ You hold ${totalBalance} tokens – access granted!`);
+                // Optionally enable premium features here
+            } else {
+                showError(`❌ You need at least ${REQUIRED_BALANCE} tokens (you have ${totalBalance}).`);
+                // Optionally disable premium features here
+            }
+
+            return totalBalance;
+        } catch (err) {
+            console.error('Error checking token balance:', err);
+            showError('Failed to fetch token balance.');
+            return 0;
+        }
+    }
+
+    // Event listener for Phantom button
+    phantomConnectBtn.addEventListener('click', () => {
+        if (phantomConnected) {
+            disconnectPhantom();
+        } else {
+            connectPhantom();
+        }
+    });
+
+    // Auto-connect if Phantom is already trusted and connected
+    function initPhantomAutoConnect() {
+        const provider = getPhantomProvider();
+        if (provider && provider.isConnected && provider.publicKey) {
+            phantomWalletPublicKey = provider.publicKey;
+            phantomConnected = true;
+            updatePhantomUI();
+            checkTokenBalance();
+        }
+    }
+    // ===== End Phantom Integration =====
+
     let replyingTo = null;
     let activePrivateChat = null;
     let currentTab = 'public';
@@ -1271,6 +1390,7 @@
     async function init() {
         if(window.innerWidth<=768) sidebarToggle.classList.remove('hidden');
         await loadAcceptedChatsFromDB();
+        initPhantomAutoConnect(); // Attempt auto-connect if Phantom already trusted
         if(username) {
             const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('username', username).single();
             if(profile && profile.avatar_url) {
