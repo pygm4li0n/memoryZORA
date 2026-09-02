@@ -64,11 +64,11 @@
         <main class="chat-panel" id="chatPanel">
             <div class="chat-header-bar">
                 <div class="header-left">
-    <span class="header-icon">💬</span>
-    <img src="https://i.postimg.cc/HLTtQcTP/Proyecto-nuevo-(4).png" alt="Logo" class="header-logo">
-</div>
+                    <span class="header-icon">💬</span>
+                    <img src="https://i.postimg.cc/HLTtQcTP/Proyecto-nuevo-(4).png" alt="Logo" class="header-logo">
+                </div>
                 <div class="header-right">
-                    <!-- NEW: Token tracker with logo and name -->
+                    <!-- Token tracker -->
                     <div class="token-tracker" id="tokenTracker">
                         <img class="token-logo" id="tokenLogo" src="" alt="logo" />
                         <span class="token-name" id="tokenName">TOKEN</span>
@@ -84,6 +84,9 @@
                         <span class="dot"></span>
                         <span id="onlineCountNumber">0</span>
                     </span>
+                    <!-- Phantom Wallet Connect Button -->
+                    <button class="btn-icon" id="phantomConnectBtn" title="Connect Phantom Wallet">👻</button>
+                    <span id="walletAddress" style="font-size:0.7rem; margin-left:8px; color:#b8c2d0;"></span>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                     <span class="badge-pill" id="userPill" style="display:none;cursor:pointer;" title="You">
                         <span id="headerAvatar" style="width:20px;height:20px;border-radius:50%;background:#1e2a3a;display:flex;align-items:center;justify-content:center;font-size:0.6rem;overflow:hidden;"></span>
@@ -135,6 +138,9 @@
         <img id="lightboxImg" src="" alt="Enlarged image">
     </div>
 
+    <!-- Solana Web3 and SPL Token libraries -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
