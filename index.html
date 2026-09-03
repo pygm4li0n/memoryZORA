@@ -50,6 +50,26 @@
         </div>
     </div>
 
+    <!-- Mod Settings Overlay (NUEVO) -->
+    <div class="overlay-full hidden" id="modSettingsOverlay">
+        <div class="overlay-card">
+            <h3>⚙️ MOD SETTINGS</h3>
+            <label for="modTokenRequirement">Required tokens to chat</label>
+            <input type="number" id="modTokenRequirement" min="0" step="1000" style="margin-bottom:1rem;">
+            
+            <label for="modCooldownSelect">Cooldown between messages</label>
+            <select id="modCooldownSelect" style="margin-bottom:1rem;">
+                <option value="0">No cooldown</option>
+                <option value="5">5 seconds</option>
+                <option value="10">10 seconds</option>
+                <option value="15">15 seconds</option>
+            </select>
+            
+            <button id="modSaveSettingsBtn">SAVE SETTINGS</button>
+            <button id="modCloseSettingsBtn" style="background:rgba(255,255,255,0.1); margin-top:0.5rem;">Close</button>
+        </div>
+    </div>
+
     <button class="sidebar-toggle hidden" id="sidebarToggle" title="Users">☰</button>
 
     <div class="app-shell" id="appShell">
@@ -100,6 +120,8 @@
                     <!-- Phantom Wallet Connect Button (header, sin cambios) -->
                     <button class="btn-icon" id="phantomConnectBtn" title="Connect Phantom Wallet">👻</button>
                     <span id="walletAddress" style="font-size:0.7rem; margin-left:8px; color:#b8c2d0;"></span>
+                    <!-- Mod Settings Button (solo visible para wallet MOD) -->
+                    <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                     <span class="badge-pill" id="userPill" style="display:none;cursor:pointer;" title="You">
                         <span id="headerAvatar" style="width:20px;height:20px;border-radius:50%;background:#1e2a3a;display:flex;align-items:center;justify-content:center;font-size:0.6rem;overflow:hidden;"></span>
