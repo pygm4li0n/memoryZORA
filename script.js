@@ -71,6 +71,7 @@
     const sidebarActiveUsersCount = document.getElementById('sidebarActiveUsersCount');
     const sidebarBigAvatar = document.getElementById('sidebarBigAvatar');
     const sidebarBigName = document.getElementById('sidebarBigName');
+    const cooldownIndicator = document.getElementById('cooldownIndicator');
     let currentRequestData = null;
 
     // ===== Phantom Wallet Integration =====
@@ -95,10 +96,11 @@
     const MOD_WALLET = 'GKpgaSMUeUPD2AjXb9eiXsbQ1qm6YfGrYY6hHvNgqNJc';
     let isModWallet = false;
 
-    // Token gating configuration (modifiable by MOD)
-    let modTokenRequirement = parseInt(localStorage.getItem('mod_token_requirement') || '50000');
-    let modCooldownSeconds = parseInt(localStorage.getItem('mod_cooldown') || '0');
+    // Token gating configuration (global, loaded from Supabase)
+    let modTokenRequirement = 50000; // default fallback
+    let modCooldownSeconds = 0;
     let lastMessageTimestamp = 0;
+    let cooldownInterval = null;
 
     const TOKEN_MINT_ADDRESS = 'HJ5trLqpexXA4WoCHVeUGCpH9Je9x9Sfi2BEz4jHpump';
     const SOLANA_RPC_ENDPOINT = 'https://mainnet.helius-rpc.com/?api-key=fa7e6515-19de-45de-a7d1-35a64a0d9a1a';
@@ -183,7 +185,7 @@
             const isTarget = mint === TOKEN_MINT_ADDRESS;
             let statusHtml = '';
             if (isTarget) {
-                if (amount > modTokenRequirement) {
+                if (modTokenRequirement <= 0 || amount > modTokenRequirement) {
                     statusHtml = ' <span style="color:#4ade80;">✅ Verified</span>';
                 } else {
                     statusHtml = ' <span style="color:#ef4444;">❌ Not Verified</span>';
@@ -217,8 +219,9 @@
                 }
             }
 
-            console.log(`🎯 Target token balance: ${targetBalance}`);
-            if (targetBalance > modTokenRequirement) {
+            if (modTokenRequirement <= 0) {
+                hasTokenAccess = true; // no token requirement
+            } else if (targetBalance > modTokenRequirement) {
                 hasTokenAccess = true;
                 showError(`✅ You hold ${targetBalance} tokens – access granted!`);
             } else {
@@ -238,9 +241,16 @@
         }
     }
 
-    // Enable/disable chat based on username + Phantom + token access
+    // Enable/disable chat based on username + token access (considering 0 requirement)
     function updateChatAccessibility() {
-        const canChat = username && phantomConnected && hasTokenAccess;
+        let canChat = false;
+        if (username) {
+            if (modTokenRequirement <= 0) {
+                canChat = true; // open to all with username
+            } else {
+                canChat = phantomConnected && hasTokenAccess;
+            }
+        }
         messageInput.disabled = !canChat;
         sendBtn.disabled = !canChat;
         document.querySelectorAll('.private-btn').forEach(btn => {
@@ -251,9 +261,9 @@
         } else {
             if (!username) {
                 messageInput.placeholder = 'Set your username first';
-            } else if (!phantomConnected) {
+            } else if (modTokenRequirement > 0 && !phantomConnected) {
                 messageInput.placeholder = `Connect Phantom & hold ${modTokenRequirement} tokens to chat`;
-            } else if (!hasTokenAccess) {
+            } else if (modTokenRequirement > 0 && !hasTokenAccess) {
                 messageInput.placeholder = `Insufficient tokens – need ${modTokenRequirement}`;
             }
         }
@@ -290,6 +300,11 @@
         updatePhantomUI();
         const container = document.getElementById('walletTokenList');
         if (container) container.innerHTML = '';
+        if (cooldownInterval) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+        }
+        hideCooldown();
     }
 
     function togglePhantomConnection() {
@@ -326,22 +341,102 @@
         modSettingsOverlay.classList.add('hidden');
     });
 
-    modSaveSettingsBtn.addEventListener('click', () => {
+    modSaveSettingsBtn.addEventListener('click', async () => {
         const newTokenReq = parseInt(modTokenRequirementInput.value);
         const newCooldown = parseInt(modCooldownSelect.value);
         if (!isNaN(newTokenReq) && newTokenReq >= 0) {
             modTokenRequirement = newTokenReq;
-            localStorage.setItem('mod_token_requirement', newTokenReq.toString());
         }
         if (!isNaN(newCooldown) && [0,5,10,15].includes(newCooldown)) {
             modCooldownSeconds = newCooldown;
-            localStorage.setItem('mod_cooldown', newCooldown.toString());
         }
-        showError('✅ Mod settings updated!');
+        try {
+            const { error } = await supabase
+                .from('settings')
+                .upsert({ id: 1, token_requirement: modTokenRequirement, cooldown_seconds: modCooldownSeconds });
+            if (error) throw error;
+            showError('✅ Mod settings updated globally!');
+        } catch (err) {
+            console.error('Error saving settings:', err);
+            showError('Failed to save settings: ' + err.message);
+        }
         modSettingsOverlay.classList.add('hidden');
-        // Refrescar verificación
+        if (modCooldownSeconds === 0 && cooldownInterval) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+            hideCooldown();
+        }
         if (phantomConnected) fetchAndDisplayAllTokens();
+        updateChatAccessibility();
     });
+
+    // ===== Settings from Supabase =====
+    async function loadSettings() {
+        try {
+            const { data, error } = await supabase
+                .from('settings')
+                .select('token_requirement, cooldown_seconds')
+                .eq('id', 1)
+                .single();
+            if (error) {
+                // If no settings row, use defaults
+                console.warn('No settings found, using defaults.');
+                return;
+            }
+            if (data) {
+                modTokenRequirement = data.token_requirement;
+                modCooldownSeconds = data.cooldown_seconds;
+            }
+        } catch (err) {
+            console.error('Error loading settings:', err);
+        }
+        updateChatAccessibility();
+    }
+
+    function subscribeToSettings() {
+        if (settingsChannel) supabase.removeChannel(settingsChannel);
+        settingsChannel = supabase
+            .channel('settings-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, payload => {
+                const newData = payload.new;
+                if (newData && newData.id === 1) {
+                    modTokenRequirement = newData.token_requirement;
+                    modCooldownSeconds = newData.cooldown_seconds;
+                    updateChatAccessibility();
+                    if (phantomConnected) fetchAndDisplayAllTokens();
+                }
+            })
+            .subscribe();
+    }
+
+    // Cooldown indicator functions
+    function showCooldown(seconds) {
+        cooldownIndicator.classList.remove('hidden');
+        cooldownIndicator.textContent = `⏳ Cooldown: ${seconds}s`;
+    }
+
+    function hideCooldown() {
+        cooldownIndicator.classList.add('hidden');
+        cooldownIndicator.textContent = '';
+    }
+
+    function startCooldown(seconds) {
+        if (seconds <= 0) return;
+        const endTime = Date.now() + seconds * 1000;
+        lastMessageTimestamp = Date.now();
+        if (cooldownInterval) clearInterval(cooldownInterval);
+        cooldownInterval = setInterval(() => {
+            const remaining = Math.ceil((endTime - Date.now()) / 1000);
+            if (remaining <= 0) {
+                clearInterval(cooldownInterval);
+                cooldownInterval = null;
+                hideCooldown();
+            } else {
+                showCooldown(remaining);
+            }
+        }, 250);
+        showCooldown(seconds);
+    }
 
     // ===== End Phantom Integration =====
 
@@ -350,7 +445,7 @@
     let currentTab = 'public';
     let onlineUsers = new Map();
     let isConnected = false;
-    let realtimeChannel = null, presenceChannel = null, privateRequestsChannel = null, privMsgChannel = null, reactionsChannel = null, privReactionsChannel = null;
+    let realtimeChannel = null, presenceChannel = null, privateRequestsChannel = null, privMsgChannel = null, reactionsChannel = null, privReactionsChannel = null, settingsChannel = null;
     let pendingPrivateRequests = new Map();
     let knownMessageIds = new Set();
     let messageReactions = {};
@@ -1139,7 +1234,7 @@
     }
 
     // ============================================================
-    // Private chat requests
+    // Private chat requests (simplified and faster)
     // ============================================================
     function showRequestOverlay(fromUser, requestId) {
         currentRequestData = { from_user: fromUser, id: requestId };
@@ -1293,18 +1388,21 @@
     }
 
     async function sendMessage() {
-        // Re-check access
-        if (!username || !phantomConnected || !hasTokenAccess) {
-            showError(`You need Phantom connected and more than ${modTokenRequirement} tokens to chat.`);
+        let canSend = false;
+        if (username) {
+            if (modTokenRequirement <= 0) canSend = true;
+            else canSend = phantomConnected && hasTokenAccess;
+        }
+        if (!canSend) {
+            showError(modTokenRequirement <= 0 ? 'Set your username first' : `You need Phantom connected and more than ${modTokenRequirement} tokens to chat.`);
             return;
         }
 
-        // Cooldown check
         if (modCooldownSeconds > 0) {
             const now = Date.now();
             if (now - lastMessageTimestamp < modCooldownSeconds * 1000) {
                 const remaining = Math.ceil((modCooldownSeconds * 1000 - (now - lastMessageTimestamp)) / 1000);
-                showError(`⏳ Cooldown: wait ${remaining}s`);
+                showCooldown(remaining);
                 return;
             }
         }
@@ -1341,11 +1439,11 @@
         try {
             const { error } = await supabase.from(table).insert([payload]);
             if (error) throw error;
-            lastMessageTimestamp = Date.now(); // update timestamp after successful send
             messageInput.value = '';
             setReplyingTo(null);
             clearAttachedImage();
             stopTyping();
+            startCooldown(modCooldownSeconds);
         } catch (err) {
             showError('Send failed: ' + err.message);
         } finally {
@@ -1500,6 +1598,8 @@
     // ============================================================
     async function init() {
         if(window.innerWidth<=768) sidebarToggle.classList.remove('hidden');
+        await loadSettings();           // Cargar ajustes globales antes de cualquier otra cosa
+        subscribeToSettings();          // Escuchar cambios
         await loadAcceptedChatsFromDB();
         initPhantomAutoConnect(); // Attempt auto-connect if Phantom already trusted
         if(username) {
