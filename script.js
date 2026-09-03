@@ -75,6 +75,10 @@
     // ===== Phantom Wallet Integration =====
     const phantomConnectBtn = document.getElementById('phantomConnectBtn');
     const walletAddressSpan = document.getElementById('walletAddress');
+    // NEW: Overlay Phantom elements
+    const phantomConnectBtnOverlay = document.getElementById('phantomConnectBtnOverlay');
+    const walletAddressOverlay = document.getElementById('walletAddressOverlay');
+
     let phantomWalletPublicKey = null;
     let phantomConnected = false;
     let hasTokenAccess = false; // whether the wallet has sufficient token balance
@@ -96,15 +100,23 @@
         return null;
     }
 
+    // Update both header and overlay UI
     function updatePhantomUI() {
-        if (phantomConnected && phantomWalletPublicKey) {
-            const addr = phantomWalletPublicKey.toBase58();
-            walletAddressSpan.textContent = `👻 ${addr.slice(0, 4)}...${addr.slice(-4)}`;
-            phantomConnectBtn.title = 'Disconnect Phantom';
-        } else {
-            walletAddressSpan.textContent = '';
-            phantomConnectBtn.title = 'Connect Phantom Wallet';
+        const connected = phantomConnected && phantomWalletPublicKey;
+        const addr = connected ? phantomWalletPublicKey.toBase58() : '';
+        const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
+
+        // Header button and address
+        walletAddressSpan.textContent = connected ? `👻 ${shortAddr}` : '';
+        phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+
+        // Overlay button and address
+        if (phantomConnectBtnOverlay) {
+            walletAddressOverlay.textContent = connected ? `👻 ${shortAddr}` : '';
+            phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+            phantomConnectBtnOverlay.innerHTML = connected ? '👻 Disconnect' : '👻 Connect Phantom';
         }
+
         updateChatAccessibility();
     }
 
@@ -254,13 +266,20 @@
         if (container) container.innerHTML = '';
     }
 
-    phantomConnectBtn.addEventListener('click', () => {
+    // Function to handle both buttons
+    function togglePhantomConnection() {
         if (phantomConnected) {
             disconnectPhantom();
         } else {
             connectPhantom();
         }
-    });
+    }
+
+    // Event listeners for both Phantom buttons
+    phantomConnectBtn.addEventListener('click', togglePhantomConnection);
+    if (phantomConnectBtnOverlay) {
+        phantomConnectBtnOverlay.addEventListener('click', togglePhantomConnection);
+    }
 
     function initPhantomAutoConnect() {
         const provider = getPhantomProvider();
