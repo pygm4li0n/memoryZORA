@@ -122,6 +122,22 @@ body {
     background: #4ade80;
     box-shadow: 0 0 6px rgba(74,222,128,0.6);
 }
+/* ── Big rank badge (NUEVO) ── */
+.big-rank {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #fff;
+    background: linear-gradient(135deg, #3b82f6, #7c3aed);
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+    margin-top: 4px;
+}
+.big-rank.hidden {
+    display: none;
+}
 .sidebar-section-label {
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
     color: #9aa8b9; padding: 14px 18px 8px; font-weight: 700;
@@ -217,13 +233,12 @@ body {
     color: #fff; text-transform: uppercase;
     text-shadow: 0 0 10px rgba(45,212,191,0.3);
 }
-/* NEW: Logo replaces text */
 .header-logo {
-    height: 40px;                /* fits within 60px header */
+    height: 40px;
     width: auto;
     object-fit: contain;
     display: block;
-    max-width: 200px;           /* prevent overflow */
+    max-width: 200px;
 }
 .chat-header-bar .header-right { display: flex; align-items: center; gap: 8px; z-index: 1; flex-wrap: wrap; }
 .badge-pill {
@@ -445,7 +460,6 @@ body {
 .reply-indicator-bar { background: rgba(45,212,191,0.1); border: 1px solid rgba(45,212,191,0.3); color: #b0e0d6; }
 .private-indicator-bar { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fcd34d; }
 
-/* NEW: thumbnail in reply preview bar */
 .reply-preview-thumb {
     width: 30px;
     height: 30px;
@@ -720,6 +734,37 @@ button.send-btn-main:disabled { background: #3a4a60; box-shadow: none; cursor: n
 
 .cooldown-indicator.hidden {
     display: none;
+}
+
+/* ── Lock overlay ── */
+.lock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 15, 26, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+.lock-overlay.hidden {
+    display: none;
+}
+.lock-content {
+    text-align: center;
+    color: #fff;
+    font-weight: 600;
+    max-width: 320px;
+}
+.lock-content p {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #b8c2d0;
 }
 
 /* ── Mobile improvements ── */
