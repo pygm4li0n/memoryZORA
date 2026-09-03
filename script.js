@@ -7,6 +7,7 @@
     // State – updated for MSN
     const STORAGE_KEY_NAME = 'msn_chat_username';
     const CLIENT_ID_KEY = 'msn_chat_client_id';
+    const ACTIVE_CHAT_KEY = 'msn_active_private_chat';
     let username = localStorage.getItem(STORAGE_KEY_NAME) || '';
     let clientId = localStorage.getItem(CLIENT_ID_KEY) || '';
     if (!clientId) {
@@ -75,7 +76,6 @@
     // ===== Phantom Wallet Integration =====
     const phantomConnectBtn = document.getElementById('phantomConnectBtn');
     const walletAddressSpan = document.getElementById('walletAddress');
-    // NEW: Overlay Phantom elements
     const phantomConnectBtnOverlay = document.getElementById('phantomConnectBtnOverlay');
     const walletAddressOverlay = document.getElementById('walletAddressOverlay');
 
@@ -83,7 +83,6 @@
     let phantomConnected = false;
     let hasTokenAccess = false; // whether the wallet has sufficient token balance
 
-    // Token gating configuration
     const TOKEN_MINT_ADDRESS = 'HJ5trLqpexXA4WoCHVeUGCpH9Je9x9Sfi2BEz4jHpump';
     const REQUIRED_BALANCE = 50000; // 50K tokens
     const SOLANA_RPC_ENDPOINT = 'https://mainnet.helius-rpc.com/?api-key=fa7e6515-19de-45de-a7d1-35a64a0d9a1a';
@@ -100,17 +99,14 @@
         return null;
     }
 
-    // Update both header and overlay UI
     function updatePhantomUI() {
         const connected = phantomConnected && phantomWalletPublicKey;
         const addr = connected ? phantomWalletPublicKey.toBase58() : '';
         const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
 
-        // Header button and address
         walletAddressSpan.textContent = connected ? `👻 ${shortAddr}` : '';
         phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
 
-        // Overlay button and address
         if (phantomConnectBtnOverlay) {
             walletAddressOverlay.textContent = connected ? `👻 ${shortAddr}` : '';
             phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
@@ -120,7 +116,6 @@
         updateChatAccessibility();
     }
 
-    // Create a container in the sidebar to display tokens
     function createTokenListContainer() {
         if (tokenListContainer) return tokenListContainer;
         const sidebarFooter = document.querySelector('.sidebar-footer');
@@ -136,7 +131,6 @@
         return tokenListContainer;
     }
 
-    // Display all token balances, highlighting the target token and showing verification status
     function displayTokenBalances(tokenAccounts) {
         const container = createTokenListContainer();
         if (!container) return;
@@ -169,7 +163,6 @@
         container.innerHTML = html;
     }
 
-    // Fetch all tokens and check eligibility for target token
     async function fetchAndDisplayAllTokens() {
         if (!phantomWalletPublicKey) return;
 
@@ -178,11 +171,8 @@
                 phantomWalletPublicKey,
                 { programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
             );
-
-            // Display all tokens with verification status
             displayTokenBalances(tokenAccounts.value);
 
-            // Check target token balance and set access
             let targetBalance = 0;
             for (const acc of tokenAccounts.value) {
                 const info = acc.account.data.parsed.info;
@@ -212,7 +202,6 @@
         }
     }
 
-    // Enable/disable chat based on username + Phantom + token access
     function updateChatAccessibility() {
         const canChat = username && phantomConnected && hasTokenAccess;
         messageInput.disabled = !canChat;
@@ -266,7 +255,6 @@
         if (container) container.innerHTML = '';
     }
 
-    // Function to handle both buttons
     function togglePhantomConnection() {
         if (phantomConnected) {
             disconnectPhantom();
@@ -275,7 +263,6 @@
         }
     }
 
-    // Event listeners for both Phantom buttons
     phantomConnectBtn.addEventListener('click', togglePhantomConnection);
     if (phantomConnectBtnOverlay) {
         phantomConnectBtnOverlay.addEventListener('click', togglePhantomConnection);
@@ -309,10 +296,15 @@
     const typingUsers = new Map();
     let typingChannel = null;
 
-    let acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
+    let acceptedPrivateChats;
+    try {
+        acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
+    } catch (e) {
+        acceptedPrivateChats = new Set();
+    }
 
     // ============================================================
-    // Token Tracker (DexScreener) – displays token price/logo
+    // Token Tracker (DexScreener)
     // ============================================================
     const TOKEN_ADDRESS = 'HmJDgky11u77hpBss6D8sjNpYPD5B6fWgSVDj58jpump';
 
@@ -400,7 +392,9 @@
             (sent||[]).forEach(r => acceptedPrivateChats.add(r.to_user));
             (received||[]).forEach(r => acceptedPrivateChats.add(r.from_user));
             saveAcceptedChats();
-        } catch (err) {}
+        } catch (err) {
+            console.error('Error loading accepted chats:', err);
+        }
     }
 
     // ============================================================
@@ -977,6 +971,7 @@
 
     function setActivePrivateChat(partnerUsername) {
         activePrivateChat = partnerUsername;
+        localStorage.setItem(ACTIVE_CHAT_KEY, partnerUsername || '');
         if(partnerUsername) {
             privateIndicatorBar.classList.remove('hidden');
             privateChatUserDisp.textContent = partnerUsername;
@@ -1173,7 +1168,9 @@
                 }
             });
             updateSidebarUI();
-        } catch(err) {}
+        } catch(err) {
+            console.error('Error loading pending requests:', err);
+        }
     }
     function subscribeToPrivateRequests() {
         if(!username) return;
@@ -1343,7 +1340,7 @@
         switchTab('public');
         await updateSidebarUI();
         setupTypingChannel();
-        updateChatAccessibility(); // apply gating after username is set
+        updateChatAccessibility();
     }
 
     // ============================================================
@@ -1457,7 +1454,13 @@
             loadReactions('private_message_reactions', true);
             subscribeReactions();
             setupTypingChannel();
-            updateChatAccessibility(); // apply gating after everything loaded
+            updateChatAccessibility();
+
+            // Restaurar chat privado activo si existía
+            const savedActiveChat = localStorage.getItem(ACTIVE_CHAT_KEY);
+            if (savedActiveChat && acceptedPrivateChats.has(savedActiveChat)) {
+                setActivePrivateChat(savedActiveChat);
+            }
         } else {
             nameOverlay.classList.remove('hidden'); nameInput.focus();
             subscribeToRealtime();
