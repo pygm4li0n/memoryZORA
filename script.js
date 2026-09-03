@@ -67,7 +67,6 @@
     const requestName = document.getElementById('requestName');
     const requestAcceptBtn = document.getElementById('requestAcceptBtn');
     const requestDeclineBtn = document.getElementById('requestDeclineBtn');
-    // New MSN sidebar elements
     const sidebarActiveUsersCount = document.getElementById('sidebarActiveUsersCount');
     const sidebarBigAvatar = document.getElementById('sidebarBigAvatar');
     const sidebarBigName = document.getElementById('sidebarBigName');
@@ -78,13 +77,15 @@
     const walletAddressSpan = document.getElementById('walletAddress');
     let phantomWalletPublicKey = null;
     let phantomConnected = false;
+    let hasTokenAccess = false; // whether the wallet has sufficient token balance
 
-    // Token configuration – replace with your actual token mint and threshold
-    const TOKEN_MINT_ADDRESS = 'YOUR_TOKEN_MINT_ADDRESS_HERE'; // Replace!
-    const REQUIRED_BALANCE = 100; // Adjust as needed
-    const SOLANA_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
+    // Token gating configuration
+    const TOKEN_MINT_ADDRESS = 'HJ5trLqpexXA4WoCHVeUGCpH9Je9x9Sfi2BEz4jHpump';
+    const REQUIRED_BALANCE = 50000; // 50K tokens
+    const SOLANA_RPC_ENDPOINT = 'https://mainnet.helius-rpc.com/?api-key=fa7e6515-19de-45de-a7d1-35a64a0d9a1a';
 
     const solanaConnection = new solanaWeb3.Connection(SOLANA_RPC_ENDPOINT);
+    let tokenListContainer = null;
 
     function getPhantomProvider() {
         if ('phantom' in window) {
@@ -98,11 +99,125 @@
     function updatePhantomUI() {
         if (phantomConnected && phantomWalletPublicKey) {
             const addr = phantomWalletPublicKey.toBase58();
-            walletAddressSpan.textContent = `👻 ${addr.slice(0,4)}...${addr.slice(-4)}`;
+            walletAddressSpan.textContent = `👻 ${addr.slice(0, 4)}...${addr.slice(-4)}`;
             phantomConnectBtn.title = 'Disconnect Phantom';
         } else {
             walletAddressSpan.textContent = '';
             phantomConnectBtn.title = 'Connect Phantom Wallet';
+        }
+        updateChatAccessibility();
+    }
+
+    // Create a container in the sidebar to display tokens
+    function createTokenListContainer() {
+        if (tokenListContainer) return tokenListContainer;
+        const sidebarFooter = document.querySelector('.sidebar-footer');
+        if (!sidebarFooter) return null;
+        tokenListContainer = document.createElement('div');
+        tokenListContainer.id = 'walletTokenList';
+        tokenListContainer.style.cssText = `
+            max-height: 160px; overflow-y: auto; margin-top: 6px;
+            font-size: 0.7rem; color: #b0c0d8; padding: 4px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        `;
+        sidebarFooter.parentNode.insertBefore(tokenListContainer, sidebarFooter);
+        return tokenListContainer;
+    }
+
+    // Display all token balances, highlighting the target token and showing verification status
+    function displayTokenBalances(tokenAccounts) {
+        const container = createTokenListContainer();
+        if (!container) return;
+
+        if (!tokenAccounts || tokenAccounts.length === 0) {
+            container.innerHTML = '<div style="opacity:0.6;">No SPL tokens found</div>';
+            return;
+        }
+
+        let html = '<div style="font-weight:bold; margin-bottom:4px;">Token Balances:</div>';
+        tokenAccounts.forEach(acc => {
+            const info = acc.account.data.parsed.info;
+            const mint = info.mint;
+            const amount = parseFloat(info.tokenAmount.uiAmountString);
+            const shortMint = mint.slice(0,4) + '...' + mint.slice(-4);
+            const isTarget = mint === TOKEN_MINT_ADDRESS;
+            let statusHtml = '';
+            if (isTarget) {
+                if (amount > REQUIRED_BALANCE) {
+                    statusHtml = ' <span style="color:#4ade80;">✅ Verified</span>';
+                } else {
+                    statusHtml = ' <span style="color:#ef4444;">❌ Not Verified</span>';
+                }
+            }
+            html += `<div style="display:flex; justify-content:space-between; gap:4px; align-items:center;">
+                <span title="${mint}">${shortMint}${statusHtml}</span>
+                <span>${amount.toLocaleString()}</span>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // Fetch all tokens and check eligibility for target token
+    async function fetchAndDisplayAllTokens() {
+        if (!phantomWalletPublicKey) return;
+
+        try {
+            const tokenAccounts = await solanaConnection.getParsedTokenAccountsByOwner(
+                phantomWalletPublicKey,
+                { programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
+            );
+
+            // Display all tokens with verification status
+            displayTokenBalances(tokenAccounts.value);
+
+            // Check target token balance and set access
+            let targetBalance = 0;
+            for (const acc of tokenAccounts.value) {
+                const info = acc.account.data.parsed.info;
+                if (info.mint === TOKEN_MINT_ADDRESS) {
+                    targetBalance += parseFloat(info.tokenAmount.uiAmountString);
+                }
+            }
+
+            console.log(`🎯 Target token balance: ${targetBalance}`);
+            if (targetBalance > REQUIRED_BALANCE) {
+                hasTokenAccess = true;
+                showError(`✅ You hold ${targetBalance} tokens – access granted!`);
+            } else {
+                hasTokenAccess = false;
+                showError(`❌ You need more than ${REQUIRED_BALANCE} tokens (you have ${targetBalance}).`);
+            }
+            updateChatAccessibility();
+        } catch (err) {
+            console.error('❌ Error fetching token balances:', err);
+            showError(`RPC error: ${err.message}. Please try again or check your connection.`);
+            hasTokenAccess = false;
+            updateChatAccessibility();
+            const container = createTokenListContainer();
+            if (container) {
+                container.innerHTML = '<div style="color:#ff6b6b;">Failed to load tokens</div>';
+            }
+        }
+    }
+
+    // Enable/disable chat based on username + Phantom + token access
+    function updateChatAccessibility() {
+        const canChat = username && phantomConnected && hasTokenAccess;
+        messageInput.disabled = !canChat;
+        sendBtn.disabled = !canChat;
+        document.querySelectorAll('.private-btn').forEach(btn => {
+            btn.disabled = !canChat;
+        });
+        if (canChat) {
+            messageInput.placeholder = 'Type a message...';
+        } else {
+            if (!username) {
+                messageInput.placeholder = 'Set your username first';
+            } else if (!phantomConnected) {
+                messageInput.placeholder = `Connect Phantom & hold ${REQUIRED_BALANCE} tokens to chat`;
+            } else if (!hasTokenAccess) {
+                messageInput.placeholder = `Insufficient tokens – need ${REQUIRED_BALANCE}`;
+            }
         }
     }
 
@@ -119,7 +234,7 @@
             phantomConnected = true;
             updatePhantomUI();
             showError('✅ Phantom connected: ' + phantomWalletPublicKey.toBase58());
-            await checkTokenBalance();
+            await fetchAndDisplayAllTokens();
         } catch (err) {
             console.error('Phantom connection error:', err);
             showError('Could not connect Phantom: ' + err.message);
@@ -133,45 +248,12 @@
         }
         phantomWalletPublicKey = null;
         phantomConnected = false;
+        hasTokenAccess = false;
         updatePhantomUI();
+        const container = document.getElementById('walletTokenList');
+        if (container) container.innerHTML = '';
     }
 
-    async function checkTokenBalance() {
-        if (!phantomWalletPublicKey) {
-            console.warn('No wallet connected');
-            return 0;
-        }
-
-        try {
-            const tokenAccounts = await solanaConnection.getParsedTokenAccountsByOwner(
-                phantomWalletPublicKey,
-                { mint: new solanaWeb3.PublicKey(TOKEN_MINT_ADDRESS) }
-            );
-
-            let totalBalance = 0;
-            for (const accountInfo of tokenAccounts.value) {
-                const tokenAmount = accountInfo.account.data.parsed.info.tokenAmount;
-                totalBalance += parseFloat(tokenAmount.uiAmountString);
-            }
-
-            console.log(`Token balance: ${totalBalance}`);
-            if (totalBalance > REQUIRED_BALANCE) {
-                showError(`✅ You hold ${totalBalance} tokens – access granted!`);
-                // Optionally enable premium features here
-            } else {
-                showError(`❌ You need at least ${REQUIRED_BALANCE} tokens (you have ${totalBalance}).`);
-                // Optionally disable premium features here
-            }
-
-            return totalBalance;
-        } catch (err) {
-            console.error('Error checking token balance:', err);
-            showError('Failed to fetch token balance.');
-            return 0;
-        }
-    }
-
-    // Event listener for Phantom button
     phantomConnectBtn.addEventListener('click', () => {
         if (phantomConnected) {
             disconnectPhantom();
@@ -180,14 +262,13 @@
         }
     });
 
-    // Auto-connect if Phantom is already trusted and connected
     function initPhantomAutoConnect() {
         const provider = getPhantomProvider();
         if (provider && provider.isConnected && provider.publicKey) {
             phantomWalletPublicKey = provider.publicKey;
             phantomConnected = true;
             updatePhantomUI();
-            checkTokenBalance();
+            fetchAndDisplayAllTokens();
         }
     }
     // ===== End Phantom Integration =====
@@ -212,9 +293,9 @@
     let acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
 
     // ============================================================
-    // Token Tracker (DexScreener) – using token address, shows name and logo
+    // Token Tracker (DexScreener) – displays token price/logo
     // ============================================================
-    const TOKEN_ADDRESS = '6mYcNBqiior9gYj4S4x2jDnd3JjggmGvax4wYhUphga';
+    const TOKEN_ADDRESS = 'HmJDgky11u77hpBss6D8sjNpYPD5B6fWgSVDj58jpump';
 
     async function updateTokenInfo() {
         const logoEl = document.getElementById('tokenLogo');
@@ -255,31 +336,23 @@
         }
     }
 
-    // Start token updates
     updateTokenInfo();
-    setInterval(updateTokenInfo, 60000); // update every 60 seconds
+    setInterval(updateTokenInfo, 60000);
 
     // ============================================================
-    // Scroll to bottom helper functions
+    // Scroll to bottom helpers
     // ============================================================
     function scrollContainerToBottom(container) {
-        if (container) {
-            container.scrollTop = container.scrollHeight;
-        }
+        if (container) container.scrollTop = container.scrollHeight;
     }
 
     function updateScrollButtonVisibility(container) {
         if (!scrollBottomBtn) return;
-        const threshold = 80; // pixels from bottom
+        const threshold = 80;
         const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
-        if (isNearBottom) {
-            scrollBottomBtn.classList.remove('visible');
-        } else {
-            scrollBottomBtn.classList.add('visible');
-        }
+        scrollBottomBtn.classList.toggle('visible', !isNearBottom);
     }
 
-    // Scroll event listeners for both containers
     [publicContainer, privateContainer].forEach(container => {
         container.addEventListener('scroll', () => {
             if (container === publicContainer && currentTab === 'public') {
@@ -290,18 +363,11 @@
         });
     });
 
-    // Click handler for the scroll-to-bottom button
     scrollBottomBtn.addEventListener('click', () => {
         const container = currentTab === 'public' ? publicContainer : privateContainer;
-        container.scrollTo({
-            top: container.scrollHeight,
-            behavior: 'smooth'
-        });
-        setTimeout(() => {
-            updateScrollButtonVisibility(container);
-        }, 300);
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        setTimeout(() => updateScrollButtonVisibility(container), 300);
     });
-    // ============================================================
 
     function saveAcceptedChats() {
         localStorage.setItem('msn_accepted_chats', JSON.stringify([...acceptedPrivateChats]));
@@ -318,7 +384,9 @@
         } catch (err) {}
     }
 
-    // Particles
+    // ============================================================
+    // Particle animation
+    // ============================================================
     const particleCanvas = document.getElementById('particleCanvas');
     const pCtx = particleCanvas.getContext('2d');
     let particles = [];
@@ -375,6 +443,9 @@
     }
     requestAnimationFrame(animateParticles);
 
+    // ============================================================
+    // Helper functions
+    // ============================================================
     function escapeHtml(t) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(t).replace(/[&<>"']/g, m=>map[m]); }
     function trunc(t, l=45) { return t && t.length>l ? t.substring(0,l)+'…' : t||''; }
     function showError(msg) {
@@ -409,18 +480,15 @@
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
         const msgDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        
         const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        if (msgDate.getTime() === today.getTime()) {
-            return `Today ${timeStr}`;
-        } else if (msgDate.getTime() === yesterday.getTime()) {
-            return `Yesterday ${timeStr}`;
-        } else {
-            return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
-        }
+        if (msgDate.getTime() === today.getTime()) return `Today ${timeStr}`;
+        else if (msgDate.getTime() === yesterday.getTime()) return `Yesterday ${timeStr}`;
+        else return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
     }
 
+    // ============================================================
+    // Avatar handling
+    // ============================================================
     async function fetchAvatars(usernames) {
         const unique = [...new Set(usernames.filter(u => u && !avatarCache[u]))];
         if (unique.length === 0) return;
@@ -435,6 +503,9 @@
         return (user || '?')[0].toUpperCase();
     }
 
+    // ============================================================
+    // Image handling
+    // ============================================================
     function resizeImage(file, maxDim=750) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -483,7 +554,9 @@
         fileInput.value = '';
     }
 
-    // ── Reactions ──
+    // ============================================================
+    // Reactions
+    // ============================================================
     async function loadReactions(table, isPrivate) {
         const { data, error } = await supabase.from(table).select('*');
         if (error) return;
@@ -532,38 +605,21 @@
         else await supabase.from(table).insert({ message_id: messageId, username, emoji });
     }
 
-    // Improved scrollToMessage: fetches missing message and renders it
+    // ============================================================
+    // Message rendering & actions
+    // ============================================================
     async function scrollToMessage(msgId) {
         const container = currentTab === 'public' ? publicContainer : privateContainer;
-        
-        // Try to find in DOM first
         let target = container.querySelector(`.msg-wrapper[data-msg-id="${msgId}"]`);
-        
         if (!target) {
-            // Message not in DOM, fetch from Supabase
             const table = currentTab === 'public' ? 'messages' : 'private_messages';
-            const { data, error } = await supabase
-                .from(table)
-                .select('*')
-                .eq('id', msgId)
-                .single();
-            
-            if (error || !data) {
-                showError('Original message could not be loaded.');
-                return;
-            }
-            
-            // Fetch avatar if needed
+            const { data, error } = await supabase.from(table).select('*').eq('id', msgId).single();
+            if (error || !data) { showError('Original message could not be loaded.'); return; }
             const user = currentTab === 'public' ? data.username : data.from_user;
             if (!getAvatarURL(user)) await fetchAvatars([user]);
-            
-            // Render the message (will be appended to container)
             await renderMessage(data, currentTab === 'private');
-            
-            // Try to find it again
             target = container.querySelector(`.msg-wrapper[data-msg-id="${msgId}"]`);
         }
-        
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             target.classList.add('highlight-flash');
@@ -590,13 +646,11 @@
         if(isPrivate) bubble.classList.add('private-msg');
 
         let innerHTML = '';
-        // Updated reply reference condition to include image-only replies
         if (msg.reply_to_username && (msg.reply_to_message || msg.reply_to_image_url)) {
             let imageThumb = '';
             if (msg.reply_to_image_url) {
                 imageThumb = `<img src="${escapeHtml(msg.reply_to_image_url)}" alt="replied image" class="reply-image-thumb">`;
             }
-            // Show placeholder if there is no text, but there is an image
             const replyText = msg.reply_to_message
                 ? `"${escapeHtml(trunc(msg.reply_to_message,55))}"`
                 : '🖼️ Image';
@@ -663,18 +717,8 @@
         if (isOwn && !msg.is_deleted) {
             const editBtn = bubble.querySelector('.edit-btn');
             const deleteBtn = bubble.querySelector('.delete-btn');
-            if (editBtn) {
-                editBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    startEditMessage(msg, isPrivate);
-                });
-            }
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deleteMessage(msg, isPrivate);
-                });
-            }
+            if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); startEditMessage(msg, isPrivate); });
+            if (deleteBtn) deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteMessage(msg, isPrivate); });
         }
         updateReactionUI(wrapper, isPrivate);
     }
@@ -706,7 +750,6 @@
         }
     }
 
-    // Add click listener for reply preview thumbnail (open lightbox)
     document.getElementById('replyPreviewThumb').addEventListener('click', function() {
         if (this.src && this.src !== '') {
             lightboxImg.src = this.src;
@@ -771,40 +814,29 @@
         }
     }
 
-    // ── Typing ──
+    // ============================================================
+    // Typing indicators
+    // ============================================================
     function startTyping() {
         if (!username || !typingChannel) return;
         const tab = currentTab === 'private' && activePrivateChat ? 'private' : 'public';
         const partner = tab === 'private' ? activePrivateChat : null;
-        typingChannel.send({
-            type: 'broadcast',
-            event: 'typing',
-            payload: { username, tab, partner }
-        }).then(() => {}).catch(console.warn);
+        typingChannel.send({ type: 'broadcast', event: 'typing', payload: { username, tab, partner } }).then(() => {}).catch(console.warn);
     }
     function stopTyping() {
         if (!username || !typingChannel) return;
-        typingChannel.send({
-            type: 'broadcast',
-            event: 'stop_typing',
-            payload: { username }
-        }).then(() => {}).catch(console.warn);
+        typingChannel.send({ type: 'broadcast', event: 'stop_typing', payload: { username } }).then(() => {}).catch(console.warn);
     }
     messageInput.addEventListener('input', () => {
         if (messageInput.value.length > 0) startTyping();
         else stopTyping();
     });
-
     function handleTypingBroadcast(payload) {
         const { event, username: sender, tab, partner } = payload;
         if (sender === username) return;
-
         if (event === 'typing') {
             if (typingUsers.has(sender)) clearTimeout(typingUsers.get(sender).timeoutId);
-            const timeoutId = setTimeout(() => {
-                typingUsers.delete(sender);
-                updateTypingIndicator();
-            }, 3000);
+            const timeoutId = setTimeout(() => { typingUsers.delete(sender); updateTypingIndicator(); }, 3000);
             typingUsers.set(sender, { tab, partner, timeoutId });
         } else if (event === 'stop_typing') {
             if (typingUsers.has(sender)) {
@@ -814,7 +846,6 @@
         }
         updateTypingIndicator();
     }
-
     function updateTypingIndicator() {
         const typersPublic = [];
         const typersPrivate = {};
@@ -822,7 +853,6 @@
             if (data.tab === 'public') typersPublic.push(user);
             else if (data.tab === 'private' && data.partner === username) typersPrivate[user] = true;
         });
-
         let text = '';
         const dots = '<span class="typing-dots"><span></span><span></span><span></span></span>';
         if (currentTab === 'public') {
@@ -833,7 +863,6 @@
         }
         typingIndicator.innerHTML = text || '';
     }
-
     function setupTypingChannel() {
         if (typingChannel) supabase.removeChannel(typingChannel);
         typingChannel = supabase.channel('typing-broadcast', { config: { broadcast: { self: false } } });
@@ -842,7 +871,9 @@
         typingChannel.subscribe();
     }
 
-    // ── Presence ──
+    // ============================================================
+    // Presence
+    // ============================================================
     function setupPresence() {
         if (presenceChannel) return;
         if (!username) return;
@@ -883,7 +914,9 @@
         }
     }
 
-    // ── Tabs & private chat ──
+    // ============================================================
+    // Tabs & Private Chat
+    // ============================================================
     function switchTab(tabName) {
         currentTab = tabName;
         const tabs = chatTabs.querySelectorAll('.chat-tab');
@@ -895,11 +928,7 @@
             privateContainer.classList.add('hidden');
             privateIndicatorBar.classList.add('hidden');
             messageInput.placeholder = 'Type a message...';
-            // NEW: scroll to bottom and update button after showing (increased to 150ms)
-            setTimeout(() => {
-                scrollContainerToBottom(publicContainer);
-                updateScrollButtonVisibility(publicContainer);
-            }, 150);
+            setTimeout(() => { scrollContainerToBottom(publicContainer); updateScrollButtonVisibility(publicContainer); }, 150);
         } else {
             publicContainer.classList.add('hidden');
             privateContainer.classList.remove('hidden');
@@ -911,11 +940,7 @@
                 privateIndicatorBar.classList.add('hidden');
                 messageInput.placeholder = 'Select a partner from the sidebar first.';
             }
-            // NEW: scroll to bottom and update button after showing (increased to 150ms)
-            setTimeout(() => {
-                scrollContainerToBottom(privateContainer);
-                updateScrollButtonVisibility(privateContainer);
-            }, 150);
+            setTimeout(() => { scrollContainerToBottom(privateContainer); updateScrollButtonVisibility(privateContainer); }, 150);
         }
         updateTypingIndicator();
         if (messageInput.value.length > 0) startTyping();
@@ -961,28 +986,22 @@
             .or(`and(from_user.eq.${username},to_user.eq.${partner}),and(from_user.eq.${partner},to_user.eq.${username})`)
             .order('sort_order', { ascending: true });
         if (error) { showError('Failed to load private messages'); return; }
-
-        // Safety sort by sort_order ascending
         data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-
         privateContainer.innerHTML = '';
         if (data.length === 0) {
             privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
         } else {
             const users = [...new Set(data.flatMap(m => [m.from_user, m.to_user]))];
             await fetchAvatars(users);
-            for (const msg of data) {
-                await renderMessage(msg, true);
-            }
+            for (const msg of data) await renderMessage(msg, true);
         }
         loadReactions('private_message_reactions', true);
-        // NEW: delayed scroll to bottom
-        setTimeout(() => {
-            scrollContainerToBottom(privateContainer);
-            updateScrollButtonVisibility(privateContainer);
-        }, 150);
+        setTimeout(() => { scrollContainerToBottom(privateContainer); updateScrollButtonVisibility(privateContainer); }, 150);
     }
 
+    // ============================================================
+    // Sidebar UI
+    // ============================================================
     async function updateSidebarUI() {
         const usersToFetch = [];
         if (username) usersToFetch.push(username);
@@ -1007,7 +1026,6 @@
         });
         sidebarUsers.innerHTML = html || '<div class="no-users-sidebar">No one else online</div>';
         onlineCountNumber.textContent = onlineUsers.size;
-        // Update new sidebar elements
         if (sidebarActiveUsersCount) sidebarActiveUsersCount.textContent = onlineUsers.size;
 
         sidebarUsers.querySelectorAll('.sidebar-user-item').forEach(item => {
@@ -1023,6 +1041,7 @@
                 });
             }
         });
+        updateChatAccessibility(); // apply gating to private buttons
     }
     function buildSidebarItem(userName, isOnline, isPending, isSelf=false, isAccepted=false) {
         const avatarURL = getAvatarURL(userName);
@@ -1039,7 +1058,9 @@
         </div>`;
     }
 
-    // Request overlay
+    // ============================================================
+    // Private chat requests
+    // ============================================================
     function showRequestOverlay(fromUser, requestId) {
         currentRequestData = { from_user: fromUser, id: requestId };
         const url = getAvatarURL(fromUser);
@@ -1080,7 +1101,6 @@
         await sendPrivateRequest(targetUser);
     }
     async function sendPrivateRequest(toUser) {
-        // Prevent duplicate pending requests
         const { data: existing } = await supabase
             .from('private_chat_requests')
             .select('id')
@@ -1160,19 +1180,19 @@
             }).subscribe();
     }
 
+    // ============================================================
+    // Load and send messages
+    // ============================================================
     async function loadMessages() {
         setConnection('connecting');
         try {
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .order('sort_order', { ascending: false })   // newest first
+                .order('sort_order', { ascending: false })
                 .limit(80);
             if (error) throw error;
-
-            // Safety sort by sort_order ascending
             data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-
             publicContainer.innerHTML = '';
             knownMessageIds.clear();
             if (data.length === 0) {
@@ -1180,16 +1200,10 @@
             } else {
                 const users = [...new Set(data.map(m => m.username))];
                 await fetchAvatars(users);
-                for (const msg of data) {
-                    await renderMessage(msg, false);
-                }
+                for (const msg of data) await renderMessage(msg, false);
             }
             setConnection('connected');
-            // NEW: delayed scroll to bottom (150ms)
-            setTimeout(() => {
-                scrollContainerToBottom(publicContainer);
-                updateScrollButtonVisibility(publicContainer);
-            }, 150);
+            setTimeout(() => { scrollContainerToBottom(publicContainer); updateScrollButtonVisibility(publicContainer); }, 150);
         } catch (err) {
             showError('Load failed: ' + err.message);
             setConnection('disconnected');
@@ -1197,9 +1211,13 @@
     }
 
     async function sendMessage() {
+        // Re-check access
+        if (!username || !phantomConnected || !hasTokenAccess) {
+            showError('You need Phantom connected and more than 50K tokens to chat.');
+            return;
+        }
         const text = messageInput.value.trim();
         if (!text && !pendingImageUrl) return;
-        if (!username) return;
         sendBtn.disabled = true;
         const isPrivate = (currentTab === 'private' && activePrivateChat);
         if (isPrivate && !activePrivateChat) {
@@ -1212,7 +1230,7 @@
         let payload = {
             message: text || null,
             image_url: pendingImageUrl || null,
-            created_at: new Date().toISOString()   // keep for backward compatibility
+            created_at: new Date().toISOString()
         };
         if (replyingTo?.id) {
             payload.reply_to_id = replyingTo.id;
@@ -1248,11 +1266,8 @@
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages' }, payload => {
                 renderMessage(payload.new, false);
                 setConnection('connected');
-                // Auto scroll only if user is near bottom
                 const isNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 80;
-                if (isNearBottom) {
-                    scrollContainerToBottom(publicContainer);
-                }
+                if (isNearBottom) scrollContainerToBottom(publicContainer);
             })
             .subscribe();
 
@@ -1262,11 +1277,8 @@
                 const msg = payload.new;
                 if (activePrivateChat && ((msg.from_user === username && msg.to_user === activePrivateChat) || (msg.from_user === activePrivateChat && msg.to_user === username))) {
                     renderMessage(msg, true);
-                    // Auto scroll only if near bottom
                     const isNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 80;
-                    if (isNearBottom) {
-                        scrollContainerToBottom(privateContainer);
-                    }
+                    if (isNearBottom) scrollContainerToBottom(privateContainer);
                 }
             })
             .subscribe();
@@ -1312,9 +1324,12 @@
         switchTab('public');
         await updateSidebarUI();
         setupTypingChannel();
+        updateChatAccessibility(); // apply gating after username is set
     }
 
+    // ============================================================
     // Event listeners
+    // ============================================================
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
     cancelReplyBtn.addEventListener('click', () => setReplyingTo(null));
@@ -1386,7 +1401,9 @@
         }
     });
 
+    // ============================================================
     // Init
+    // ============================================================
     async function init() {
         if(window.innerWidth<=768) sidebarToggle.classList.remove('hidden');
         await loadAcceptedChatsFromDB();
@@ -1421,6 +1438,7 @@
             loadReactions('private_message_reactions', true);
             subscribeReactions();
             setupTypingChannel();
+            updateChatAccessibility(); // apply gating after everything loaded
         } else {
             nameOverlay.classList.remove('hidden'); nameInput.focus();
             subscribeToRealtime();
