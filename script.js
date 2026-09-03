@@ -79,12 +79,28 @@
     const phantomConnectBtnOverlay = document.getElementById('phantomConnectBtnOverlay');
     const walletAddressOverlay = document.getElementById('walletAddressOverlay');
 
+    // Mod Settings elements
+    const modSettingsBtn = document.getElementById('modSettingsBtn');
+    const modSettingsOverlay = document.getElementById('modSettingsOverlay');
+    const modTokenRequirementInput = document.getElementById('modTokenRequirement');
+    const modCooldownSelect = document.getElementById('modCooldownSelect');
+    const modSaveSettingsBtn = document.getElementById('modSaveSettingsBtn');
+    const modCloseSettingsBtn = document.getElementById('modCloseSettingsBtn');
+
     let phantomWalletPublicKey = null;
     let phantomConnected = false;
     let hasTokenAccess = false; // whether the wallet has sufficient token balance
 
+    // MOD wallet address
+    const MOD_WALLET = 'GKpgaSMUeUPD2AjXb9eiXsbQ1qm6YfGrYY6hHvNgqNJc';
+    let isModWallet = false;
+
+    // Token gating configuration (modifiable by MOD)
+    let modTokenRequirement = parseInt(localStorage.getItem('mod_token_requirement') || '50000');
+    let modCooldownSeconds = parseInt(localStorage.getItem('mod_cooldown') || '0');
+    let lastMessageTimestamp = 0;
+
     const TOKEN_MINT_ADDRESS = 'HJ5trLqpexXA4WoCHVeUGCpH9Je9x9Sfi2BEz4jHpump';
-    const REQUIRED_BALANCE = 50000; // 50K tokens
     const SOLANA_RPC_ENDPOINT = 'https://mainnet.helius-rpc.com/?api-key=fa7e6515-19de-45de-a7d1-35a64a0d9a1a';
 
     const solanaConnection = new solanaWeb3.Connection(SOLANA_RPC_ENDPOINT);
@@ -97,6 +113,21 @@
         }
         if (window.solana?.isPhantom) return window.solana;
         return null;
+    }
+
+    // Check if connected wallet is MOD
+    function checkIfModWallet() {
+        if (phantomConnected && phantomWalletPublicKey) {
+            isModWallet = phantomWalletPublicKey.toBase58() === MOD_WALLET;
+            if (isModWallet) {
+                modSettingsBtn.classList.remove('hidden');
+            } else {
+                modSettingsBtn.classList.add('hidden');
+            }
+        } else {
+            isModWallet = false;
+            modSettingsBtn.classList.add('hidden');
+        }
     }
 
     function updatePhantomUI() {
@@ -113,9 +144,11 @@
             phantomConnectBtnOverlay.innerHTML = connected ? '👻 Disconnect' : '👻 Connect Phantom';
         }
 
+        checkIfModWallet();
         updateChatAccessibility();
     }
 
+    // Create a container in the sidebar to display tokens
     function createTokenListContainer() {
         if (tokenListContainer) return tokenListContainer;
         const sidebarFooter = document.querySelector('.sidebar-footer');
@@ -131,6 +164,7 @@
         return tokenListContainer;
     }
 
+    // Display all token balances, highlighting the target token and showing verification status
     function displayTokenBalances(tokenAccounts) {
         const container = createTokenListContainer();
         if (!container) return;
@@ -149,7 +183,7 @@
             const isTarget = mint === TOKEN_MINT_ADDRESS;
             let statusHtml = '';
             if (isTarget) {
-                if (amount > REQUIRED_BALANCE) {
+                if (amount > modTokenRequirement) {
                     statusHtml = ' <span style="color:#4ade80;">✅ Verified</span>';
                 } else {
                     statusHtml = ' <span style="color:#ef4444;">❌ Not Verified</span>';
@@ -163,6 +197,7 @@
         container.innerHTML = html;
     }
 
+    // Fetch all tokens and check eligibility for target token
     async function fetchAndDisplayAllTokens() {
         if (!phantomWalletPublicKey) return;
 
@@ -171,6 +206,7 @@
                 phantomWalletPublicKey,
                 { programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
             );
+
             displayTokenBalances(tokenAccounts.value);
 
             let targetBalance = 0;
@@ -182,12 +218,12 @@
             }
 
             console.log(`🎯 Target token balance: ${targetBalance}`);
-            if (targetBalance > REQUIRED_BALANCE) {
+            if (targetBalance > modTokenRequirement) {
                 hasTokenAccess = true;
                 showError(`✅ You hold ${targetBalance} tokens – access granted!`);
             } else {
                 hasTokenAccess = false;
-                showError(`❌ You need more than ${REQUIRED_BALANCE} tokens (you have ${targetBalance}).`);
+                showError(`❌ You need more than ${modTokenRequirement} tokens (you have ${targetBalance}).`);
             }
             updateChatAccessibility();
         } catch (err) {
@@ -202,6 +238,7 @@
         }
     }
 
+    // Enable/disable chat based on username + Phantom + token access
     function updateChatAccessibility() {
         const canChat = username && phantomConnected && hasTokenAccess;
         messageInput.disabled = !canChat;
@@ -215,9 +252,9 @@
             if (!username) {
                 messageInput.placeholder = 'Set your username first';
             } else if (!phantomConnected) {
-                messageInput.placeholder = `Connect Phantom & hold ${REQUIRED_BALANCE} tokens to chat`;
+                messageInput.placeholder = `Connect Phantom & hold ${modTokenRequirement} tokens to chat`;
             } else if (!hasTokenAccess) {
-                messageInput.placeholder = `Insufficient tokens – need ${REQUIRED_BALANCE}`;
+                messageInput.placeholder = `Insufficient tokens – need ${modTokenRequirement}`;
             }
         }
     }
@@ -277,6 +314,35 @@
             fetchAndDisplayAllTokens();
         }
     }
+
+    // ===== Mod Settings Logic =====
+    modSettingsBtn.addEventListener('click', () => {
+        modTokenRequirementInput.value = modTokenRequirement;
+        modCooldownSelect.value = modCooldownSeconds.toString();
+        modSettingsOverlay.classList.remove('hidden');
+    });
+
+    modCloseSettingsBtn.addEventListener('click', () => {
+        modSettingsOverlay.classList.add('hidden');
+    });
+
+    modSaveSettingsBtn.addEventListener('click', () => {
+        const newTokenReq = parseInt(modTokenRequirementInput.value);
+        const newCooldown = parseInt(modCooldownSelect.value);
+        if (!isNaN(newTokenReq) && newTokenReq >= 0) {
+            modTokenRequirement = newTokenReq;
+            localStorage.setItem('mod_token_requirement', newTokenReq.toString());
+        }
+        if (!isNaN(newCooldown) && [0,5,10,15].includes(newCooldown)) {
+            modCooldownSeconds = newCooldown;
+            localStorage.setItem('mod_cooldown', newCooldown.toString());
+        }
+        showError('✅ Mod settings updated!');
+        modSettingsOverlay.classList.add('hidden');
+        // Refrescar verificación
+        if (phantomConnected) fetchAndDisplayAllTokens();
+    });
+
     // ===== End Phantom Integration =====
 
     let replyingTo = null;
@@ -1229,9 +1295,20 @@
     async function sendMessage() {
         // Re-check access
         if (!username || !phantomConnected || !hasTokenAccess) {
-            showError('You need Phantom connected and more than 50K tokens to chat.');
+            showError(`You need Phantom connected and more than ${modTokenRequirement} tokens to chat.`);
             return;
         }
+
+        // Cooldown check
+        if (modCooldownSeconds > 0) {
+            const now = Date.now();
+            if (now - lastMessageTimestamp < modCooldownSeconds * 1000) {
+                const remaining = Math.ceil((modCooldownSeconds * 1000 - (now - lastMessageTimestamp)) / 1000);
+                showError(`⏳ Cooldown: wait ${remaining}s`);
+                return;
+            }
+        }
+
         const text = messageInput.value.trim();
         if (!text && !pendingImageUrl) return;
         sendBtn.disabled = true;
@@ -1264,6 +1341,7 @@
         try {
             const { error } = await supabase.from(table).insert([payload]);
             if (error) throw error;
+            lastMessageTimestamp = Date.now(); // update timestamp after successful send
             messageInput.value = '';
             setReplyingTo(null);
             clearAttachedImage();
