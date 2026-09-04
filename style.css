@@ -1,7 +1,3 @@
-/* ============================================================
-   MemeSocialNetwork – Retro MSN / Y2K Dark UI
-   ============================================================ */
-
 :root {
     --bg-deep: #080d1a;
     --bg-panel: rgba(14, 20, 34, 0.94);
@@ -1776,4 +1772,9 @@ button.send-btn-main:disabled {
     .header-logo {
         height: 30px;
     }
+}
+
+/* ---------- Critical Utility: Hidden ---------- */
+.hidden {
+    display: none !important;
 }
