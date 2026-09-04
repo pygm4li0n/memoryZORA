@@ -21,8 +21,10 @@
             </div>
             <h3 style="margin-bottom: 0.8rem;">CREATE YOUR IDENTITY</h3>
             <input type="text" id="nameInput" placeholder="Your signature..." maxlength="30" autocomplete="off" style="margin-bottom: 1rem;">
-            <button class="btn-icon" id="phantomConnectBtnOverlay" title="Connect Phantom Wallet" style="margin-bottom: 0.5rem; width: 100%; padding: 12px; border-radius: 12px;">
-                👻 Connect Phantom
+            <!-- Phantom connect button with image -->
+            <button class="btn-icon" id="phantomConnectBtnOverlay" title="Connect Phantom Wallet" style="margin-bottom: 0.5rem; width: 100%; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" style="width: 20px; height: 20px; object-fit: contain;">
+                <span>Connect Phantom</span>
             </button>
             <span id="walletAddressOverlay" style="font-size:0.7rem; margin-bottom: 1rem; color:#b8c2d0;"></span>
             <button id="nameSubmitBtn">JOIN MEME SOCIAL NETWORK</button>
@@ -63,7 +65,6 @@
 
     <div class="app-shell" id="appShell">
         <aside class="sidebar" id="sidebar">
-            <!-- Big user profile -->
             <div class="sidebar-user-profile-big" id="sidebarUserProfileBig">
                 <div class="big-avatar" id="sidebarBigAvatar">?</div>
                 <div class="big-info">
@@ -71,7 +72,6 @@
                     <div class="big-rank hidden" id="sidebarBigRank"></div>
                     <div class="big-status"><span class="status-dot"></span> Online</div>
                 </div>
-                <!-- Botón de edición movido aquí -->
                 <button class="btn-icon" id="sidebarChangeNameBtn" title="Change name" style="flex-shrink:0;">✎</button>
             </div>
             <div class="sidebar-section-label">
@@ -90,7 +90,8 @@
             <div class="chat-header-bar">
                 <div class="header-left">
                     <span class="header-icon">💬</span>
-                    <img src="https://i.postimg.cc/HLTtQcTP/Proyecto-nuevo-(4).png" alt="Logo" class="header-logo">
+                    <!-- Nuevo logo -->
+                    <img src="https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png" alt="Logo" class="header-logo">
                 </div>
                 <div class="header-right">
                     <!-- Token tracker -->
@@ -108,7 +109,10 @@
                         <span class="dot"></span>
                         <span id="onlineCountNumber">0</span>
                     </span>
-                    <button class="btn-icon" id="phantomConnectBtn" title="Connect Phantom Wallet">👻</button>
+                    <!-- Phantom wallet button with image -->
+                    <button class="btn-icon" id="phantomConnectBtn" title="Connect Phantom Wallet">
+                        <img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" style="width: 18px; height: 18px; object-fit: contain;">
+                    </button>
                     <span id="walletAddress" style="font-size:0.7rem; margin-left:8px; color:#b8c2d0;"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
@@ -143,7 +147,6 @@
                     <span class="image-preview-name" id="imagePreviewName"></span>
                     <button class="image-preview-remove" id="imagePreviewRemove">✕</button>
                 </div>
-                <!-- Cooldown indicator -->
                 <div id="cooldownIndicator" class="cooldown-indicator hidden"></div>
                 <div class="input-row-wrap">
                     <input type="text" id="messageInput" placeholder="Type a message..." maxlength="500" autocomplete="off">
@@ -152,14 +155,7 @@
                     <button class="send-btn-main" id="sendBtn">SEND</button>
                 </div>
             </div>
-
-            <!-- Lock overlay para no verificados -->
-            <div id="lockOverlay" class="lock-overlay hidden">
-                <div class="lock-content">
-                    <span style="font-size:3rem;">🔒</span>
-                    <p id="lockMessage">Connect Phantom and hold the required tokens to unlock the chat.</p>
-                </div>
-            </div>
+            <!-- (Lock overlay eliminado) -->
         </main>
     </div>
 
