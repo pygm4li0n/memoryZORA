@@ -11,9 +11,13 @@
     --accent-gold: #fbbf24;
     --accent-blue: #3b82f6;
     --accent-green: #10b981;
+    --accent-lime: #c8f31d;
+    --accent-magenta: #ff4ecd;
     --glow-cyan: 0 0 12px rgba(45, 212, 191, 0.35), 0 0 28px rgba(45, 212, 191, 0.12);
     --glow-purple: 0 0 14px rgba(167, 139, 250, 0.35), 0 0 28px rgba(167, 139, 250, 0.12);
     --glow-gold: 0 0 12px rgba(251, 191, 36, 0.35), 0 0 24px rgba(251, 191, 36, 0.12);
+    --glow-lime: 0 0 10px rgba(200, 243, 29, 0.4), 0 0 20px rgba(200, 243, 29, 0.15);
+    --glow-magenta: 0 0 12px rgba(255, 78, 205, 0.4), 0 0 24px rgba(255, 78, 205, 0.15);
     --text-primary: #e8eaf6;
     --text-secondary: #b8c2d0;
     --text-muted: #7a8699;
@@ -254,7 +258,7 @@ body {
     width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.25); color: #cbd5e1; cursor: pointer;
     font-size: 1rem; display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s; flex-shrink: 0; overflow: hidden; /* Añadido para que la imagen no se salga */
+    transition: all 0.3s; flex-shrink: 0; overflow: hidden;
 }
 .btn-icon img {
     width: 18px;
@@ -652,113 +656,4 @@ button.send-btn-main:disabled { background: #3a4a60; box-shadow: none; cursor: n
     color: var(--danger);
 }
 
-/* ── Mod Settings Button & Overlay ── */
-#modSettingsBtn.hidden {
-    display: none;
-}
-
-#modSettingsOverlay .overlay-card {
-    text-align: left;
-}
-
-#modSettingsOverlay label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.8rem;
-    color: #b8c2d0;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-}
-
-#modSettingsOverlay input[type="number"],
-#modSettingsOverlay select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    background: #0f1622;
-    color: #e2e8f0;
-    font-size: 0.9rem;
-    outline: none;
-    transition: all 0.3s;
-    font-family: var(--font-main);
-    margin-bottom: 1rem;
-}
-
-#modSettingsOverlay input[type="number"]:focus,
-#modSettingsOverlay select:focus {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 14px rgba(0, 240, 255, 0.2);
-}
-
-#modSaveSettingsBtn,
-#modCloseSettingsBtn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-weight: 700;
-    transition: all 0.3s;
-    margin-top: 0.5rem;
-}
-
-#modSaveSettingsBtn {
-    background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 40%, #10b981 100%);
-    color: #fff;
-    text-transform: uppercase;
-}
-
-#modSaveSettingsBtn:hover {
-    box-shadow: 0 0 25px rgba(124, 58, 237, 0.7);
-}
-
-#modCloseSettingsBtn {
-    background: rgba(255,255,255,0.08);
-    color: #cbd5e1;
-}
-
-#modCloseSettingsBtn:hover {
-    background: rgba(255,255,255,0.15);
-}
-
-/* ── Cooldown Indicator ── */
-.cooldown-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    border-radius: 8px;
-    color: #ffc107;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-}
-
-.cooldown-indicator.hidden {
-    display: none;
-}
-
-/* ── Mobile improvements ── */
-@media (max-width: 768px) {
-    .sidebar { position: fixed; top: 0; left: 0; height: 100%; z-index: 25; transform: translateX(-100%); }
-    .sidebar.open { transform: translateX(0); }
-    .sidebar-toggle { display: flex; width: 44px; height: 44px; font-size: 1.4rem; }
-    .chat-panel { width: 100%; }
-    .msg-wrapper { max-width: 92%; }
-    .msg-image-wrap { max-width: 220px; }
-    #messageInput { font-size: 0.8rem; padding: 10px 12px; }
-    button.send-btn-main { padding: 10px 16px; font-size: 0.75rem; }
-    .chat-header-bar { padding: 0 10px; }
-    .chat-header-bar .header-title { font-size: 0.9rem; }
-    .badge-pill { font-size: 0.68rem; padding: 5px 10px; }
-    .online-count-badge { font-size: 0.68rem; padding: 4px 10px; }
-    .conn-text-full { display: none; }
-    .user-pill-name { display: none; }
-    .typing-indicator { font-size: 0.9rem; }
-    .sidebar-user-profile-big .big-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
-    .sidebar-user-profile-big .big-name { font-size: 1rem; }
-    .header-logo { height: 30px; }
-}
+/* ── Mod Settings Button & Overlay ─
