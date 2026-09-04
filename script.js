@@ -18,7 +18,7 @@
     let avatarCache = {};
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // DOM elements (removed userPill, displayNamePill, headerAvatar, changeNameBtn)
+    // DOM elements (removed userPill, displayNamePill, headerAvatar, changeNameBtn, lockOverlay, lockMessage)
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
     const messageInput = document.getElementById('messageInput');
@@ -70,8 +70,6 @@
     const sidebarBigName = document.getElementById('sidebarBigName');
     const sidebarBigRank = document.getElementById('sidebarBigRank');
     const sidebarChangeNameBtn = document.getElementById('sidebarChangeNameBtn');
-    const lockOverlay = document.getElementById('lockOverlay');
-    const lockMessage = document.getElementById('lockMessage');
     const cooldownIndicator = document.getElementById('cooldownIndicator');
     const modSettingsBtn = document.getElementById('modSettingsBtn');
     const modSettingsOverlay = document.getElementById('modSettingsOverlay');
@@ -128,13 +126,15 @@
         const addr = connected ? phantomWalletPublicKey.toBase58() : '';
         const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
 
-        walletAddressSpan.textContent = connected ? `👻 ${shortAddr}` : '';
+        walletAddressSpan.textContent = connected ? `👛 ${shortAddr}` : '';
         phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
 
         if (phantomConnectBtnOverlay) {
-            walletAddressOverlay.textContent = connected ? `👻 ${shortAddr}` : '';
+            walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
             phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
-            phantomConnectBtnOverlay.innerHTML = connected ? '👻 Disconnect' : '👻 Connect Phantom';
+            phantomConnectBtnOverlay.innerHTML = connected 
+                ? `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" style="width:18px;height:18px;object-fit:contain;"> Disconnect`
+                : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" style="width:18px;height:18px;object-fit:contain;"> Connect Phantom`;
         }
 
         checkIfModWallet();
@@ -256,19 +256,6 @@
         messageInput.disabled = !canChat;
         sendBtn.disabled = !canChat;
         document.querySelectorAll('.private-btn').forEach(btn => btn.disabled = !canChat);
-
-        if (lockOverlay) {
-            if (!canChat) {
-                let msg = 'Connect Phantom and hold the required tokens to unlock the chat.';
-                if (!username) msg = 'Set your username first';
-                else if (modTokenRequirement > 0 && !phantomConnected) msg = `Connect Phantom & hold ${modTokenRequirement} tokens to chat`;
-                else if (modTokenRequirement > 0 && phantomConnected && !hasTokenAccess) msg = `Insufficient tokens – need ${modTokenRequirement}`;
-                lockMessage.textContent = msg;
-                lockOverlay.classList.remove('hidden');
-            } else {
-                lockOverlay.classList.add('hidden');
-            }
-        }
 
         if (canChat) {
             messageInput.placeholder = 'Type a message...';
@@ -1430,24 +1417,20 @@
     async function applyUsername(name) {
         username = name;
         localStorage.setItem(STORAGE_KEY_NAME, name);
-        // removed displayNamePill.textContent = name;
 
         if(profilePicFile) {
             try {
                 const url = await uploadToStorage(profilePicFile, AVATAR_BUCKET, 300);
                 await supabase.from('profiles').upsert({ username: name, avatar_url: url });
                 avatarCache[name] = url;
-                // removed headerAvatar.innerHTML = ...
                 if (sidebarBigAvatar) sidebarBigAvatar.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">`;
             } catch(err) { showError('Avatar upload failed: ' + err.message); }
         } else {
             const initial = (name[0]||'?').toUpperCase();
-            // removed headerAvatar.innerHTML = initial;
             if (sidebarBigAvatar) sidebarBigAvatar.innerHTML = initial;
         }
         if (sidebarBigName) sidebarBigName.textContent = name;
 
-        // removed userPill.style.display = 'flex';
         inputAreaBar.style.display = 'flex';
         nameOverlay.classList.add('hidden');
         setReplyingTo(null);
