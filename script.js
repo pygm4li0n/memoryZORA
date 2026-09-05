@@ -792,6 +792,23 @@
         }
     }
 
+    // 🆕 Helper to render message content with X/Twitter embeds
+    function renderMessageContent(text) {
+        if (!text) return '';
+        const xUrlRegex = /https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([^\/\s]+\/status\/\d+)/gi;
+        const matches = [...text.matchAll(xUrlRegex)];
+        const cleanText = text.replace(xUrlRegex, '').trim();
+        let html = '';
+        if (cleanText) {
+            html += `<div class="msg-text">${escapeHtml(cleanText)}</div>`;
+        }
+        for (const match of matches) {
+            const url = match[0];
+            html += `<blockquote class="twitter-tweet"><a href="${escapeHtml(url)}"></a></blockquote>`;
+        }
+        return html;
+    }
+
     async function renderMessage(msg, isPrivate = false) {
         if(knownMessageIds.has(msg.id)) return;
         knownMessageIds.add(msg.id);
@@ -837,7 +854,7 @@
         if (msg.is_deleted) {
             innerHTML += `<div class="msg-text deleted">Message removed</div>`;
         } else {
-            if (msg.message) innerHTML += `<div class="msg-text">${escapeHtml(msg.message)}</div>`;
+            if (msg.message) innerHTML += renderMessageContent(msg.message);
         }
         if (msg.image_url && !msg.is_deleted) {
             innerHTML += `<div class="msg-image-wrap" data-img-src="${escapeHtml(msg.image_url)}"><img src="${escapeHtml(msg.image_url)}" alt="shared image" loading="lazy"></div>`;
@@ -855,6 +872,11 @@
         wrapper.appendChild(bubble);
         container.appendChild(wrapper);
         container.scrollTop = container.scrollHeight;
+
+        // 🆕 Load Twitter/X embeds for this new message
+        if (window.twttr && window.twttr.widgets) {
+            window.twttr.widgets.load(wrapper);
+        }
 
         const replyBtn = bubble.querySelector('.reply-btn');
         if (replyBtn) {
@@ -950,7 +972,11 @@
             if (error) { showError('Edit failed'); return; }
             msg.message = newText;
             msg.edited_at = new Date().toISOString();
-            textDiv.innerHTML = escapeHtml(newText);
+            textDiv.innerHTML = renderMessageContent(newText);
+            // Reload embeds if any
+            if (window.twttr && window.twttr.widgets) {
+                window.twttr.widgets.load(textDiv);
+            }
             const timeSpan = bubble.querySelector('.msg-time');
             if (timeSpan) {
                 let editedSpan = bubble.querySelector('.msg-edited');
