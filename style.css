@@ -255,7 +255,7 @@ body {
 }
 /* Updated: logo 30% bigger on desktop */
 .header-logo {
-    height: 52px;   /* was 40px, now +30% */
+    height: 102px;   /* was 40px, now +30% */
     width: auto;
     object-fit: contain;
     display: block;
