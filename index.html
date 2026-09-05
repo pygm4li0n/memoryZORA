@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meme Social Network // MSN</title>
-    <!-- cache-busting query added -->
     <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
@@ -22,7 +21,6 @@
             </div>
             <h3>CREATE YOUR IDENTITY</h3>
             <input type="text" id="nameInput" placeholder="Your signature..." maxlength="30" autocomplete="off">
-            <!-- Phantom connect button with image -->
             <button class="btn-icon phantom-overlay-btn" id="phantomConnectBtnOverlay" title="Connect Phantom Wallet">
                 <img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom">
                 <span>Connect Phantom</span>
@@ -62,7 +60,7 @@
         </div>
     </div>
 
-    <button class="sidebar-toggle hidden" id="sidebarToggle" title="Users">☰</button>
+    <!-- No standalone sidebar toggle here anymore -->
 
     <div class="app-shell" id="appShell">
         <aside class="sidebar" id="sidebar">
@@ -75,6 +73,7 @@
                 </div>
                 <button class="btn-icon edit-profile-btn" id="sidebarChangeNameBtn" title="Change name">✎</button>
             </div>
+
             <div class="sidebar-section-label">
                 🔵 ACTIVE USERS <span class="active-users-count" id="sidebarActiveUsersCount">0</span>
             </div>
@@ -90,17 +89,22 @@
         <main class="chat-panel" id="chatPanel">
             <div class="chat-header-bar">
                 <div class="header-left">
-                    <span class="header-icon">💬</span>
+                    <!-- Sidebar toggle moved here, replaces old header icon -->
+                    <button class="sidebar-toggle hidden" id="sidebarToggle" title="Users">☰</button>
                     <img src="https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png" alt="Logo" class="header-logo">
                 </div>
-                <div class="header-right">
-                    <!-- Token tracker -->
+
+                <!-- NEW: center container for token tracker (big on desktop) -->
+                <div class="header-center">
                     <div class="token-tracker" id="tokenTracker">
                         <img class="token-logo" id="tokenLogo" src="" alt="logo">
                         <span class="token-name" id="tokenName">TOKEN</span>
                         <span class="token-price" id="tokenPrice">--</span>
                         <span class="token-change" id="tokenChange">--</span>
                     </div>
+                </div>
+
+                <div class="header-right">
                     <span class="badge-pill" id="connectionPill">
                         <span id="connDot"></span>
                         <span id="connText" class="conn-text-full">Connecting…</span>
@@ -113,6 +117,8 @@
                     <button class="btn-icon phantom-btn" id="phantomConnectBtn" title="Connect Phantom Wallet">
                         <img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom">
                     </button>
+                    <!-- Mobile edit profile button (hidden on desktop) -->
+                    <button class="btn-icon mobile-edit-btn" id="mobileEditBtn" title="Edit profile">✎</button>
                     <span class="wallet-address" id="walletAddress"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
@@ -155,7 +161,6 @@
                     <button class="send-btn-main" id="sendBtn">SEND</button>
                 </div>
             </div>
-            <!-- (Lock overlay eliminado) -->
         </main>
     </div>
 
