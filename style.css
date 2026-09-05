@@ -253,9 +253,9 @@ body {
     color: var(--text-primary); text-transform: uppercase;
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
-/* Updated: logo 1.5x bigger on desktop */
+/* Updated: logo 30% bigger on desktop */
 .header-logo {
-    height: 60px;   /* was 40px */
+    height: 52px;   /* was 40px, now +30% */
     width: auto;
     object-fit: contain;
     display: block;
@@ -826,7 +826,7 @@ button.send-btn-main:disabled { background: var(--bg-secondary); box-shadow: non
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        height: 45px; /* 1.5x of original 30px */
+        height: 45px; /* 50% bigger than original 30px */
         width: auto;
         max-width: 140px;
         object-fit: contain;
