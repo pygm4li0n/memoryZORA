@@ -864,7 +864,7 @@
             if (error || !data) { showError('Original message could not be loaded.'); return; }
             const user = currentTab === 'public' ? data.username : data.from_user;
             if (!getAvatarURL(user)) await fetchAvatars([user]);
-            await renderMessage(data, currentTab === 'private', false); // no scroll for single
+            await renderMessage(data, currentTab === 'private', false);
             target = container.querySelector(`.msg-wrapper[data-msg-id="${msgId}"]`);
         }
         if (target) {
@@ -1277,7 +1277,7 @@
         } else {
             const users = [...new Set(data.flatMap(m => [m.from_user, m.to_user]))];
             await fetchAvatars(users);
-            for (const msg of data) await renderMessage(msg, true, false); // no scroll during bulk
+            for (const msg of data) await renderMessage(msg, true, false);
             scrollContainerToBottom(privateContainer);
             updateScrollButtonVisibility(privateContainer);
         }
@@ -1482,11 +1482,13 @@
     async function loadMessages() {
         setConnection('connecting');
         try {
+            // Use the message_feed view to get messages + profile data in one request
             const { data, error } = await supabase
-                .from('messages')
+                .from('message_feed')
                 .select('*')
                 .order('sort_order', { ascending: false })
-                .limit(80);
+                .range(0, 29);   // only last 30 messages for fast initial load
+
             if (error) throw error;
             data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
             publicContainer.innerHTML = '';
@@ -1494,10 +1496,16 @@
             if (data.length === 0) {
                 publicContainer.innerHTML = '<div class="empty-chat-hint">No messages yet. ⚡</div>';
             } else {
-                const users = [...new Set(data.map(m => m.username))];
-                await fetchAvatars(users);
-                for (const msg of data) await renderMessage(msg, false, false); // no scroll during bulk
-                scrollContainerToBottom(publicContainer);
+                // Populate caches from the view (no extra fetch needed)
+                data.forEach(msg => {
+                    if (msg.avatar_url) avatarCache[msg.username] = msg.avatar_url;
+                    if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
+                });
+
+                for (const msg of data) {
+                    await renderMessage(msg, false, false); // no scroll per message
+                }
+                scrollContainerToBottom(publicContainer); // scroll once
                 updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
