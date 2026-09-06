@@ -6,7 +6,7 @@
 
     // State
     const STORAGE_KEY_NAME = 'msn_chat_username';
-    const LAST_USERNAME_KEY = 'msn_last_username';   // <-- ADDED
+    const LAST_USERNAME_KEY = 'msn_last_username';   // <-- NEW
     const CLIENT_ID_KEY = 'msn_chat_client_id';
     const ACTIVE_CHAT_KEY = 'msn_active_private_chat';
     let username = localStorage.getItem(STORAGE_KEY_NAME) || '';
@@ -16,13 +16,18 @@
         localStorage.setItem(CLIENT_ID_KEY, clientId);
     }
 
+    // Phantom state (moved earlier)
+    let phantomWalletPublicKey = null;
+    let phantomConnected = false;
+    let hasTokenAccess = false;
+
     let avatarCache = {};
     let userBalances = {};
     let currentAvatarUrl = null;
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // DOM elements (unchanged)
+    // DOM elements (same as before)
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
     const messageInput = document.getElementById('messageInput');
@@ -94,11 +99,6 @@
 
     let currentRequestData = null;
 
-    // Phantom state
-    let phantomWalletPublicKey = null;
-    let phantomConnected = false;
-    let hasTokenAccess = false;
-
     const MOD_WALLET = 'GKpgaSMUeUPD2AjXb9eiXsbQ1qm6YfGrYY6hHvNgqNJc';
     let isModWallet = false;
     let modTokenRequirement = 50000;
@@ -113,7 +113,6 @@
 
     // IntersectionObserver for lazy loading Twitter embeds
     let tweetObserver = null;
-
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
         tweetObserver = new IntersectionObserver((entries) => {
@@ -128,7 +127,6 @@
             });
         }, { rootMargin: '200px' });
     }
-
     function observeTweetsInWrapper(wrapper) {
         if (!tweetObserver || !wrapper.querySelector('.twitter-tweet')) return;
         tweetObserver.observe(wrapper);
@@ -195,12 +193,10 @@
     function displayTokenBalances(tokenAccounts) {
         const container = createTokenListContainer();
         if (!container) return;
-
         if (!tokenAccounts || tokenAccounts.length === 0) {
             container.innerHTML = '<div style="opacity:0.6;">No SPL tokens found</div>';
             return;
         }
-
         let html = '<div style="font-weight:bold; margin-bottom:4px;">Token Balances:</div>';
         tokenAccounts.forEach(acc => {
             const info = acc.account.data.parsed.info;
@@ -224,20 +220,17 @@
         container.innerHTML = html;
     }
 
-    // Badge system
     function getBadge(balance) {
         if (balance >= 1000000) return { emoji: '🐋', name: 'Whale' };
         if (balance >= 250000) return { emoji: '🐬', name: 'Dolphin' };
         if (balance >= 100000) return { emoji: '🦀', name: 'Crab' };
         return { emoji: '🦐', name: 'Shrimp' };
     }
-
     function getBadgeForUser(user) {
         const bal = userBalances[user];
         if (bal === null || bal === undefined) return null;
         return getBadge(bal);
     }
-
     function updateUserRank(balance) {
         if (!sidebarBigRank) return;
         if (balance === null || balance === undefined) {
@@ -251,15 +244,12 @@
 
     async function fetchAndDisplayAllTokens() {
         if (!phantomWalletPublicKey) return;
-
         try {
             const tokenAccounts = await solanaConnection.getParsedTokenAccountsByOwner(
                 phantomWalletPublicKey,
                 { programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
             );
-
             displayTokenBalances(tokenAccounts.value);
-
             let targetBalance = 0;
             for (const acc of tokenAccounts.value) {
                 const info = acc.account.data.parsed.info;
@@ -267,9 +257,7 @@
                     targetBalance += parseFloat(info.tokenAmount.uiAmountString);
                 }
             }
-
             updateUserRank(targetBalance);
-
             try {
                 await supabase.from('profiles').upsert({
                     username: username,
@@ -280,7 +268,6 @@
             } catch (err) {
                 console.warn('Failed to update profile balance:', err);
             }
-
             if (modTokenRequirement <= 0) {
                 hasTokenAccess = true;
             } else if (targetBalance > modTokenRequirement) {
@@ -312,7 +299,6 @@
         messageInput.disabled = !canChat;
         sendBtn.disabled = !canChat;
         document.querySelectorAll('.private-btn').forEach(btn => btn.disabled = !canChat);
-
         if (canChat) {
             messageInput.placeholder = 'Type a message...';
         } else {
@@ -423,7 +409,6 @@
             showError('Failed to post announcement: ' + err.message);
         }
     }
-
     modPostAnnouncementBtn.addEventListener('click', async () => {
         const msg = modAnnouncementInput.value.trim();
         if (!msg) {
@@ -491,7 +476,6 @@
         modMessageText.innerHTML = linkifyText(trimmed);
     }
 
-    // Cooldown
     function showCooldown(seconds) {
         cooldownIndicator.classList.remove('hidden');
         cooldownIndicator.textContent = `⏳ Cooldown: ${seconds}s`;
@@ -532,10 +516,8 @@
     const EMOJIS = ['❤️','😂','😮','😢','😡'];
     let pendingImageUrl = null;
     let profilePicFile = null;
-
     const typingUsers = new Map();
     let typingChannel = null;
-
     let acceptedPrivateChats;
     try {
         acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
@@ -543,12 +525,10 @@
         acceptedPrivateChats = new Set();
     }
 
-    // Token Tracker
     const TOKEN_ADDRESS = 'HmJDgky11u77hpBss6D8sjNpYPD5B6fWgSVDj58jpump';
     async function updateTokenInfo() {
         const trackers = document.querySelectorAll('.token-tracker');
         if (!trackers.length) return;
-
         try {
             const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_ADDRESS}`);
             const data = await response.json();
@@ -558,18 +538,13 @@
                 const change = parseFloat(pair.priceChange.h24);
                 const tokenName = pair.baseToken.name || pair.baseToken.symbol || 'TOKEN';
                 const logoUrl = pair.info?.imageUrl || pair.baseToken?.imageUrl || '';
-
                 trackers.forEach(tracker => {
                     const logoEl = tracker.querySelector('.token-logo');
                     const nameEl = tracker.querySelector('.token-name');
                     const priceEl = tracker.querySelector('.token-price');
                     const changeEl = tracker.querySelector('.token-change');
-
                     if (nameEl) nameEl.textContent = tokenName;
-                    if (logoEl) {
-                        logoEl.src = logoUrl;
-                        logoEl.style.display = logoUrl ? 'block' : 'none';
-                    }
+                    if (logoEl) { logoEl.src = logoUrl; logoEl.style.display = logoUrl ? 'block' : 'none'; }
                     if (priceEl) priceEl.textContent = price ? `$${price.toFixed(4)}` : '--';
                     if (changeEl) {
                         changeEl.textContent = change ? `${change.toFixed(2)}%` : '--';
@@ -583,10 +558,7 @@
                     const changeEl = tracker.querySelector('.token-change');
                     if (logoEl) logoEl.style.display = 'none';
                     if (priceEl) priceEl.textContent = '--';
-                    if (changeEl) {
-                        changeEl.textContent = '--';
-                        changeEl.className = 'token-change';
-                    }
+                    if (changeEl) { changeEl.textContent = '--'; changeEl.className = 'token-change'; }
                 });
             }
         } catch (err) {
@@ -597,17 +569,13 @@
                 const changeEl = tracker.querySelector('.token-change');
                 if (logoEl) logoEl.style.display = 'none';
                 if (priceEl) priceEl.textContent = '--';
-                if (changeEl) {
-                    changeEl.textContent = '--';
-                    changeEl.className = 'token-change';
-                }
+                if (changeEl) { changeEl.textContent = '--'; changeEl.className = 'token-change'; }
             });
         }
     }
     updateTokenInfo();
     setInterval(updateTokenInfo, 60000);
 
-    // Scroll helpers
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
     function updateScrollButtonVisibility(container) {
         if (!scrollBottomBtn) return;
@@ -639,7 +607,7 @@
         } catch (err) { console.error('Error loading accepted chats:', err); }
     }
 
-    // Particle animation
+    // Particle animation (unchanged)
     const particleCanvas = document.getElementById('particleCanvas');
     const pCtx = particleCanvas.getContext('2d');
     let particles = [];
@@ -696,7 +664,6 @@
     }
     requestAnimationFrame(animateParticles);
 
-    // Helper functions
     function escapeHtml(t) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(t).replace(/[&<>"']/g, m=>map[m]); }
     function trunc(t, l=45) { return t && t.length>l ? t.substring(0,l)+'…' : t||''; }
     function showError(msg) {
@@ -757,7 +724,7 @@
         return (user || '?')[0].toUpperCase();
     }
 
-    // Image handling
+    // Image handling (unchanged)
     function resizeImage(file, maxDim=750) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -806,7 +773,7 @@
         fileInput.value = '';
     }
 
-    // Reactions
+    // Reactions (unchanged)
     async function loadReactions(table, isPrivate) {
         const { data, error } = await supabase.from(table).select('*');
         if (error) return;
@@ -877,7 +844,6 @@
         }
     }
 
-    // Helper to render message content with X/Twitter embeds
     function renderMessageContent(text) {
         if (!text) return '';
         const xUrlRegex = /https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([^\/\s]+\/status\/\d+)/gi;
@@ -960,7 +926,6 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Lazy load tweets: observe wrapper if it contains twitter-tweet
         observeTweetsInWrapper(wrapper);
 
         const replyBtn = bubble.querySelector('.reply-btn');
@@ -1090,7 +1055,7 @@
         }
     }
 
-    // Typing indicators
+    // Typing indicators (unchanged)
     function startTyping() {
         if (!username || !typingChannel) return;
         const tab = currentTab === 'private' && activePrivateChat ? 'private' : 'public';
@@ -1159,7 +1124,7 @@
         typingChannel.subscribe();
     }
 
-    // Presence
+    // Presence (unchanged)
     function setupPresence() {
         if (presenceChannel) return;
         if (!username) return;
@@ -1357,7 +1322,7 @@
         </div>`;
     }
 
-    // Private chat requests
+    // Private chat requests (unchanged)
     function showRequestOverlay(fromUser, requestId) {
         currentRequestData = { from_user: fromUser, id: requestId };
         const url = getAvatarURL(fromUser);
@@ -1609,7 +1574,7 @@
     async function applyUsername(name) {
         username = name;
         localStorage.setItem(STORAGE_KEY_NAME, name);
-        localStorage.setItem(LAST_USERNAME_KEY, name);   // <-- ADDED
+        localStorage.setItem(LAST_USERNAME_KEY, name);   // <-- Store last username
 
         let avatarUrlToUse = currentAvatarUrl;
         if(profilePicFile) {
@@ -1641,7 +1606,7 @@
         updateChatAccessibility();
     }
 
-    // Event listeners (unchanged...)
+    // Event listeners (unchanged)
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
     cancelReplyBtn.addEventListener('click', () => setReplyingTo(null));
@@ -1741,6 +1706,7 @@
 
     // Init
     async function init() {
+        // Wallet auto-connect FIRST
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
         initPhantomAutoConnect();
         setupTweetObserver();
@@ -1752,6 +1718,7 @@
         inputAreaBar.classList.add('hidden');
 
         if(username) {
+            // existing user flow (same)
             const { data: profile } = await supabase.from('profiles').select('avatar_url, token_balance, wallet_address').eq('username', username).single();
             if(profile && profile.avatar_url) {
                 avatarCache[username] = profile.avatar_url;
@@ -1792,7 +1759,7 @@
                 setActivePrivateChat(savedActiveChat);
             }
         } else {
-            // 🆕 Prefill with last used identity
+            // Prefill overlay with last used identity
             const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
             if (lastUsername) {
                 nameInput.value = lastUsername;
