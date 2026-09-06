@@ -18,7 +18,7 @@
     let avatarCache = {};
     let userBalances = {};
     let currentAvatarUrl = null;
-    let modAnnouncement = '';   // 🆕 Store current mod announcement
+    let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // DOM elements
@@ -109,6 +109,29 @@
     const SOLANA_RPC_ENDPOINT = 'https://mainnet.helius-rpc.com/?api-key=fa7e6515-19de-45de-a7d1-35a64a0d9a1a';
     const solanaConnection = new solanaWeb3.Connection(SOLANA_RPC_ENDPOINT);
     let tokenListContainer = null;
+
+    // IntersectionObserver for lazy loading Twitter embeds
+    let tweetObserver = null;
+
+    function setupTweetObserver() {
+        if (tweetObserver || !('IntersectionObserver' in window)) return;
+        tweetObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const wrapper = entry.target;
+                    if (window.twttr && window.twttr.widgets) {
+                        window.twttr.widgets.load(wrapper);
+                    }
+                    tweetObserver.unobserve(wrapper);
+                }
+            });
+        }, { rootMargin: '200px' });
+    }
+
+    function observeTweetsInWrapper(wrapper) {
+        if (!tweetObserver || !wrapper.querySelector('.twitter-tweet')) return;
+        tweetObserver.observe(wrapper);
+    }
 
     function getPhantomProvider() {
         if ('phantom' in window) {
@@ -353,7 +376,7 @@
         modTokenRequirementInput.value = modTokenRequirement;
         modCooldownSelect.value = modCooldownSeconds.toString();
         if (modAnnouncementInput) {
-            modAnnouncementInput.value = modAnnouncement || '';   // 🆕 prefill current announcement
+            modAnnouncementInput.value = modAnnouncement || '';
         }
         if (modAnnouncementSection) {
             modAnnouncementSection.classList.toggle('hidden', !isModWallet);
@@ -386,14 +409,13 @@
         updateChatAccessibility();
     });
 
-    // 🆕 Post announcement
     async function postModAnnouncement(message) {
         try {
             const { error } = await supabase
                 .from('settings')
                 .upsert({ id: 1, mod_announcement: message }, { onConflict: 'id' });
             if (error) throw error;
-            modAnnouncement = message;   // 🆕 update local copy
+            modAnnouncement = message;
             showError('✅ Announcement posted!');
         } catch (err) {
             console.error('Error posting announcement:', err);
@@ -448,7 +470,6 @@
             .subscribe();
     }
 
-    // Helper: escape HTML and convert URLs to clickable links
     function linkifyText(text) {
         let escaped = escapeHtml(text);
         const urlRegex = /(https?:\/\/[^\s<]+)/g;
@@ -496,7 +517,7 @@
         showCooldown(seconds);
     }
 
-    // ============== REST OF ORIGINAL CODE (message rendering, etc.) ==============
+    // ============== REST OF ORIGINAL CODE ==============
     let replyingTo = null;
     let activePrivateChat = null;
     let currentTab = 'public';
@@ -843,7 +864,7 @@
             if (error || !data) { showError('Original message could not be loaded.'); return; }
             const user = currentTab === 'public' ? data.username : data.from_user;
             if (!getAvatarURL(user)) await fetchAvatars([user]);
-            await renderMessage(data, currentTab === 'private');
+            await renderMessage(data, currentTab === 'private', false); // no scroll for single
             target = container.querySelector(`.msg-wrapper[data-msg-id="${msgId}"]`);
         }
         if (target) {
@@ -872,7 +893,7 @@
         return html;
     }
 
-    async function renderMessage(msg, isPrivate = false) {
+    async function renderMessage(msg, isPrivate = false, shouldScroll = true) {
         if(knownMessageIds.has(msg.id)) return;
         knownMessageIds.add(msg.id);
         const container = isPrivate ? privateContainer : publicContainer;
@@ -933,11 +954,13 @@
         bubble.innerHTML = innerHTML;
         wrapper.appendChild(bubble);
         container.appendChild(wrapper);
-        container.scrollTop = container.scrollHeight;
 
-        if (window.twttr && window.twttr.widgets) {
-            window.twttr.widgets.load(wrapper);
+        if (shouldScroll) {
+            container.scrollTop = container.scrollHeight;
         }
+
+        // Lazy load tweets: observe wrapper if it contains twitter-tweet
+        observeTweetsInWrapper(wrapper);
 
         const replyBtn = bubble.querySelector('.reply-btn');
         if (replyBtn) {
@@ -1034,9 +1057,7 @@
             msg.message = newText;
             msg.edited_at = new Date().toISOString();
             textDiv.innerHTML = renderMessageContent(newText);
-            if (window.twttr && window.twttr.widgets) {
-                window.twttr.widgets.load(textDiv);
-            }
+            observeTweetsInWrapper(wrapper);
             const timeSpan = bubble.querySelector('.msg-time');
             if (timeSpan) {
                 let editedSpan = bubble.querySelector('.msg-edited');
@@ -1256,10 +1277,11 @@
         } else {
             const users = [...new Set(data.flatMap(m => [m.from_user, m.to_user]))];
             await fetchAvatars(users);
-            for (const msg of data) await renderMessage(msg, true);
+            for (const msg of data) await renderMessage(msg, true, false); // no scroll during bulk
+            scrollContainerToBottom(privateContainer);
+            updateScrollButtonVisibility(privateContainer);
         }
         loadReactions('private_message_reactions', true);
-        setTimeout(() => { scrollContainerToBottom(privateContainer); updateScrollButtonVisibility(privateContainer); }, 150);
     }
 
     // Sidebar UI
@@ -1474,10 +1496,11 @@
             } else {
                 const users = [...new Set(data.map(m => m.username))];
                 await fetchAvatars(users);
-                for (const msg of data) await renderMessage(msg, false);
+                for (const msg of data) await renderMessage(msg, false, false); // no scroll during bulk
+                scrollContainerToBottom(publicContainer);
+                updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
-            setTimeout(() => { scrollContainerToBottom(publicContainer); updateScrollButtonVisibility(publicContainer); }, 150);
         } catch (err) {
             showError('Load failed: ' + err.message);
             setConnection('disconnected');
@@ -1553,7 +1576,7 @@
         if (realtimeChannel) supabase.removeChannel(realtimeChannel);
         realtimeChannel = supabase.channel('public-msgs')
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages' }, payload => {
-                renderMessage(payload.new, false);
+                renderMessage(payload.new, false, true);
                 setConnection('connected');
                 const isNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 80;
                 if (isNearBottom) scrollContainerToBottom(publicContainer);
@@ -1565,7 +1588,7 @@
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'private_messages' }, payload => {
                 const msg = payload.new;
                 if (activePrivateChat && ((msg.from_user === username && msg.to_user === activePrivateChat) || (msg.from_user === activePrivateChat && msg.to_user === username))) {
-                    renderMessage(msg, true);
+                    renderMessage(msg, true, true);
                     const isNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 80;
                     if (isNearBottom) scrollContainerToBottom(privateContainer);
                 }
@@ -1718,11 +1741,17 @@
 
     // Init
     async function init() {
-        if(window.innerWidth<=768) sidebarToggle.classList.remove('hidden');
+        // Start wallet auto-connect immediately, before other heavy operations
+        if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
+        initPhantomAutoConnect();
+
+        // Setup IntersectionObserver for tweet lazy loading
+        setupTweetObserver();
+
+        // Continue with other initializations
         await loadSettings();
         subscribeToSettings();
         await loadAcceptedChatsFromDB();
-        initPhantomAutoConnect();
 
         inputAreaBar.classList.add('hidden');
 
