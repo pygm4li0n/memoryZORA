@@ -6,6 +6,7 @@
 
     // State
     const STORAGE_KEY_NAME = 'msn_chat_username';
+    const LAST_USERNAME_KEY = 'msn_last_username';   // <-- ADDED
     const CLIENT_ID_KEY = 'msn_chat_client_id';
     const ACTIVE_CHAT_KEY = 'msn_active_private_chat';
     let username = localStorage.getItem(STORAGE_KEY_NAME) || '';
@@ -21,7 +22,7 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // DOM elements
+    // DOM elements (unchanged)
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
     const messageInput = document.getElementById('messageInput');
@@ -1482,13 +1483,11 @@
     async function loadMessages() {
         setConnection('connecting');
         try {
-            // Use the message_feed view to get messages + profile data in one request
             const { data, error } = await supabase
                 .from('message_feed')
                 .select('*')
                 .order('sort_order', { ascending: false })
-                .range(0, 29);   // only last 30 messages for fast initial load
-
+                .range(0, 29);
             if (error) throw error;
             data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
             publicContainer.innerHTML = '';
@@ -1496,16 +1495,12 @@
             if (data.length === 0) {
                 publicContainer.innerHTML = '<div class="empty-chat-hint">No messages yet. ⚡</div>';
             } else {
-                // Populate caches from the view (no extra fetch needed)
                 data.forEach(msg => {
                     if (msg.avatar_url) avatarCache[msg.username] = msg.avatar_url;
                     if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
                 });
-
-                for (const msg of data) {
-                    await renderMessage(msg, false, false); // no scroll per message
-                }
-                scrollContainerToBottom(publicContainer); // scroll once
+                for (const msg of data) await renderMessage(msg, false, false);
+                scrollContainerToBottom(publicContainer);
                 updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
@@ -1525,7 +1520,6 @@
             showError(modTokenRequirement <= 0 ? 'Set your username first' : `You need Phantom connected and more than ${modTokenRequirement} tokens to chat.`);
             return;
         }
-
         if (modCooldownSeconds > 0) {
             const now = Date.now();
             if (now - lastMessageTimestamp < modCooldownSeconds * 1000) {
@@ -1534,7 +1528,6 @@
                 return;
             }
         }
-
         const text = messageInput.value.trim();
         if (!text && !pendingImageUrl) return;
         sendBtn.disabled = true;
@@ -1544,7 +1537,6 @@
             sendBtn.disabled = false;
             return;
         }
-
         let table = isPrivate ? 'private_messages' : 'messages';
         let payload = {
             message: text || null,
@@ -1563,7 +1555,6 @@
         } else {
             payload.username = username;
         }
-
         try {
             const { error } = await supabase.from(table).insert([payload]);
             if (error) throw error;
@@ -1590,7 +1581,6 @@
                 if (isNearBottom) scrollContainerToBottom(publicContainer);
             })
             .subscribe();
-
         if (privMsgChannel) supabase.removeChannel(privMsgChannel);
         privMsgChannel = supabase.channel('private-msgs')
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'private_messages' }, payload => {
@@ -1619,6 +1609,7 @@
     async function applyUsername(name) {
         username = name;
         localStorage.setItem(STORAGE_KEY_NAME, name);
+        localStorage.setItem(LAST_USERNAME_KEY, name);   // <-- ADDED
 
         let avatarUrlToUse = currentAvatarUrl;
         if(profilePicFile) {
@@ -1650,7 +1641,7 @@
         updateChatAccessibility();
     }
 
-    // Event listeners
+    // Event listeners (unchanged...)
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
     cancelReplyBtn.addEventListener('click', () => setReplyingTo(null));
@@ -1714,6 +1705,7 @@
         currentAvatarUrl = prevAvatar;
 
         localStorage.removeItem(STORAGE_KEY_NAME);
+        // Keep LAST_USERNAME_KEY for prefill
         username = '';
         inputAreaBar.classList.add('hidden');
         nameOverlay.classList.remove('hidden');
@@ -1749,14 +1741,10 @@
 
     // Init
     async function init() {
-        // Start wallet auto-connect immediately, before other heavy operations
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
         initPhantomAutoConnect();
-
-        // Setup IntersectionObserver for tweet lazy loading
         setupTweetObserver();
 
-        // Continue with other initializations
         await loadSettings();
         subscribeToSettings();
         await loadAcceptedChatsFromDB();
@@ -1804,6 +1792,26 @@
                 setActivePrivateChat(savedActiveChat);
             }
         } else {
+            // 🆕 Prefill with last used identity
+            const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
+            if (lastUsername) {
+                nameInput.value = lastUsername;
+                const { data: lastProfile } = await supabase
+                    .from('profiles')
+                    .select('avatar_url')
+                    .eq('username', lastUsername)
+                    .single();
+                if (lastProfile && lastProfile.avatar_url) {
+                    currentAvatarUrl = lastProfile.avatar_url;
+                    profilePicPreview.innerHTML = `<img src="${lastProfile.avatar_url}" alt="Profile">`;
+                } else {
+                    currentAvatarUrl = null;
+                    profilePicPreview.innerHTML = '<span>📷</span>';
+                }
+            } else {
+                nameInput.value = '';
+                profilePicPreview.innerHTML = '<span>📷</span>';
+            }
             nameOverlay.classList.remove('hidden');
             nameInput.focus();
             subscribeToRealtime();
