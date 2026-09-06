@@ -18,6 +18,7 @@
     let avatarCache = {};
     let userBalances = {};
     let currentAvatarUrl = null;
+    let modAnnouncement = '';   // 🆕 Store current mod announcement
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // DOM elements
@@ -84,7 +85,6 @@
     const phantomConnectBtnOverlay = document.getElementById('phantomConnectBtnOverlay');
     const walletAddressOverlay = document.getElementById('walletAddressOverlay');
     const mobileEditBtn = document.getElementById('mobileEditBtn');
-    // 🆕 MOD announcement elements
     const modMessageBox = document.getElementById('modMessageBox');
     const modMessageText = document.getElementById('modMessageText');
     const modAnnouncementSection = document.getElementById('modAnnouncementSection');
@@ -128,7 +128,6 @@
             isModWallet = false;
             modSettingsBtn.classList.add('hidden');
         }
-        // 🆕 Toggle announcement section visibility for mod only
         if (modAnnouncementSection) {
             modAnnouncementSection.classList.toggle('hidden', !isModWallet);
         }
@@ -353,6 +352,9 @@
     modSettingsBtn.addEventListener('click', () => {
         modTokenRequirementInput.value = modTokenRequirement;
         modCooldownSelect.value = modCooldownSeconds.toString();
+        if (modAnnouncementInput) {
+            modAnnouncementInput.value = modAnnouncement || '';   // 🆕 prefill current announcement
+        }
         if (modAnnouncementSection) {
             modAnnouncementSection.classList.toggle('hidden', !isModWallet);
         }
@@ -391,6 +393,7 @@
                 .from('settings')
                 .upsert({ id: 1, mod_announcement: message }, { onConflict: 'id' });
             if (error) throw error;
+            modAnnouncement = message;   // 🆕 update local copy
             showError('✅ Announcement posted!');
         } catch (err) {
             console.error('Error posting announcement:', err);
@@ -418,7 +421,8 @@
             if (!error && data) {
                 modTokenRequirement = data.token_requirement;
                 modCooldownSeconds = data.cooldown_seconds;
-                updateModAnnouncementDisplay(data.mod_announcement || '');
+                modAnnouncement = data.mod_announcement || '';
+                updateModAnnouncementDisplay(modAnnouncement);
             }
         } catch (err) {
             console.error('Error loading settings:', err);
@@ -435,7 +439,8 @@
                 if (newData && newData.id === 1) {
                     modTokenRequirement = newData.token_requirement;
                     modCooldownSeconds = newData.cooldown_seconds;
-                    updateModAnnouncementDisplay(newData.mod_announcement || '');
+                    modAnnouncement = newData.mod_announcement || '';
+                    updateModAnnouncementDisplay(modAnnouncement);
                     updateChatAccessibility();
                     if (phantomConnected) fetchAndDisplayAllTokens();
                 }
@@ -443,13 +448,25 @@
             .subscribe();
     }
 
+    // Helper: escape HTML and convert URLs to clickable links
+    function linkifyText(text) {
+        let escaped = escapeHtml(text);
+        const urlRegex = /(https?:\/\/[^\s<]+)/g;
+        return escaped.replace(urlRegex, url => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#ff9999; text-decoration:underline;">${url}</a>`;
+        });
+    }
+
     function updateModAnnouncementDisplay(message) {
-        if (!modMessageText) return;
-        if (message && message.trim() !== '') {
-            modMessageText.textContent = message.trim();
-        } else {
-            modMessageText.textContent = 'No announcements yet';
+        if (!modMessageBox || !modMessageText) return;
+        const trimmed = message ? message.trim() : '';
+        if (trimmed === '') {
+            modMessageBox.classList.add('hidden');
+            modMessageText.innerHTML = '';
+            return;
         }
+        modMessageBox.classList.remove('hidden');
+        modMessageText.innerHTML = linkifyText(trimmed);
     }
 
     // Cooldown
@@ -1091,12 +1108,26 @@
         let text = '';
         const dots = '<span class="typing-dots"><span></span><span></span><span></span></span>';
         if (currentTab === 'public') {
-            if (typersPublic.length === 1) text = `${typersPublic[0]} is typing... ${dots}`;
-            else if (typersPublic.length > 1) text = `Several people are typing... ${dots}`;
+            const count = typersPublic.length;
+            if (count === 1) {
+                text = `${escapeHtml(typersPublic[0])} is typing... ${dots}`;
+            } else if (count === 2) {
+                text = `${escapeHtml(typersPublic[0])} and ${escapeHtml(typersPublic[1])} are typing... ${dots}`;
+            } else if (count > 2) {
+                text = `2 or more are typing... ${dots}`;
+            }
         } else if (currentTab === 'private' && activePrivateChat) {
-            if (typersPrivate[activePrivateChat]) text = `${activePrivateChat} is typing... ${dots}`;
+            if (typersPrivate[activePrivateChat]) {
+                text = `${escapeHtml(activePrivateChat)} is typing... ${dots}`;
+            }
         }
-        typingIndicator.innerHTML = text || '';
+        if (!text) {
+            typingIndicator.classList.add('hidden');
+            typingIndicator.innerHTML = '';
+            return;
+        }
+        typingIndicator.classList.remove('hidden');
+        typingIndicator.innerHTML = text;
     }
     function setupTypingChannel() {
         if (typingChannel) supabase.removeChannel(typingChannel);
