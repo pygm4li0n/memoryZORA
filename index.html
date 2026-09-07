@@ -129,6 +129,8 @@
                     <button class="btn-icon mobile-edit-btn" id="mobileEditBtn" title="Edit profile">✎</button>
                     <span class="wallet-address" id="walletAddress"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
+                    <!-- Theme toggle button -->
+                    <button class="btn-icon" id="themeToggleBtn" title="Switch theme">🎨</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                 </div>
             </div>
@@ -198,16 +200,29 @@
                 if (theme === 'retro') {
                     href = 'retro-green.css';
                 } else {
-                    href = 'style.css?v=2'; // original
+                    href = 'style.css?v=2';
                 }
                 themeLink.setAttribute('href', href);
                 localStorage.setItem(THEME_KEY, theme);
             }
 
-            // Expose globally for console / future buttons
+            // Expose globally (optional)
             window.setTheme = setTheme;
 
-            // Load saved theme (default to original)
+            // Toggle between themes
+            function toggleTheme() {
+                const current = localStorage.getItem(THEME_KEY) || 'original';
+                const next = current === 'retro' ? 'original' : 'retro';
+                setTheme(next);
+            }
+
+            // Attach event to the toggle button
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleTheme);
+            }
+
+            // Load saved theme on page load (default original)
             const saved = localStorage.getItem(THEME_KEY);
             if (saved === 'retro') {
                 setTheme('retro');
