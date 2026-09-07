@@ -1,16 +1,18 @@
+/* =====================================================
+   THEME FIXES – Toast, Wallet, Phantom Viewport, Token Contrast
+===================================================== */
+
 /* Hide toast completely when not visible */
 .error-toast {
     display: none !important;
 }
 
-/* When visible – clean, opaque, auto vanish, theme‑aware */
+/* Visible toast – clean, theme‑aware, auto vanish */
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
     z-index: 9999 !important;
     pointer-events: auto !important;
-
-    /* Theme colours */
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
     border: 1px solid var(--accent-cyan, #20FF62) !important;
@@ -19,21 +21,16 @@
     font-size: 0.9rem !important;
     font-weight: 600 !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-
-    /* Default to centered on mobile */
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-
-    /* Fade out and remove from view */
     animation: toastFadeOut 2.5s ease-in-out forwards !important;
 }
 
-/* On desktop – position inside the sidebar area */
+/* Desktop: toast inside sidebar */
 @media (min-width: 769px) {
     .error-toast.visible {
         left: calc(var(--sidebar-width, 280px) / 2) !important;
-        transform: translate(-50%, -50%) !important;
         max-width: calc(var(--sidebar-width, 280px) - 20px) !important;
         white-space: normal !important;
         text-align: center !important;
@@ -44,6 +41,59 @@
     0%   { opacity: 1; }
     80%  { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
+}
+
+/* Wallet address – bigger and centered on desktop */
+.wallet-address {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+@media (min-width: 769px) {
+    .header-right {
+        position: relative;
+        justify-content: center;
+    }
+    .header-right .wallet-address {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.2rem !important;
+        z-index: 4;
+        background: var(--bg-panel, #111827);
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border-default, #233261);
+    }
+}
+@media (max-width: 768px) {
+    .wallet-address {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ── CRITICAL: Phantom in‑app browser viewport fix ── */
+/* Use dynamic viewport height and safe‑area padding */
+html, body {
+    height: 100% !important;
+    height: 100dvh !important;
+    overflow: hidden;
+}
+.app-shell {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    /* Ensure it starts below any top browser/system bar */
+    padding-top: env(safe-area-inset-top) !important;
+    box-sizing: border-box;
+}
+/* Keep the chat input above Phantom’s bottom bar */
+.input-area-bar {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+}
+/* Add a little bottom space to the messages container */
+.messages-container {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
 }
 
 /* Token balances – readable on all themes */
