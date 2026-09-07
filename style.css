@@ -1,32 +1,29 @@
 /* =====================================================
-   RETRO-FUTURISTIC GREEN PHOSPHOR CRT THEME – OVERRIDES
-   No layout changes – only visual reskin
+   RETRO-FUTURISTIC GREEN PHOSPHOR CRT THEME (OVERRIDE)
+   – No layout changes; only colors, fonts, textures
+   – Preserves all functionality and responsiveness
 ===================================================== */
 
-/* ---------- 1. Core variables & base ---------- */
 :root {
-    /* Override original palette */
+    /* Core palette */
     --bg-deep: #050706;
     --bg-panel: #171A19;
-    --bg-elevated: #1e2221;
-    --bg-input: #0a0d0c;
-    --bg-hover: #303535;
-    --bg-secondary: #2a2f2e;
-    --border-subtle: #1a1f1e;
-    --border-default: #454B4B;
-    --border-strong: #5a6161;
+    --bg-elevated: #202524;
+    --bg-input: #0A0F0D;
+    --bg-hover: #2A302F;
+    --bg-secondary: #303535;
 
-    /* New phosphor green accents */
-    --accent-cyan: #20FF62;          /* primary green */
-    --accent-blue: #00A83B;          /* emerald */
-    --accent-purple: #20FF62;        /* keep green for consistency */
-    --accent-pink: #73FF9A;          /* highlight green */
-    --accent-magenta: #73FF9A;
-    --accent-yellow: #eaff00;        /* optional yellow for warnings */
+    /* Phosphor green accents */
+    --accent-cyan: #20FF62;       /* primary green */
+    --accent-blue: #00A83B;       /* emerald */
+    --accent-purple: #73FF9A;     /* highlight green */
+    --accent-pink: #20FF62;
+    --accent-magenta: #20FF62;
+    --accent-yellow: #eaff00;     /* warning yellow */
     --accent-green: #20FF62;
     --accent-lime: #20FF62;
     --accent-orange: #ffaa00;
-    --accent-red: #ff5c5c;
+    --accent-red: #FF5C7C;        /* kept for errors / destructive */
 
     /* Glows */
     --glow-cyan: 0 0 6px rgba(32, 255, 98, 0.5), 0 0 12px rgba(32, 255, 98, 0.2);
@@ -40,22 +37,21 @@
     --text-secondary: #b0f0c0;
     --text-muted: #6b8f7a;
 
-    /* Font stacks */
+    /* Fonts */
     --font-main: 'Segoe UI', 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
     --font-mono: 'Courier New', 'Lucida Console', 'Consolas', monospace;
 
-    /* Radii – less rounded */
+    /* Radii – squared/terminal style */
     --radius-sm: 4px;
     --radius-md: 6px;
     --radius-lg: 8px;
     --radius-xl: 10px;
 
-    /* Sidebar & header unchanged in size */
+    /* Layout dimensions (unchanged) */
     --sidebar-width: 280px;
-    --header-height: 70px;   /* matches original */
+    --header-height: 70px;
 }
 
-/* ---------- 2. Global texture & base ---------- */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -80,7 +76,7 @@ body {
     -webkit-user-select: none;
 }
 
-/* Scanline overlay on whole app shell */
+/* Subtle scanlines overlay on the whole app */
 .app-shell::after {
     content: '';
     position: absolute;
@@ -101,7 +97,7 @@ body {
     mix-blend-mode: overlay;
 }
 
-/* ---------- 3. Outer containers: metallic frame ---------- */
+/* Outer shell – metallic frame */
 .app-shell {
     background: linear-gradient(145deg, #2a2f2e 0%, #171A19 30%, #101312 100%);
     border: 1px solid #454B4B;
@@ -120,7 +116,7 @@ body {
     border-left: 1px solid #454B4B;
 }
 
-/* ---------- 4. Sidebar internals ---------- */
+/* ---------- Sidebar ---------- */
 .sidebar-user-profile-big {
     background: linear-gradient(145deg, #202524 0%, #171A19 100%);
     border-bottom: 1px solid #454B4B;
@@ -270,7 +266,7 @@ body {
     box-shadow: 0 0 8px rgba(32,255,98,0.4);
 }
 
-/* ---------- 5. Header / top bar ---------- */
+/* ---------- Header / Top Bar ---------- */
 .chat-header-bar {
     background: linear-gradient(180deg, #1e2221 0%, #171A19 100%);
     border-bottom: 1px solid #454B4B;
@@ -360,7 +356,7 @@ body {
     filter: drop-shadow(0 0 4px rgba(32,255,98,0.6));
 }
 
-/* ---------- 6. Chat tabs ---------- */
+/* ---------- Chat Tabs ---------- */
 .chat-tabs {
     background: #0a0d0c;
     border-bottom: 1px solid #454B4B;
@@ -389,9 +385,9 @@ body {
     background: rgba(32,255,98,0.05);
 }
 
-/* ---------- 7. Messages / LCD area ---------- */
+/* ---------- Messages / LCD Area ---------- */
 .messages-container {
-    background: #002414; /* deep green LCD background */
+    background: #002414;
     background-image:
         repeating-linear-gradient(
             to bottom,
@@ -496,7 +492,7 @@ body {
     border-color: #73FF9A;
 }
 
-/* Reply reference block */
+/* Reply reference */
 .reply-ref-block {
     background: rgba(32,255,98,0.08);
     border-left: 3px solid #20FF62;
@@ -579,7 +575,7 @@ body {
     color: #20FF62;
 }
 
-/* ---------- 8. Input area ---------- */
+/* ---------- Input Area ---------- */
 .input-area-bar {
     background: #0a0d0c;
     border-top: 1px solid #454B4B;
@@ -700,7 +696,7 @@ button.send-btn-main:disabled {
     box-shadow: none;
 }
 
-/* ---------- 9. Scrollbars (general) ---------- */
+/* ---------- General Scrollbars ---------- */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -720,7 +716,7 @@ button.send-btn-main:disabled {
     box-shadow: 0 0 6px rgba(32,255,98,0.5);
 }
 
-/* ---------- 10. Overlays / modals ---------- */
+/* ---------- Overlays / Modals ---------- */
 .overlay-full,
 .request-overlay {
     background: rgba(5, 7, 6, 0.92);
@@ -744,7 +740,10 @@ button.send-btn-main:disabled {
     letter-spacing: 0.06em;
 }
 
-.overlay-card input[type="text"] {
+.overlay-card input[type="text"],
+.overlay-card input[type="number"],
+.overlay-card select,
+.overlay-card textarea {
     background: #002414;
     border: 1px solid #454B4B;
     color: #d8ffe2;
@@ -752,7 +751,9 @@ button.send-btn-main:disabled {
     border-radius: 3px;
 }
 
-.overlay-card input[type="text"]:focus {
+.overlay-card input:focus,
+.overlay-card select:focus,
+.overlay-card textarea:focus {
     border-color: #20FF62;
     box-shadow: 0 0 10px rgba(32,255,98,0.4);
 }
@@ -786,7 +787,7 @@ button.send-btn-main:disabled {
     box-shadow: 0 0 16px rgba(32,255,98,0.6);
 }
 
-/* Request overlay specific */
+/* Request overlay */
 .request-card {
     background: linear-gradient(145deg, #1e2221 0%, #0d1512 100%);
 }
@@ -841,7 +842,7 @@ button.send-btn-main:disabled {
     border-radius: 3px;
 }
 
-#modSettingsOverlay input[type="number"]:focus,
+#modSettingsOverlay input:focus,
 #modSettingsOverlay select:focus,
 #modSettingsOverlay textarea:focus {
     border-color: #20FF62;
@@ -875,7 +876,7 @@ button.send-btn-main:disabled {
     color: #20FF62;
 }
 
-/* ---------- 11. Mod message box ---------- */
+/* Mod message box */
 .mod-message-box {
     background: rgba(255, 0, 0, 0.08);
     border: 1px solid #ff5c5c;
@@ -896,7 +897,7 @@ button.send-btn-main:disabled {
     font-family: var(--font-mono);
 }
 
-/* ---------- 12. Cooldown indicator ---------- */
+/* Cooldown indicator */
 .cooldown-indicator {
     background: rgba(234,255,0,0.1);
     border: 1px solid #eaff00;
@@ -906,7 +907,7 @@ button.send-btn-main:disabled {
     padding: 4px 10px;
 }
 
-/* ---------- 13. Token tracker ---------- */
+/* Token tracker */
 .token-tracker {
     background: #1e2221;
     border: 1px solid #454B4B;
@@ -930,7 +931,7 @@ button.send-btn-main:disabled {
     text-shadow: 0 0 4px rgba(255,92,92,0.6);
 }
 
-/* ---------- 14. Lightbox ---------- */
+/* Lightbox */
 .lightbox-overlay {
     background: rgba(5,7,6,0.95);
 }
@@ -941,7 +942,7 @@ button.send-btn-main:disabled {
     box-shadow: 0 0 40px rgba(32,255,98,0.4);
 }
 
-/* ---------- 15. Typing indicator ---------- */
+/* Typing indicator */
 .typing-indicator {
     color: #20FF62;
     font-family: var(--font-mono);
@@ -953,7 +954,7 @@ button.send-btn-main:disabled {
     box-shadow: 0 0 6px #20FF62;
 }
 
-/* ---------- 16. Responsive tweaks (visual only) ---------- */
+/* Responsive visual tweaks (no layout changes) */
 @media (max-width: 768px) {
     .header-logo-mobile {
         filter: drop-shadow(0 0 6px rgba(32,255,98,0.6));
@@ -974,7 +975,7 @@ button.send-btn-main:disabled {
     }
 }
 
-/* ---------- 17. Miscellaneous ---------- */
+/* Misc */
 .hidden {
     display: none !important;
 }
@@ -1001,7 +1002,7 @@ button.send-btn-main:disabled {
     box-shadow: 0 0 18px rgba(32,255,98,0.6);
 }
 
-/* Ensure all monospace elements get correct font */
+/* Force monospace on technical elements */
 .msg-username,
 .msg-time,
 .msg-text,
