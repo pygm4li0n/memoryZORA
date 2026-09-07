@@ -1,47 +1,38 @@
 /* =====================================================
-   THEME FIXES – Clean toast, wallet, Phantom viewport, token contrast
-   Works across all themes and devices
+   FINAL THEME FIXES – Centered toast w/ abbreviated wallet,
+   Phantom viewport safe area, token contrast
 ===================================================== */
 
-/* ── Hide toast completely when not visible ── */
+/* Hide separate wallet address element in header (no bubble) */
+.wallet-address {
+    display: none !important;
+}
+
+/* Toast hidden by default */
 .error-toast {
     display: none !important;
 }
 
-/* ── Visible toast – small, centered, theme‑aware, auto‑vanish ── */
+/* Toast visible – clean, centered, theme-aware, auto-vanish */
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
     z-index: 9999 !important;
     pointer-events: auto !important;
 
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
     border: 1px solid var(--accent-cyan, #20FF62) !important;
-    border-radius: 6px !important;
-    padding: 6px 16px !important;
-    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    font-size: 0.9rem !important;
     font-weight: 600 !important;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
-
-    /* Mobile default: centered */
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
 
     animation: toastFadeOut 2.5s ease-in-out forwards !important;
-}
-
-/* Desktop: toast inside sidebar area, smaller */
-@media (min-width: 769px) {
-    .error-toast.visible {
-        left: calc(var(--sidebar-width, 280px) / 2) !important;
-        transform: translate(-50%, -50%) !important;
-        max-width: calc(var(--sidebar-width, 280px) - 20px) !important;
-        white-space: normal !important;
-        text-align: center !important;
-        font-size: 0.75rem !important;
-    }
 }
 
 @keyframes toastFadeOut {
@@ -50,30 +41,7 @@
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* ── Wallet address – simple inline text, no bubble, hidden when empty ── */
-.wallet-address {
-    display: none;               /* hidden by default */
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    color: var(--text-secondary, #94a3b8) !important;
-    white-space: nowrap !important;
-    /* No background, border, or positioning */
-}
-
-/* Show only when there is actual text (wallet connected) */
-.wallet-address:not(:empty) {
-    display: inline;
-    /* Remain in normal flow */
-}
-
-/* Adjust size for mobile */
-@media (max-width: 768px) {
-    .wallet-address:not(:empty) {
-        font-size: 0.7rem !important;
-    }
-}
-
-/* ── Phantom in‑app browser – dynamic viewport & safe area ── */
+/* Phantom in-app browser viewport fix */
 html, body {
     height: 100% !important;
     height: 100dvh !important;
@@ -92,7 +60,7 @@ html, body {
     padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
 }
 
-/* ── Token balances – readable on all themes ── */
+/* Token balances readable on all themes */
 #walletTokenList {
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
