@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meme Social Network // MSN</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <!-- Theme stylesheet (swappable) -->
+    <link id="themeStylesheet" rel="stylesheet" href="style.css?v=2">
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </head>
@@ -185,5 +186,35 @@
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+
+    <!-- Theme switching script -->
+    <script>
+        (function() {
+            const themeLink = document.getElementById('themeStylesheet');
+            const THEME_KEY = 'msn_theme';
+
+            function setTheme(theme) {
+                let href;
+                if (theme === 'retro') {
+                    href = 'retro-green.css';
+                } else {
+                    href = 'style.css?v=2'; // original
+                }
+                themeLink.setAttribute('href', href);
+                localStorage.setItem(THEME_KEY, theme);
+            }
+
+            // Expose globally for console / future buttons
+            window.setTheme = setTheme;
+
+            // Load saved theme (default to original)
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved === 'retro') {
+                setTheme('retro');
+            } else {
+                setTheme('original');
+            }
+        })();
+    </script>
 </body>
 </html>
