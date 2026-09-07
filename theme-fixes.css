@@ -19,8 +19,8 @@
     color: var(--text-primary, #ffffff) !important;
     border: 1px solid var(--accent-cyan, #20FF62) !important;
     border-radius: 6px !important;
-    padding: 6px 16px !important;          /* reduced padding */
-    font-size: 0.8rem !important;          /* smaller font */
+    padding: 6px 16px !important;
+    font-size: 0.8rem !important;
     font-weight: 600 !important;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
 
@@ -50,37 +50,26 @@
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* ── Wallet address – abbreviated, bigger but not huge, centered on desktop ── */
+/* ── Wallet address – simple inline text, no bubble, hidden when empty ── */
 .wallet-address {
-    font-size: 0.95rem !important;        /* moderate size */
-    font-weight: 600 !important;
+    display: none;               /* hidden by default */
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary, #94a3b8) !important;
     white-space: nowrap !important;
+    /* No background, border, or positioning */
 }
 
-/* Desktop: center the wallet in header right area */
-@media (min-width: 769px) {
-    .header-right {
-        position: relative;
-        justify-content: center;
-    }
-    .header-right .wallet-address {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 0.95rem !important;
-        z-index: 4;
-        background: var(--bg-panel, #111827);
-        padding: 2px 10px;
-        border-radius: 14px;
-        border: 1px solid var(--border-default, #233261);
-    }
+/* Show only when there is actual text (wallet connected) */
+.wallet-address:not(:empty) {
+    display: inline;
+    /* Remain in normal flow */
 }
 
-/* Mobile: wallet stays small */
+/* Adjust size for mobile */
 @media (max-width: 768px) {
-    .wallet-address {
-        font-size: 0.75rem !important;
+    .wallet-address:not(:empty) {
+        font-size: 0.7rem !important;
     }
 }
 
