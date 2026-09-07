@@ -8,6 +8,30 @@
     <link id="themeStylesheet" rel="stylesheet" href="style.css?v=2">
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <!-- Inline style for the theme picker (uses CSS variables) -->
+    <style>
+        .theme-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: var(--bg-elevated, #1e2221);
+            color: var(--text-primary, #d8ffe2);
+            border: 1px solid var(--border-default, #454B4B);
+            border-radius: 4px;
+            padding: 0 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: inherit;
+            height: 34px;
+            line-height: 1;
+        }
+        .theme-select:hover {
+            border-color: var(--accent-cyan, #20FF62);
+        }
+        .theme-select:focus {
+            outline: none;
+            box-shadow: 0 0 8px rgba(32,255,98,0.4);
+        }
+    </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
@@ -129,8 +153,12 @@
                     <button class="btn-icon mobile-edit-btn" id="mobileEditBtn" title="Edit profile">✎</button>
                     <span class="wallet-address" id="walletAddress"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
-                    <!-- Theme toggle button -->
-                    <button class="btn-icon" id="themeToggleBtn" title="Switch theme">🎨</button>
+                    <!-- Theme picker dropdown -->
+                    <select id="themeSelect" class="theme-select" title="Choose theme">
+                        <option value="original">🎨 Original</option>
+                        <option value="retro">🟢 Retro Green</option>
+                        <option value="orange">🟠 Orange</option>
+                    </select>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                 </div>
             </div>
@@ -189,46 +217,41 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 
-    <!-- Theme switching script -->
+    <!-- Theme switching script (supports multiple themes) -->
     <script>
         (function() {
             const themeLink = document.getElementById('themeStylesheet');
+            const themeSelect = document.getElementById('themeSelect');
             const THEME_KEY = 'msn_theme';
 
-            function setTheme(theme) {
-                let href;
-                if (theme === 'retro') {
-                    href = 'retro-green.css';
-                } else {
-                    href = 'style.css?v=2';
-                }
-                themeLink.setAttribute('href', href);
-                localStorage.setItem(THEME_KEY, theme);
-            }
+            // Map theme IDs to CSS file paths
+            const themes = {
+                original: 'style.css?v=2',
+                retro: 'retro-green.css',
+                orange: 'orange-theme.css'
+            };
 
-            // Expose globally (optional)
-            window.setTheme = setTheme;
-
-            // Toggle between themes
-            function toggleTheme() {
-                const current = localStorage.getItem(THEME_KEY) || 'original';
-                const next = current === 'retro' ? 'original' : 'retro';
-                setTheme(next);
-            }
-
-            // Attach event to the toggle button
-            const toggleBtn = document.getElementById('themeToggleBtn');
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', toggleTheme);
+            function setTheme(themeId) {
+                if (!themes[themeId]) themeId = 'original';
+                themeLink.setAttribute('href', themes[themeId]);
+                localStorage.setItem(THEME_KEY, themeId);
+                if (themeSelect) themeSelect.value = themeId;
             }
 
             // Load saved theme on page load (default original)
-            const saved = localStorage.getItem(THEME_KEY);
-            if (saved === 'retro') {
-                setTheme('retro');
-            } else {
-                setTheme('original');
+            const saved = localStorage.getItem(THEME_KEY) || 'original';
+            setTheme(saved);
+
+            // Listen for changes from the dropdown
+            if (themeSelect) {
+                themeSelect.addEventListener('change', (e) => {
+                    setTheme(e.target.value);
+                });
             }
+
+            // Expose globally for console or future buttons
+            window.setTheme = setTheme;
+            window.getCurrentTheme = () => localStorage.getItem(THEME_KEY) || 'original';
         })();
     </script>
 </body>
