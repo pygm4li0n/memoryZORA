@@ -319,7 +319,8 @@
             phantomWalletPublicKey = resp.publicKey;
             phantomConnected = true;
             updatePhantomUI();
-            showError('✅ Phantom connected: ' + phantomWalletPublicKey.toBase58());
+            const addr = phantomWalletPublicKey.toBase58();
+showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
             await fetchAndDisplayAllTokens();
         } catch (err) {
             console.error('Phantom connection error:', err);
