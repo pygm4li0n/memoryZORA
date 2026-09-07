@@ -1,0 +1,21 @@
+/* Hide Phantom toast by default – only show when .visible */
+.error-toast {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+.error-toast.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* Ensure token balances in sidebar are readable */
+#walletTokenList {
+    background: var(--bg-panel, #111827) !important;
+    color: var(--text-primary, #ffffff) !important;
+    border-top: 1px solid var(--border-default, #233261) !important;
+    padding: 8px 6px !important;
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
+}
