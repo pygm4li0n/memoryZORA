@@ -970,3 +970,31 @@ button.send-btn-main:disabled { background: var(--bg-secondary); box-shadow: non
 #modPostAnnouncementBtn:hover {
     box-shadow: 0 0 15px rgba(255, 92, 124, 0.6);
 }
+
+/* ── Theme Picker Dropdown (added) ── */
+.theme-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: var(--font-main);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    height: 34px;
+    line-height: 1;
+}
+
+.theme-select:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: var(--glow-cyan);
+}
+
+.theme-select:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: var(--glow-cyan);
+}
