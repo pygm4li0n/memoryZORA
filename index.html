@@ -6,9 +6,11 @@
     <title>Meme Social Network // MSN</title>
     <!-- Theme stylesheet (swappable) -->
     <link id="themeStylesheet" rel="stylesheet" href="style.css?v=2">
+    <!-- Separate fixes: Phantom toast + token contrast -->
+    <link rel="stylesheet" href="theme-fixes.css">
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    <!-- Inline styles: theme picker + fixes -->
+    <!-- Inline style: only theme picker -->
     <style>
         .theme-select {
             appearance: none;
@@ -30,28 +32,6 @@
         .theme-select:focus {
             outline: none;
             box-shadow: 0 0 8px rgba(32,255,98,0.4);
-        }
-
-        /* Hide Phantom toast by default – only show when .visible */
-        .error-toast {
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-        }
-        .error-toast.visible {
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-        }
-
-        /* Ensure token balances in sidebar are readable */
-        #walletTokenList {
-            background: var(--bg-panel, #111827) !important;
-            color: var(--text-primary, #ffffff) !important;
-            border-top: 1px solid var(--border-default, #233261) !important;
-            padding: 8px 6px !important;
-            font-size: 0.75rem !important;
-            line-height: 1.4 !important;
         }
     </style>
 </head>
