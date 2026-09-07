@@ -3,34 +3,50 @@
     display: none !important;
 }
 
-/* When visible – clean, centered, opaque, auto vanish */
+/* When visible – clean, opaque, auto vanish, theme‑aware */
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    background: rgba(0, 0, 0, 0.95) !important;
-    color: #ffffff !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+
+    /* Theme colours */
+    background: var(--bg-panel, #111827) !important;
+    color: var(--text-primary, #ffffff) !important;
     border: 1px solid var(--accent-cyan, #20FF62) !important;
     border-radius: 8px !important;
     padding: 10px 24px !important;
     font-size: 0.9rem !important;
     font-weight: 600 !important;
-    z-index: 9999 !important;
-    pointer-events: auto !important;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+
+    /* Default to centered on mobile */
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    /* Fade out and remove from view */
     animation: toastFadeOut 2.5s ease-in-out forwards !important;
 }
 
-/* Fade out and remove from view */
+/* On desktop – position inside the sidebar area */
+@media (min-width: 769px) {
+    .error-toast.visible {
+        left: calc(var(--sidebar-width, 280px) / 2) !important;
+        transform: translate(-50%, -50%) !important;
+        max-width: calc(var(--sidebar-width, 280px) - 20px) !important;
+        white-space: normal !important;
+        text-align: center !important;
+    }
+}
+
 @keyframes toastFadeOut {
     0%   { opacity: 1; }
     80%  { opacity: 1; }
-    100% { opacity: 0; pointer-events: none; }
+    100% { opacity: 0; visibility: hidden; }
 }
 
-/* Ensure token balances are readable */
+/* Token balances – readable on all themes */
 #walletTokenList {
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
