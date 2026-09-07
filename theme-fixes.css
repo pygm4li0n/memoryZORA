@@ -1,39 +1,46 @@
 /* =====================================================
-   THEME FIXES – Toast, Wallet, Phantom Viewport, Token Contrast
+   THEME FIXES – Clean toast, wallet, Phantom viewport, token contrast
+   Works across all themes and devices
 ===================================================== */
 
-/* Hide toast completely when not visible */
+/* ── Hide toast completely when not visible ── */
 .error-toast {
     display: none !important;
 }
 
-/* Visible toast – clean, theme‑aware, auto vanish */
+/* ── Visible toast – small, centered, theme‑aware, auto‑vanish ── */
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
     z-index: 9999 !important;
     pointer-events: auto !important;
+
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
     border: 1px solid var(--accent-cyan, #20FF62) !important;
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-size: 0.9rem !important;
+    border-radius: 6px !important;
+    padding: 6px 16px !important;          /* reduced padding */
+    font-size: 0.8rem !important;          /* smaller font */
     font-weight: 600 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3) !important;
+
+    /* Mobile default: centered */
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
+
     animation: toastFadeOut 2.5s ease-in-out forwards !important;
 }
 
-/* Desktop: toast inside sidebar */
+/* Desktop: toast inside sidebar area, smaller */
 @media (min-width: 769px) {
     .error-toast.visible {
         left: calc(var(--sidebar-width, 280px) / 2) !important;
+        transform: translate(-50%, -50%) !important;
         max-width: calc(var(--sidebar-width, 280px) - 20px) !important;
         white-space: normal !important;
         text-align: center !important;
+        font-size: 0.75rem !important;
     }
 }
 
@@ -43,12 +50,14 @@
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* Wallet address – bigger and centered on desktop */
+/* ── Wallet address – abbreviated, bigger but not huge, centered on desktop ── */
 .wallet-address {
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
+    font-size: 0.95rem !important;        /* moderate size */
+    font-weight: 600 !important;
     white-space: nowrap !important;
 }
+
+/* Desktop: center the wallet in header right area */
 @media (min-width: 769px) {
     .header-right {
         position: relative;
@@ -59,22 +68,23 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
-        font-size: 1.2rem !important;
+        font-size: 0.95rem !important;
         z-index: 4;
         background: var(--bg-panel, #111827);
-        padding: 4px 12px;
-        border-radius: 20px;
+        padding: 2px 10px;
+        border-radius: 14px;
         border: 1px solid var(--border-default, #233261);
     }
 }
+
+/* Mobile: wallet stays small */
 @media (max-width: 768px) {
     .wallet-address {
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
     }
 }
 
-/* ── CRITICAL: Phantom in‑app browser viewport fix ── */
-/* Use dynamic viewport height and safe‑area padding */
+/* ── Phantom in‑app browser – dynamic viewport & safe area ── */
 html, body {
     height: 100% !important;
     height: 100dvh !important;
@@ -83,20 +93,17 @@ html, body {
 .app-shell {
     height: 100dvh !important;
     max-height: 100dvh !important;
-    /* Ensure it starts below any top browser/system bar */
     padding-top: env(safe-area-inset-top) !important;
     box-sizing: border-box;
 }
-/* Keep the chat input above Phantom’s bottom bar */
 .input-area-bar {
     padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
 }
-/* Add a little bottom space to the messages container */
 .messages-container {
     padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
 }
 
-/* Token balances – readable on all themes */
+/* ── Token balances – readable on all themes ── */
 #walletTokenList {
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
