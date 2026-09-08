@@ -1,9 +1,9 @@
 /* =====================================================
-   FINAL THEME FIXES – Centered toast w/ abbreviated wallet,
-   Phantom viewport safe area, token contrast
+   FINAL THEME FIXES – Centered toast, wallet abbreviation,
+   Phantom bottom bar, token contrast
 ===================================================== */
 
-/* Hide separate wallet address element in header (no bubble) */
+/* Hide separate wallet address element in header */
 .wallet-address {
     display: none !important;
 }
@@ -13,7 +13,7 @@
     display: none !important;
 }
 
-/* Toast visible – clean, centered, theme-aware, auto-vanish */
+/* Toast visible – always centered on all screens */
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
@@ -47,20 +47,26 @@ html, body {
     height: 100dvh !important;
     overflow: hidden;
 }
+
 .app-shell {
     height: 100dvh !important;
     max-height: 100dvh !important;
+    /* Push content below Phantom's top bar */
     padding-top: env(safe-area-inset-top) !important;
     box-sizing: border-box;
 }
+
+/* Give extra bottom space so chat input is not hidden */
 .input-area-bar {
-    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
-}
-.messages-container {
-    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+    margin-bottom: env(safe-area-inset-bottom) !important;
 }
 
-/* Token balances readable on all themes */
+.messages-container {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+}
+
+/* Token balances readable */
 #walletTokenList {
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
