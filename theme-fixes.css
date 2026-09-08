@@ -126,8 +126,8 @@ html, body {
 /* Input bar – lifted slightly, safe‑area aware */
 .input-area-bar {
     flex-shrink: 0;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    margin-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;   /* was 10px */
+    margin-bottom: calc(15px + env(safe-area-inset-bottom)) !important;    /* was 8px */
     box-sizing: border-box;
 }
 
@@ -151,6 +151,7 @@ html, body {
         height: 100dvh !important;
         max-height: 100dvh !important;
         padding-bottom: env(safe-area-inset-bottom) !important;
+        margin-bottom: env(safe-area-inset-bottom) !important;   /* extra bottom margin */
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -163,7 +164,7 @@ html, body {
     }
     .sidebar-footer {
         flex-shrink: 0;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(15px + env(safe-area-inset-bottom)) !important;   /* more padding */
         min-height: 40px;
         display: flex;
         align-items: center;
