@@ -148,23 +148,25 @@ html, body {
 /* ── Sidebar on mobile – full height, footer visible, no clipping ── */
 @media (max-width: 768px) {
     .sidebar {
-        height: 100dvh !important;
-        max-height: 100dvh !important;
-        padding-bottom: env(safe-area-inset-bottom) !important;
-        margin-bottom: env(safe-area-inset-bottom) !important;   /* extra bottom margin */
+        height: calc(100dvh - 15px - env(safe-area-inset-bottom)) !important;
+        max-height: calc(100dvh - 15px - env(safe-area-inset-bottom)) !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
     }
+
     .sidebar-users {
         flex: 1;
         overflow-y: auto;
     }
+
     .sidebar-footer {
         flex-shrink: 0;
-        padding-bottom: calc(15px + env(safe-area-inset-bottom)) !important;   /* more padding */
+        padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
         min-height: 40px;
         display: flex;
         align-items: center;
