@@ -1,65 +1,8 @@
 /* =====================================================
-   FINAL THEME FIXES – Perfect Phantom fit, toast, wallet,
-   token contrast
+   PHANTOM WALLET PERFECT FIT + SCROLL BUTTON FIX
 ===================================================== */
 
-/* ── Hide toast by default, show centered when needed ── */
-.error-toast {
-    display: none !important;
-}
-.error-toast.visible {
-    display: block !important;
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 9999 !important;
-    pointer-events: auto !important;
-
-    background: var(--bg-panel, #111827) !important;
-    color: var(--text-primary, #ffffff) !important;
-    border: 1px solid var(--accent-cyan, #20FF62) !important;
-    border-radius: 8px !important;
-    padding: 10px 24px !important;
-    font-size: 0.9rem !important;
-    font-weight: 600 !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
-
-    animation: toastFadeOut 2.5s ease-in-out forwards !important;
-}
-@keyframes toastFadeOut {
-    0%   { opacity: 1; }
-    80%  { opacity: 1; }
-    100% { opacity: 0; visibility: hidden; }
-}
-
-/* ── Wallet address visibility: header on desktop, sidebar on mobile ── */
-.wallet-address {
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    color: var(--text-secondary, #94a3b8) !important;
-    white-space: nowrap !important;
-}
-
-/* Hide header wallet on mobile */
-@media (max-width: 768px) {
-    .header-right .wallet-address {
-        display: none !important;
-    }
-}
-
-/* Show sidebar wallet only on mobile */
-.sidebar-footer .wallet-address {
-    display: none;
-}
-@media (max-width: 768px) {
-    .sidebar-footer .wallet-address {
-        display: inline !important;
-        font-size: 0.75rem !important;
-    }
-}
-
-/* ── Perfect fit inside Phantom Wallet ── */
+/* Remove any top gap and force full visible height */
 html, body {
     height: 100%;
     margin: 0;
@@ -72,26 +15,43 @@ html, body {
     height: 100dvh;
     max-height: 100vh;
     max-height: 100dvh;
-    padding: 0;                     /* ← remove top gap */
+    padding: 0 !important;          /* kill top gap */
     box-sizing: border-box;
 }
 
-/* Keep chat input fully visible and tappable */
-.input-area-bar {
-    padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    margin-bottom: 0 !important;
+/* Chat panel fills the shell */
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;             /* anchor for scroll button */
 }
 
+/* Messages area takes all remaining space */
 .messages-container {
-    padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
 }
 
-/* ── Token balances readable ── */
-#walletTokenList {
-    background: var(--bg-panel, #111827) !important;
-    color: var(--text-primary, #ffffff) !important;
-    border-top: 1px solid var(--border-default, #233261) !important;
-    padding: 8px 6px !important;
-    font-size: 0.75rem !important;
-    line-height: 1.4 !important;
+/* Input bar stays above Phantom's bottom bar */
+.input-area-bar {
+    flex-shrink: 0;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+    margin-bottom: env(safe-area-inset-bottom) !important;
+    box-sizing: border-box;
+}
+
+/* Scroll-to-bottom button sits right above the input bar */
+.scroll-bottom-btn {
+    position: absolute !important;
+    bottom: calc(80px + env(safe-area-inset-bottom)) !important;  /* above input area */
+    right: 16px !important;
+    width: 40px;
+    height: 40px;
+    z-index: 20;
+    display: none;                /* shown by JS when needed */
+}
+.scroll-bottom-btn.visible {
+    display: flex !important;
 }
