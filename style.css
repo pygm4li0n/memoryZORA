@@ -270,7 +270,7 @@ body {
 .header-logo-mobile {
     display: none;
     height: 50px;
-    width: 230px;               /* adjust for mobile */
+    width: 300px;               /* ← increased from 230px */
     background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
     background-size: contain;
     background-repeat: no-repeat;
