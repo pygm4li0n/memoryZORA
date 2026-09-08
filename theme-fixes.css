@@ -158,7 +158,7 @@ html, body {
         flex-direction: column;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        position: fixed;           /* ensure containing block for absolute children */
+        position: fixed;
         top: 0;
         left: 0;
     }
@@ -177,11 +177,11 @@ html, body {
         gap: 6px;
     }
 
-    /* Theme button aligned with pencil (right of profile) */
+    /* Theme button aligned exactly with pencil, closer to it */
     .sidebar-theme-btn {
         position: absolute;
-        top: 52px;               /* vertical center of profile row (72px avatar/2 + 20px top padding) */
-        right: 70px;             /* to the left of pencil (pencil at right 16px, width 34px, gap 20px) */
+        top: 39px;               /* computed: 20px padding + 72/2 - 17 = 39 */
+        right: 58px;             /* 16px (pencil right) + 34px (pencil width) + 8px gap */
         display: flex;
         z-index: 30;
     }
@@ -215,7 +215,7 @@ blockquote.twitter-tweet,
     .header-right {
         gap: 6px !important;
         position: absolute;
-        right: 6px;              /* move header icons slightly left */
+        right: 10px;             /* moved slightly left from original 6px */
         top: 50%;
         transform: translateY(-50%);
         z-index: 5;
@@ -235,7 +235,7 @@ blockquote.twitter-tweet,
         height: 24px;
         object-fit: contain;
     }
-    /* Theme selector (still in header for now, but may be hidden or shown as small circle) */
+    /* Theme selector in header (still present but we can keep as is or hide) */
     .header-right .theme-select {
         appearance: none;
         -webkit-appearance: none;
