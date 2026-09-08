@@ -37,8 +37,6 @@
     --font-main: 'Segoe UI', 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
     --sidebar-width: 280px;
     --header-height: 70px;   /* Correct unit: 80px */
-    /* Default logo – can be overridden per theme */
-    --logo-url: url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png');
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -217,7 +215,7 @@ body {
 }
 .sidebar-footer .status-dot-sm { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); flex-shrink: 0; box-shadow: 0 0 6px rgba(34, 197, 94, 0.7); }
 .sidebar-toggle {
-    display: none; position: static;
+    display: none; position: static;   /* changed from absolute to static (inside header) */
     width: 36px; height: 36px; border-radius: 50%;
     background: var(--bg-elevated); border: 1px solid var(--border-default); color: #fff;
     cursor: pointer; font-size: 1.2rem;
@@ -238,7 +236,7 @@ body {
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     border-bottom: 1px solid var(--border-default);
     background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(17, 24, 39, 0.95) 100%);
-    flex-shrink: 0; position: relative; overflow: visible;
+    flex-shrink: 0; position: relative; overflow: visible;  /* <--- Changed to visible */
     box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 .chat-header-bar::after {
@@ -255,27 +253,18 @@ body {
     color: var(--text-primary); text-transform: uppercase;
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
 }
-/* Desktop logo – now a background div */
+/* Desktop logo */
 .header-logo {
-    height: 65px;
-    width: 300px;                /* adjust to your logo's aspect ratio */
-    background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    height: 65px;               /* <--- Correct unit: 70px */
+    width: auto;
+    object-fit: contain;
     display: block;
+    max-width: none;            /* <--- Remove width cap */
     filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
 }
-
+/* Mobile centered logo, hidden by default */
 .header-logo-mobile {
     display: none;
-    height: 50px;
-    width: 300px;               /* ← increased from 230px */
-    background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
 }
 /* NEW: header center for token tracker */
 .header-center {
@@ -838,11 +827,9 @@ button.send-btn-main:disabled { background: var(--bg-secondary); box-shadow: non
         left: 50%;
         transform: translateX(-50%);
         height: 50px;               /* <--- Adjust mobile logo height here */
-        width: 120px;               /* <--- added for background sizing */
-        background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
+        width: auto;
+        max-width: none;
+        object-fit: contain;
         z-index: 1;
         filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
     }
