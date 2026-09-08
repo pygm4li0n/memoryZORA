@@ -1,6 +1,6 @@
 /* =====================================================
-   FINAL THEME FIXES – Perfect Phantom fit, toast, wallet,
-   scroll button, token contrast
+   FINAL THEME FIXES – No extra gap under messages,
+   raised footer on mobile, scroll button, wallet, toast
 ===================================================== */
 
 /* ── Phantom connected toast – centered, clean, auto-vanish ── */
@@ -76,7 +76,7 @@ html, body {
     height: 100dvh;
     max-height: 100vh;
     max-height: 100dvh;
-    padding: 0 !important;          /* remove any top gap */
+    padding: 0 !important;
     box-sizing: border-box;
 }
 
@@ -88,25 +88,25 @@ html, body {
     position: relative;
 }
 
-/* Messages area takes remaining space, leaves room for input */
+/* Messages area takes remaining space, no large bottom padding */
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: 8px !important;   /* small gap only */
 }
 
 /* Input bar lifted slightly for clarity */
 .input-area-bar {
     flex-shrink: 0;
     padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    margin-bottom: calc(5px + env(safe-area-inset-bottom)) !important;
+    margin-bottom: calc(8px + env(safe-area-inset-bottom)) !important;   /* raised */
     box-sizing: border-box;
 }
 
-/* Scroll‑to‑bottom button – above the typing area, right aligned */
+/* Scroll‑to‑bottom button – above the typing area, 20px higher than before */
 .scroll-bottom-btn {
     position: absolute !important;
-    bottom: calc(90px + env(safe-area-inset-bottom)) !important; /* adjust if needed */
+    bottom: calc(70px + env(safe-area-inset-bottom)) !important;  /* raised */
     right: 16px !important;
     width: 40px;
     height: 40px;
@@ -115,6 +115,19 @@ html, body {
 }
 .scroll-bottom-btn.visible {
     display: flex !important;
+}
+
+/* Ensure sidebar on mobile ends at the same bottom as chat */
+@media (max-width: 768px) {
+    .sidebar {
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        padding-bottom: env(safe-area-inset-bottom) !important;
+        box-sizing: border-box;
+    }
+    .sidebar-footer {
+        padding-bottom: env(safe-area-inset-bottom) !important;
+    }
 }
 
 /* ── Token balances readable ── */
