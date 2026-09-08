@@ -1,19 +1,11 @@
 /* =====================================================
-   FINAL THEME FIXES – Centered toast, wallet abbreviation,
-   Phantom bottom bar, token contrast
+   THEME FIXES – Toast, Wallet, Phantom Viewport, Token Contrast
 ===================================================== */
 
-/* Hide separate wallet address element in header */
-.wallet-address {
-    display: none !important;
-}
-
-/* Toast hidden by default */
+/* ── Toast hidden by default, centered when visible ── */
 .error-toast {
     display: none !important;
 }
-
-/* Toast visible – always centered on all screens */
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
@@ -30,43 +22,63 @@
     padding: 10px 24px !important;
     font-size: 0.9rem !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 
     animation: toastFadeOut 2.5s ease-in-out forwards !important;
 }
-
 @keyframes toastFadeOut {
     0%   { opacity: 1; }
     80%  { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* Phantom in-app browser viewport fix */
+/* ── Wallet address: visible in header on desktop ── */
+.wallet-address {
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary, #94a3b8) !important;
+    white-space: nowrap !important;
+}
+
+/* Hide header wallet on mobile */
+@media (max-width: 768px) {
+    .header-right .wallet-address {
+        display: none !important;
+    }
+}
+
+/* Show sidebar wallet only on mobile */
+.sidebar-footer .wallet-address {
+    display: none;
+}
+@media (max-width: 768px) {
+    .sidebar-footer .wallet-address {
+        display: inline !important;
+        font-size: 0.75rem !important;
+    }
+}
+
+/* ── Phantom in-app browser viewport fix ── */
 html, body {
     height: 100% !important;
     height: 100dvh !important;
     overflow: hidden;
 }
-
 .app-shell {
     height: 100dvh !important;
     max-height: 100dvh !important;
-    /* Push content below Phantom's top bar */
     padding-top: env(safe-area-inset-top) !important;
     box-sizing: border-box;
 }
-
-/* Give extra bottom space so chat input is not hidden */
 .input-area-bar {
     padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
     margin-bottom: env(safe-area-inset-bottom) !important;
 }
-
 .messages-container {
     padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
 }
 
-/* Token balances readable */
+/* ── Token balances readable ── */
 #walletTokenList {
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
