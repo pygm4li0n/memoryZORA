@@ -134,7 +134,7 @@ html, body {
 /* Scroll‑to‑bottom button – above input, raised */
 .scroll-bottom-btn {
     position: absolute !important;
-    bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(140px + env(safe-area-inset-bottom)) !important;
     right: 16px !important;
     width: 40px;
     height: 40px;
