@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Meme Social Network // MSN</title>
     <!-- Theme stylesheet (swappable) -->
     <link id="themeStylesheet" rel="stylesheet" href="style.css?v=2">
@@ -129,7 +129,8 @@
             <div class="chat-header-bar">
                 <div class="header-left">
                     <button class="sidebar-toggle hidden" id="sidebarToggle" title="Users">☰</button>
-                    <img src="https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png" alt="Logo" class="header-logo">
+                    <!-- Logo as div for CSS-controlled image -->
+                    <div class="header-logo"></div>
                 </div>
                 <div class="header-center">
                     <div class="token-tracker" id="tokenTracker">
@@ -139,7 +140,8 @@
                         <span class="token-change" id="tokenChange">--</span>
                     </div>
                 </div>
-                <img src="https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png" alt="Logo" class="header-logo-mobile">
+                <!-- Mobile logo as div -->
+                <div class="header-logo-mobile"></div>
                 <div class="header-right">
                     <span class="badge-pill" id="connectionPill">
                         <span id="connDot"></span>
