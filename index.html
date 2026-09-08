@@ -10,28 +10,74 @@
     <link rel="stylesheet" href="theme-fixes.css">
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    <!-- Inline style: only theme picker -->
+    <!-- Inline style: theme buttons and overlay -->
     <style>
-        .theme-select {
-            appearance: none;
-            -webkit-appearance: none;
-            background: var(--bg-elevated, #1e2221);
-            color: var(--text-primary, #d8ffe2);
-            border: 1px solid var(--border-default, #454B4B);
-            border-radius: 4px;
-            padding: 0 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-family: inherit;
+        /* Circular theme buttons (header & sidebar) */
+        .header-theme-btn,
+        .sidebar-theme-btn {
+            width: 34px;
             height: 34px;
-            line-height: 1;
+            border-radius: 50%;
+            border: 1px solid var(--border-default, #454B4B);
+            background: var(--bg-elevated, #1e2221);
+            color: var(--text-primary, #ffffff);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
-        .theme-select:hover {
+        .header-theme-btn:hover,
+        .sidebar-theme-btn:hover {
             border-color: var(--accent-cyan, #20FF62);
-        }
-        .theme-select:focus {
-            outline: none;
             box-shadow: 0 0 8px rgba(32,255,98,0.4);
+        }
+
+        /* Overlay card for theme selection */
+        .theme-overlay-card {
+            max-width: 320px;
+        }
+        .theme-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .theme-option {
+            padding: 12px;
+            border: 1px solid var(--border-default, #454B4B);
+            border-radius: var(--radius-sm, 4px);
+            background: var(--bg-input, #111827);
+            color: var(--text-primary, #ffffff);
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .theme-option:hover {
+            border-color: var(--accent-cyan, #20FF62);
+            background: var(--bg-hover, #1d2b4d);
+        }
+        #themeOverlayCloseBtn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: var(--radius-sm, 4px);
+            background: var(--bg-hover, #1d2b4d);
+            color: var(--text-primary, #ffffff);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Show/hide appropriately */
+        @media (max-width: 768px) {
+            .header-theme-btn { display: none; }
+            .sidebar-theme-btn { display: flex; }
+        }
+        .sidebar-theme-btn { display: none; }
+        @media (min-width: 769px) {
+            .sidebar-theme-btn { display: none; }
         }
     </style>
 </head>
@@ -84,7 +130,6 @@
                 <option value="10">10 seconds</option>
                 <option value="15">15 seconds</option>
             </select>
-            <!-- MOD Announcement Section (visible only to mod wallet) -->
             <div id="modAnnouncementSection" class="hidden">
                 <label for="modAnnouncementInput">Official Announcement</label>
                 <textarea id="modAnnouncementInput" rows="3" maxlength="300" placeholder="Type your announcement..."></textarea>
@@ -97,7 +142,6 @@
 
     <div class="app-shell" id="appShell">
         <aside class="sidebar" id="sidebar">
-            <!-- Sidebar content unchanged -->
             <div class="sidebar-user-profile-big" id="sidebarUserProfileBig">
                 <div class="big-avatar" id="sidebarBigAvatar">?</div>
                 <div class="big-info">
@@ -110,6 +154,8 @@
             <div class="sidebar-section-label">
                 🔵 ACTIVE USERS <span class="active-users-count" id="sidebarActiveUsersCount">0</span>
             </div>
+            <!-- Sidebar theme button (mobile only) -->
+            <button class="btn-icon sidebar-theme-btn" id="sidebarThemeBtn" title="Change theme">🎨</button>
             <div class="sidebar-users" id="sidebarUsers">
                 <div class="no-users-sidebar">No one else online</div>
             </div>
@@ -156,13 +202,8 @@
                     <button class="btn-icon mobile-edit-btn" id="mobileEditBtn" title="Edit profile">✎</button>
                     <span class="wallet-address" id="walletAddress"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
-                    <!-- Theme picker dropdown -->
-                    <select id="themeSelect" class="theme-select" title="Choose theme">
-                        <option value="original">🎨</option>
-                        <option value="retro">🟢</option>
-                        <option value="orange">🟠</option>
-                        <option value="cherry">🍒</option>
-                    </select>
+                    <!-- Header theme button (desktop only) -->
+                    <button class="btn-icon header-theme-btn" id="headerThemeBtn" title="Change theme">🎨</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                 </div>
             </div>
@@ -170,7 +211,6 @@
                 <div class="chat-tab active" data-tab="public">🌐 Public</div>
                 <div class="chat-tab" data-tab="private">🔒 Private</div>
             </div>
-            <!-- MOD Announcement Box (fixed above messages) -->
             <div class="mod-message-box" id="modMessageBox">
                 <span class="mod-badge">MOD</span>
                 <span class="mod-message-text" id="modMessageText">No announcements yet</span>
@@ -185,7 +225,6 @@
             </div>
             <button class="scroll-bottom-btn" id="scrollBottomBtn" title="Scroll to bottom">↓</button>
             <div class="input-area-bar" id="inputAreaBar">
-                <!-- Input area unchanged -->
                 <div class="reply-indicator-bar hidden" id="replyIndicatorBar">
                     <span>↳ Replying to <strong id="replyToUserDisp"></strong></span>
                     <img id="replyPreviewThumb" class="reply-preview-thumb hidden" src="" alt="thumb">
@@ -212,6 +251,20 @@
         </main>
     </div>
 
+    <!-- Theme Selection Overlay -->
+    <div class="overlay-full hidden" id="themeOverlay">
+        <div class="overlay-card theme-overlay-card">
+            <h3>Select Theme</h3>
+            <div class="theme-options">
+                <button class="theme-option" data-theme="original">🎨 Original</button>
+                <button class="theme-option" data-theme="retro">🟢 Retro Green</button>
+                <button class="theme-option" data-theme="orange">🟠 Orange</button>
+                <button class="theme-option" data-theme="cherry">🍒 Cherry</button>
+            </div>
+            <button id="themeOverlayCloseBtn">Close</button>
+        </div>
+    </div>
+
     <div class="lightbox-overlay hidden" id="lightboxOverlay">
         <img id="lightboxImg" src="" alt="Enlarged image">
     </div>
@@ -221,14 +274,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 
-    <!-- Theme switching script (supports multiple themes) -->
+    <!-- Theme switching script (updated for overlay) -->
     <script>
         (function() {
             const themeLink = document.getElementById('themeStylesheet');
-            const themeSelect = document.getElementById('themeSelect');
             const THEME_KEY = 'msn_theme';
 
-            // Map theme IDs to CSS file paths
             const themes = {
                 original: 'style.css?v=2',
                 retro: 'retro-green.css',
@@ -240,21 +291,40 @@
                 if (!themes[themeId]) themeId = 'original';
                 themeLink.setAttribute('href', themes[themeId]);
                 localStorage.setItem(THEME_KEY, themeId);
-                if (themeSelect) themeSelect.value = themeId;
             }
 
-            // Load saved theme on page load (default original)
+            // Load saved theme
             const saved = localStorage.getItem(THEME_KEY) || 'original';
             setTheme(saved);
 
-            // Listen for changes from the dropdown
-            if (themeSelect) {
-                themeSelect.addEventListener('change', (e) => {
-                    setTheme(e.target.value);
-                });
+            // Overlay elements
+            const headerThemeBtn = document.getElementById('headerThemeBtn');
+            const sidebarThemeBtn = document.getElementById('sidebarThemeBtn');
+            const themeOverlay = document.getElementById('themeOverlay');
+            const themeOverlayCloseBtn = document.getElementById('themeOverlayCloseBtn');
+            const themeOptionButtons = document.querySelectorAll('.theme-option');
+
+            function openThemeOverlay() {
+                themeOverlay.classList.remove('hidden');
             }
 
-            // Expose globally for console or future buttons
+            function closeThemeOverlay() {
+                themeOverlay.classList.add('hidden');
+            }
+
+            if (headerThemeBtn) headerThemeBtn.addEventListener('click', openThemeOverlay);
+            if (sidebarThemeBtn) sidebarThemeBtn.addEventListener('click', openThemeOverlay);
+            if (themeOverlayCloseBtn) themeOverlayCloseBtn.addEventListener('click', closeThemeOverlay);
+
+            themeOptionButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const themeId = btn.getAttribute('data-theme');
+                    setTheme(themeId);
+                    closeThemeOverlay();
+                });
+            });
+
+            // Expose globally
             window.setTheme = setTheme;
             window.getCurrentTheme = () => localStorage.getItem(THEME_KEY) || 'original';
         })();
