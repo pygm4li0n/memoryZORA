@@ -1,6 +1,7 @@
 /* =====================================================
    THEME FIXES – Phantom fit, scroll, sidebar, X links,
-   footer height, emoji-only theme select on mobile
+   footer height, emoji-only theme select on mobile,
+   badge alignment, theme button alignment
 ===================================================== */
 
 /* Prevent horizontal overflow globally */
@@ -173,14 +174,26 @@ html, body {
         gap: 6px;
     }
 
-    /* Theme button next to pencil */
+    /* Ensure profile row is the containing block for absolute positioning */
+    .sidebar-user-profile-big {
+        position: relative;
+    }
+
+    /* Theme button perfectly aligned with pencil */
     .sidebar-theme-btn {
         position: absolute;
-        top: 35px;               /* vertical center of profile row */
-        right: 60px;              /* to the right of pencil (edit button) */
+        top: 50%;
+        right: 58px;            /* just left of pencil, same vertical center */
+        transform: translateY(-50%);
         display: flex;
         z-index: 30;
     }
+}
+
+/* ── Center rank badge between name and status (both desktop & mobile) ── */
+.big-rank {
+    margin: 2px 0 !important;
+    line-height: 1.2;
 }
 
 /* ── X / Twitter links – wrap and don’t overflow ── */
@@ -249,7 +262,6 @@ blockquote.twitter-tweet,
         color: var(--text-primary, #ffffff);
         font-size: 0.8rem;
     }
-    /* Use background image? Not needed if option text is emoji */
 }
 
 /* ── Token balances readable ── */
