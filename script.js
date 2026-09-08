@@ -28,6 +28,7 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // DOM elements (same as before)
+    const sidebarWalletAddress = document.getElementById('sidebarWalletAddress');
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
     const messageInput = document.getElementById('messageInput');
