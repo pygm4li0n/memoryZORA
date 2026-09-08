@@ -1,6 +1,32 @@
 /* =====================================================
-   FINAL THEME FIXES – Correct spacing, sidebar, arrow, header
+   FINAL THEME FIXES – Phantom perfect layout, scroll,
+   sidebar alignment, header, X links
 ===================================================== */
+
+/* ── Prevent any horizontal scroll / overflow ── */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.app-shell,
+.chat-panel,
+.messages-container,
+.sidebar,
+.input-area-bar,
+.chat-header-bar {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
 
 /* ── Phantom connected toast – centered, clean, auto-vanish ── */
 .error-toast {
@@ -87,15 +113,17 @@ html, body {
     position: relative;
 }
 
-/* Messages area – anchors to bottom with normal gap */
+/* Messages area – vertical scroll works, no overflow */
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 0 18px 12px !important;  /* bottom = gap between messages */
+    -webkit-overflow-scrolling: touch;
+    padding: 0 18px 12px !important;   /* bottom gap similar to message gap */
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     gap: 12px;
+    max-width: 100%;
 }
 
 /* Input bar – minimal top margin, lifted on mobile */
@@ -120,7 +148,7 @@ html, body {
     display: flex !important;
 }
 
-/* ── Sidebar on mobile – full height, footer visible ── */
+/* ── Sidebar on mobile – full height, footer visible, no overflow ── */
 @media (max-width: 768px) {
     .sidebar {
         height: 100dvh !important;
@@ -129,7 +157,8 @@ html, body {
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        overflow-y: auto;      /* allow scroll if content exceeds */
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
     .sidebar-users {
         flex: 1;
@@ -145,7 +174,16 @@ html, body {
     }
 }
 
-/* ── Mobile header: keep phantom & theme picker visible ── */
+/* ── X / Twitter links – prevent overflow and wrap ── */
+.twitter-tweet,
+blockquote.twitter-tweet {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+}
+
+/* ── Mobile header: keep phantom & theme picker visible, compact ── */
 @media (max-width: 768px) {
     .header-right .badge-pill,
     .header-right .online-count-badge,
@@ -153,14 +191,22 @@ html, body {
     .header-right #refreshBtn {
         display: none !important;
     }
-    /* Ensure phantom button and theme select remain visible */
     .header-right .phantom-btn,
     .header-right .theme-select {
         display: inline-flex !important;
     }
-    /* Adjust header right to fit */
     .header-right {
-        gap: 6px !important;
+        gap: 4px !important;
+    }
+    .header-right .btn-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+    .header-right .theme-select {
+        padding: 0 4px;
+        height: 30px;
+        font-size: 0.75rem;
     }
 }
 
