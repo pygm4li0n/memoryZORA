@@ -172,6 +172,15 @@ html, body {
         align-items: center;
         gap: 6px;
     }
+
+    /* Theme button next to pencil */
+    .sidebar-theme-btn {
+        position: absolute;
+        top: 35px;               /* vertical center of profile row */
+        right: 60px;              /* to the right of pencil (edit button) */
+        display: flex;
+        z-index: 30;
+    }
 }
 
 /* ── X / Twitter links – wrap and don’t overflow ── */
