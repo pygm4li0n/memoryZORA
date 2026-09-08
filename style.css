@@ -36,7 +36,7 @@
     --radius-xl: 22px;
     --font-main: 'Segoe UI', 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
     --sidebar-width: 280px;
-    --header-height: 70px;   /* Correct unit: 80px */
+    --header-height: 70px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
@@ -215,7 +215,7 @@ body {
 }
 .sidebar-footer .status-dot-sm { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); flex-shrink: 0; box-shadow: 0 0 6px rgba(34, 197, 94, 0.7); }
 .sidebar-toggle {
-    display: none; position: static;   /* changed from absolute to static (inside header) */
+    display: none; position: static;
     width: 36px; height: 36px; border-radius: 50%;
     background: var(--bg-elevated); border: 1px solid var(--border-default); color: #fff;
     cursor: pointer; font-size: 1.2rem;
@@ -236,7 +236,7 @@ body {
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     border-bottom: 1px solid var(--border-default);
     background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(17, 24, 39, 0.95) 100%);
-    flex-shrink: 0; position: relative; overflow: visible;  /* <--- Changed to visible */
+    flex-shrink: 0; position: relative; overflow: visible;
     box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 .chat-header-bar::after {
@@ -255,18 +255,18 @@ body {
 }
 /* Desktop logo */
 .header-logo {
-    height: 65px;               /* <--- Correct unit: 70px */
+    height: 65px;
     width: auto;
     object-fit: contain;
     display: block;
-    max-width: none;            /* <--- Remove width cap */
+    max-width: none;
     filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
 }
 /* Mobile centered logo, hidden by default */
 .header-logo-mobile {
     display: none;
 }
-/* NEW: header center for token tracker */
+/* header center for token tracker */
 .header-center {
     flex: 1;
     display: flex;
@@ -274,7 +274,6 @@ body {
     align-items: center;
     z-index: 1;
 }
-/* Hide old header icon (replaced by sidebar toggle) */
 .header-icon {
     display: none;
 }
@@ -702,100 +701,46 @@ button.send-btn-main:disabled { background: var(--bg-secondary); box-shadow: non
     color: var(--accent-red);
     text-shadow: 0 0 8px rgba(255, 92, 124, 0.5);
 }
-/* Hide mobile‑only token tracker by default */
 .token-tracker.mobile-only {
     display: none;
 }
 
-/* ── Mod Settings Button & Overlay ── */
-#modSettingsBtn.hidden {
-    display: none;
-}
-
-#modSettingsOverlay .overlay-card {
-    text-align: left;
-}
-
-#modSettingsOverlay label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-}
-
+/* ── Mod Settings ── */
+#modSettingsBtn.hidden { display: none; }
+#modSettingsOverlay .overlay-card { text-align: left; }
+#modSettingsOverlay label { display: block; margin-bottom: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.05em; }
 #modSettingsOverlay input[type="number"],
 #modSettingsOverlay select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    background: var(--bg-input);
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    outline: none;
-    transition: all 0.3s;
-    font-family: var(--font-main);
-    margin-bottom: 1rem;
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border-default);
+    border-radius: var(--radius-md); background: var(--bg-input); color: var(--text-primary);
+    font-size: 0.9rem; outline: none; transition: all 0.3s; font-family: var(--font-main); margin-bottom: 1rem;
 }
-
 #modSettingsOverlay input[type="number"]:focus,
 #modSettingsOverlay select:focus {
     border-color: var(--accent-cyan);
     box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
 }
-
 #modSaveSettingsBtn,
 #modCloseSettingsBtn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-weight: 700;
-    transition: all 0.3s;
-    margin-top: 0.5rem;
+    width: 100%; padding: 12px; border: none; border-radius: var(--radius-md);
+    cursor: pointer; font-weight: 700; transition: all 0.3s; margin-top: 0.5rem;
 }
-
 #modSaveSettingsBtn {
     background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-cyan) 25%, var(--accent-purple) 50%, var(--accent-pink) 75%, var(--accent-yellow) 100%);
-    color: #fff;
-    text-transform: uppercase;
+    color: #fff; text-transform: uppercase;
 }
+#modSaveSettingsBtn:hover { box-shadow: 0 0 20px rgba(34, 197, 94, 0.7); }
+#modCloseSettingsBtn { background: var(--bg-hover); color: var(--text-secondary); }
+#modCloseSettingsBtn:hover { background: var(--bg-secondary); color: #fff; }
 
-#modSaveSettingsBtn:hover {
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.7);
-}
-
-#modCloseSettingsBtn {
-    background: var(--bg-hover);
-    color: var(--text-secondary);
-}
-
-#modCloseSettingsBtn:hover {
-    background: var(--bg-secondary);
-    color: #fff;
-}
-
-/* ── Cooldown Indicator ── */
+/* ── Cooldown ── */
 .cooldown-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
-    background: rgba(234, 179, 8, 0.1);
-    border: 1px solid rgba(234, 179, 8, 0.3);
-    border-radius: 8px;
-    color: var(--accent-yellow);
-    font-size: 0.8rem;
-    font-weight: 600;
+    display: flex; align-items: center; justify-content: center; padding: 6px 12px;
+    background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3);
+    border-radius: 8px; color: var(--accent-yellow); font-size: 0.8rem; font-weight: 600;
     letter-spacing: 0.05em;
 }
-
-.cooldown-indicator.hidden {
-    display: none;
-}
+.cooldown-indicator.hidden { display: none; }
 
 /* ── Mobile improvements ── */
 @media (max-width: 768px) {
@@ -816,185 +761,102 @@ button.send-btn-main:disabled { background: var(--bg-secondary); box-shadow: non
     .typing-indicator { font-size: 0.9rem; }
     .sidebar-user-profile-big .big-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
     .sidebar-user-profile-big .big-name { font-size: 1rem; }
-    
-    /* Mobile: hide original desktop logo, show centered mobile logo */
-    .header-left .header-logo {
-        display: none;
-    }
+    .header-left .header-logo { display: none; }
     .header-logo-mobile {
-        display: block;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        height: 50px;               /* <--- Adjust mobile logo height here */
-        width: auto;
-        max-width: none;
-        object-fit: contain;
-        z-index: 1;
+        display: block; position: absolute; left: 50%; transform: translateX(-50%);
+        height: 50px; width: auto; max-width: none; object-fit: contain; z-index: 1;
         filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
     }
-    /* Header left/right absolute for hamburger and buttons */
-    .header-left {
-        position: absolute;
-        left: 10px;
-        z-index: 2;
-    }
-    .header-right {
-        position: absolute;
-        right: 10px;
-        z-index: 2;
-    }
-
-    /* Mobile header: only logo, phantom, and edit profile */
+    .header-left, .header-right { position: absolute; left: 10px; z-index: 2; }
+    .header-right { left: auto; right: 10px; }
     .header-right .badge-pill,
     .header-right .online-count-badge,
     .header-right .wallet-address,
-    .header-right #refreshBtn {
-        display: none !important;
-    }
-    .mobile-edit-btn {
-        display: flex;
-    }
-    .sidebar-token {
-        margin: 10px 12px;
-        padding: 6px 10px;
-    }
-    /* Token tracker hidden in header on mobile (center is hidden) */
-    .header-center {
-        display: none;
-    }
-    /* Show the mobile token tracker inside sidebar */
+    .header-right #refreshBtn { display: none !important; }
+    .mobile-edit-btn { display: flex; }
+    .header-center { display: none; }
     .token-tracker.mobile-only {
-        display: flex;
-        margin: 12px;
-        padding: 6px 10px;
-        border-radius: 18px;
-        background: var(--bg-elevated);
-        border: 1px solid var(--border-default);
-        font-size: 0.7rem;
-        justify-content: center;
-        align-items: center;
-        gap: 6px;
+        display: flex; margin: 12px; padding: 6px 10px; border-radius: 18px;
+        background: var(--bg-elevated); border: 1px solid var(--border-default);
+        font-size: 0.7rem; justify-content: center; align-items: center; gap: 6px;
     }
-    .scroll-bottom-btn {
-        bottom: 80px;
-    }
-    /* Touch improvements */
-    .private-btn,
-    .sidebar-user-item {
-        touch-action: manipulation;
-    }
+    .scroll-bottom-btn { bottom: 80px; }
+    .private-btn, .sidebar-user-item { touch-action: manipulation; }
 }
 
-/* Hide mobile edit button on desktop */
-.mobile-edit-btn {
-    display: none;
-}
+.mobile-edit-btn { display: none; }
 
-/* ── User Badge (for chat and sidebar) ── */
-.user-badge {
-    font-size: 0.75rem;
-    margin-left: 4px;
-    vertical-align: middle;
-    filter: drop-shadow(0 0 4px rgba(255,255,255,0.4));
-}
-.user-badge.small {
-    font-size: 0.65rem;
-    margin-left: 3px;
-}
+/* ── User Badge ── */
+.user-badge { font-size: 0.75rem; margin-left: 4px; vertical-align: middle; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
+.user-badge.small { font-size: 0.65rem; margin-left: 3px; }
 
-/* ── NEW: MOD Message Box ── */
+/* ── MOD Message Box ── */
 .mod-message-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
-    background: rgba(255, 0, 0, 0.08);
-    border: 1px solid rgba(255, 0, 0, 0.25);
-    border-radius: 0 0 12px 12px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    display: flex; align-items: center; gap: 10px; padding: 8px 16px;
+    background: rgba(255, 0, 0, 0.08); border: 1px solid rgba(255, 0, 0, 0.25);
+    border-radius: 0 0 12px 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 2px 8px rgba(255, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    z-index: 5;
+    color: var(--text-primary); font-size: 0.85rem; flex-shrink: 0; z-index: 5;
 }
 .mod-badge {
-    background: rgba(255, 0, 0, 0.2);
-    border: 1px solid rgba(255, 0, 0, 0.5);
-    color: #ff6b6b;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.7rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    box-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
-    flex-shrink: 0;
+    background: rgba(255, 0, 0, 0.2); border: 1px solid rgba(255, 0, 0, 0.5);
+    color: #ff6b6b; padding: 2px 8px; border-radius: 12px; font-weight: 700; font-size: 0.7rem;
+    letter-spacing: 0.05em; text-transform: uppercase; box-shadow: 0 0 8px rgba(255, 0, 0, 0.3); flex-shrink: 0;
 }
-.mod-message-text {
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #ffd7d7;
-}
+.mod-message-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #ffd7d7; }
 
-/* ── NEW: Mod Announcement Input & Button ── */
+/* ── Mod Announcement ── */
 #modAnnouncementSection textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    background: var(--bg-input);
-    color: var(--text-primary);
-    font-family: var(--font-main);
-    font-size: 0.9rem;
-    resize: vertical;
-    margin-bottom: 0.5rem;
+    width: 100%; padding: 10px; border: 1px solid var(--border-default); border-radius: var(--radius-md);
+    background: var(--bg-input); color: var(--text-primary); font-family: var(--font-main); font-size: 0.9rem;
+    resize: vertical; margin-bottom: 0.5rem;
 }
 #modPostAnnouncementBtn {
     background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
-    color: #fff;
-    border: none;
-    padding: 10px;
-    width: 100%;
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    color: #fff; border: none; padding: 10px; width: 100%; border-radius: var(--radius-md);
+    font-weight: 700; cursor: pointer; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;
 }
-#modPostAnnouncementBtn:hover {
-    box-shadow: 0 0 15px rgba(255, 92, 124, 0.6);
-}
+#modPostAnnouncementBtn:hover { box-shadow: 0 0 15px rgba(255, 92, 124, 0.6); }
 
-/* ── Theme Picker Dropdown (added) ── */
-.theme-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-family: var(--font-main);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    height: 34px;
-    line-height: 1;
+/* ── Theme buttons & overlay ── */
+.header-theme-btn,
+.sidebar-theme-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--border-default); background: var(--bg-elevated);
+    color: var(--text-primary); font-size: 1.2rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
 }
-
-.theme-select:hover {
+.header-theme-btn:hover,
+.sidebar-theme-btn:hover {
     border-color: var(--accent-cyan);
-    box-shadow: var(--glow-cyan);
+    box-shadow: 0 0 8px rgba(32,255,98,0.4);
 }
-
-.theme-select:focus {
-    outline: none;
+.theme-overlay-card {
+    max-width: 320px;
+}
+.theme-options {
+    display: flex; flex-direction: column; gap: 10px; margin: 15px 0;
+}
+.theme-option {
+    padding: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+    background: var(--bg-input); color: var(--text-primary); font-size: 0.9rem;
+    cursor: pointer; text-align: left; transition: all 0.2s;
+}
+.theme-option:hover {
     border-color: var(--accent-cyan);
-    box-shadow: var(--glow-cyan);
+    background: var(--bg-hover);
+}
+#themeOverlayCloseBtn {
+    width: 100%; padding: 10px; border: none; border-radius: var(--radius-sm);
+    background: var(--bg-hover); color: var(--text-primary); cursor: pointer; font-weight: 600;
+}
+/* Show/hide theme buttons */
+@media (max-width: 768px) {
+    .header-theme-btn { display: none; }
+    .sidebar-theme-btn { display: flex; }
+}
+.sidebar-theme-btn { display: none; }
+@media (min-width: 769px) {
+    .sidebar-theme-btn { display: none; }
 }
