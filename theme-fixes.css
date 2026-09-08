@@ -1,9 +1,10 @@
 /* =====================================================
-   FINAL THEME FIXES – Phantom perfect layout, scroll,
-   sidebar alignment, header, X links
+   THEME FIXES – Phantom fit, toast, wallet,
+   sidebar alignment, scroll button, header
+   – Does NOT alter messages-container layout
 ===================================================== */
 
-/* ── Prevent any horizontal scroll / overflow ── */
+/* Prevent horizontal overflow */
 html, body {
     overflow-x: hidden !important;
     max-width: 100%;
@@ -14,7 +15,6 @@ html, body {
 }
 
 * {
-    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -28,7 +28,7 @@ html, body {
     overflow-x: hidden;
 }
 
-/* ── Phantom connected toast – centered, clean, auto-vanish ── */
+/* ── Phantom connected toast – centered, clean, auto‑vanish ── */
 .error-toast {
     display: none !important;
 }
@@ -48,7 +48,7 @@ html, body {
     padding: 10px 24px !important;
     font-size: 0.9rem !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
 
     animation: toastFadeOut 2.5s ease-in-out forwards !important;
 }
@@ -73,12 +73,11 @@ html, body {
     }
 }
 
-/* Hide header wallet on mobile */
+/* Hide header wallet on mobile, show in sidebar */
 @media (max-width: 768px) {
     .header-right .wallet-address {
         display: none !important;
     }
-    /* Show sidebar wallet only on mobile */
     .sidebar-footer .wallet-address {
         display: inline !important;
         font-size: 0.75rem !important;
@@ -113,20 +112,7 @@ html, body {
     position: relative;
 }
 
-/* Messages area – vertical scroll works, no overflow */
-.messages-container {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 0 18px 12px !important;   /* bottom gap similar to message gap */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 12px;
-    max-width: 100%;
-}
-
-/* Input bar – minimal top margin, lifted on mobile */
+/* Input bar – lifted slightly, safe‑area aware */
 .input-area-bar {
     flex-shrink: 0;
     padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
@@ -134,7 +120,7 @@ html, body {
     box-sizing: border-box;
 }
 
-/* Scroll‑to‑bottom button – clearly above input */
+/* Scroll‑to‑bottom button – above input */
 .scroll-bottom-btn {
     position: absolute !important;
     bottom: calc(80px + env(safe-area-inset-bottom)) !important;
@@ -148,7 +134,7 @@ html, body {
     display: flex !important;
 }
 
-/* ── Sidebar on mobile – full height, footer visible, no overflow ── */
+/* ── Sidebar on mobile – footer visible, scrollable if needed ── */
 @media (max-width: 768px) {
     .sidebar {
         height: 100dvh !important;
