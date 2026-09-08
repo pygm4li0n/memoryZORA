@@ -70,14 +70,19 @@
             font-weight: 600;
         }
 
-        /* Show/hide appropriately */
-        @media (max-width: 768px) {
-            .header-theme-btn { display: none; }
-            .sidebar-theme-btn { display: flex; }
+        /* Hide sidebar theme button by default */
+        .sidebar-theme-btn {
+            display: none;
         }
-        .sidebar-theme-btn { display: none; }
-        @media (min-width: 769px) {
-            .sidebar-theme-btn { display: none; }
+
+        /* On mobile, show sidebar button and hide header button */
+        @media (max-width: 768px) {
+            .header-theme-btn {
+                display: none;
+            }
+            .sidebar-theme-btn {
+                display: flex;
+            }
         }
     </style>
 </head>
