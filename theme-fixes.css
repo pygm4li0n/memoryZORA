@@ -148,8 +148,8 @@ html, body {
 /* ── Sidebar on mobile – full height, footer visible, no clipping ── */
 @media (max-width: 768px) {
     .sidebar {
-        height: calc(100dvh - 15px - env(safe-area-inset-bottom)) !important;
-        max-height: calc(100dvh - 15px - env(safe-area-inset-bottom)) !important;
+        height: calc(100dvh - 25px - env(safe-area-inset-bottom)) !important;
+        max-height: calc(100dvh - 25px - env(safe-area-inset-bottom)) !important;
         padding-bottom: 0 !important;
         margin-bottom: 0 !important;
         box-sizing: border-box;
