@@ -157,24 +157,30 @@
     }
 
     function updatePhantomUI() {
-        const connected = phantomConnected && phantomWalletPublicKey;
-        const addr = connected ? phantomWalletPublicKey.toBase58() : '';
-        const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
+    const connected = phantomConnected && phantomWalletPublicKey;
+    const addr = connected ? phantomWalletPublicKey.toBase58() : '';
+    const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
 
-        walletAddressSpan.textContent = connected ? `👛 ${shortAddr}` : '';
-        phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+    // Header wallet (desktop)
+    walletAddressSpan.textContent = connected ? `👛 ${shortAddr}` : '';
+    phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
 
-        if (phantomConnectBtnOverlay) {
-            walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
-            phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
-            phantomConnectBtnOverlay.innerHTML = connected 
-                ? `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Disconnect</span>`
-                : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connect Phantom</span>`;
-        }
-
-        checkIfModWallet();
-        updateChatAccessibility();
+    // Sidebar wallet (mobile)
+    if (sidebarWalletAddress) {
+        sidebarWalletAddress.textContent = connected ? `👛 ${shortAddr}` : '';
     }
+
+    if (phantomConnectBtnOverlay) {
+        walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
+        phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+        phantomConnectBtnOverlay.innerHTML = connected 
+            ? `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Disconnect</span>`
+            : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connect Phantom</span>`;
+    }
+
+    checkIfModWallet();
+    updateChatAccessibility();
+}
 
     function createTokenListContainer() {
         if (tokenListContainer) return tokenListContainer;
