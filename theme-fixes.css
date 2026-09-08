@@ -1,6 +1,6 @@
 /* =====================================================
    THEME FIXES – Phantom fit, scroll, sidebar, X links,
-   footer height – no icon relocation
+   footer height, emoji-only theme select on mobile
 ===================================================== */
 
 /* Prevent horizontal overflow globally */
@@ -126,8 +126,8 @@ html, body {
 /* Input bar – lifted slightly, safe‑area aware */
 .input-area-bar {
     flex-shrink: 0;
-    padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;   /* was 10px */
-    margin-bottom: calc(15px + env(safe-area-inset-bottom)) !important;    /* was 8px */
+    padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;
+    margin-bottom: calc(15px + env(safe-area-inset-bottom)) !important;
     box-sizing: border-box;
 }
 
@@ -185,7 +185,7 @@ blockquote.twitter-tweet,
     white-space: normal !important;
 }
 
-/* ── Mobile header: keep both phantom & theme picker visible, compact ── */
+/* ── Mobile header: keep both phantom & theme picker visible, compact, emoji-only theme selector ── */
 @media (max-width: 768px) {
     .header-right .badge-pill,
     .header-right .online-count-badge,
@@ -193,23 +193,54 @@ blockquote.twitter-tweet,
     .header-right #refreshBtn {
         display: none !important;
     }
-    .header-right .phantom-btn,
-    .header-right .theme-select {
-        display: inline-flex !important;
-    }
     .header-right {
         gap: 4px !important;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
     }
-    .header-right .btn-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 0.9rem;
+    .header-right .phantom-btn {
+        display: inline-flex !important;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+    }
+    .header-right .phantom-btn img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
     }
     .header-right .theme-select {
-        padding: 0 4px;
-        height: 30px;
-        font-size: 0.75rem;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+        border: 1px solid var(--border-default, #454B4B);
+        background: var(--bg-elevated, #1e2221);
+        color: var(--text-primary, #ffffff);
+        font-size: 0;
+        text-align: center;
+        cursor: pointer;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
     }
+    /* Show selected emoji via first option text */
+    .header-right .theme-select option {
+        background: var(--bg-panel, #111827);
+        color: var(--text-primary, #ffffff);
+        font-size: 0.8rem;
+    }
+    /* Use background image? Not needed if option text is emoji */
 }
 
 /* ── Token balances readable ── */
