@@ -1,6 +1,7 @@
 /* =====================================================
-   FINAL THEME FIXES – No extra gap under messages,
-   raised footer on mobile, scroll button, wallet, toast
+   FINAL THEME FIXES – No gap under messages,
+   full sidebar visibility on mobile,
+   raised scroll arrow, Phantom fit
 ===================================================== */
 
 /* ── Phantom connected toast – centered, clean, auto-vanish ── */
@@ -88,25 +89,25 @@ html, body {
     position: relative;
 }
 
-/* Messages area takes remaining space, no large bottom padding */
+/* Messages area – no extra bottom padding, so last message sits near input */
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 8px !important;   /* small gap only */
+    padding-bottom: 0 !important;   /* zero gap under last message */
 }
 
-/* Input bar lifted slightly for clarity */
+/* Input bar lifted slightly */
 .input-area-bar {
     flex-shrink: 0;
     padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    margin-bottom: calc(8px + env(safe-area-inset-bottom)) !important;   /* raised */
+    margin-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
     box-sizing: border-box;
 }
 
-/* Scroll‑to‑bottom button – above the typing area, 20px higher than before */
+/* Scroll‑to‑bottom button – higher above the typing area */
 .scroll-bottom-btn {
     position: absolute !important;
-    bottom: calc(70px + env(safe-area-inset-bottom)) !important;  /* raised */
+    bottom: calc(90px + env(safe-area-inset-bottom)) !important; /* raised more */
     right: 16px !important;
     width: 40px;
     height: 40px;
@@ -117,16 +118,28 @@ html, body {
     display: flex !important;
 }
 
-/* Ensure sidebar on mobile ends at the same bottom as chat */
+/* Ensure sidebar on mobile ends at same bottom as chat, footer visible */
 @media (max-width: 768px) {
     .sidebar {
         height: 100dvh !important;
         max-height: 100dvh !important;
         padding-bottom: env(safe-area-inset-bottom) !important;
         box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar-users {
+        flex: 1;
+        overflow-y: auto;
     }
     .sidebar-footer {
+        flex-shrink: 0;
         padding-bottom: env(safe-area-inset-bottom) !important;
+        /* ensure footer content not clipped */
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 }
 
