@@ -258,7 +258,7 @@ body {
 /* Desktop logo – now a background div */
 .header-logo {
     height: 65px;
-    width: 150px;                /* adjust to your logo's aspect ratio */
+    width: 300px;                /* adjust to your logo's aspect ratio */
     background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
     background-size: contain;
     background-repeat: no-repeat;
@@ -266,9 +266,16 @@ body {
     display: block;
     filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
 }
-/* Mobile centered logo, hidden by default */
+
 .header-logo-mobile {
     display: none;
+    height: 50px;
+    width: 230px;               /* adjust for mobile */
+    background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.4));
 }
 /* NEW: header center for token tracker */
 .header-center {
