@@ -1,6 +1,9 @@
 /* =====================================================
-   8-BIT ARCADE PIXEL-ART THEME – FIXED
-   – Includes --chat-texture, --logo-url fallback
+   8-BIT ARCADE PIXEL-ART THEME
+   – Based on Vintage Hi‑Fi structure (working base)
+   – Pure black, magenta rails, cyan details, electric blue active,
+     red alerts, orange/yellow highlights, lime status.
+   – No gradients, no blur, no soft shadows, no glassmorphism.
 ===================================================== */
 
 :root {
@@ -68,8 +71,8 @@
     --header-height: 70px;
 
     /* ---- REQUIRED VARIABLES (were missing) ---- */
-    --chat-texture: none;               /* needed for messages background */
-    --logo-url: url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'); /* fallback logo */
+    --chat-texture: none;
+    --logo-url: url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png');
 
     /* optional pixel grid overlay */
     --pixel-grid: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 4px);
@@ -503,7 +506,7 @@ body {
     display: block; 
     max-width: none; 
     filter: none;
-    background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
+    background-image: var(--logo-url);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -1408,7 +1411,7 @@ button.send-btn-main:disabled {
         max-width: none;
         object-fit: contain;
         z-index: 1;
-        background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
+        background-image: var(--logo-url);
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
