@@ -1,10 +1,9 @@
 /* =====================================================
    8-BIT ARCADE PIXEL-ART THEME
-   – Adapted from Vintage Hi‑Fi structure
+   – Adapted from Vintage Hi-Fi structure
    – Pure black, hot magenta rails, cyan details,
      electric blue active, red alerts, orange/yellow highlights,
      lime status. No gradients, no blur, no soft shadows.
-   – Load after base styles to override visual layer.
 ===================================================== */
 
 :root {
@@ -17,16 +16,16 @@
     --bg-secondary: #0f0f0f;
 
     /* ---- ARCADE PRIMARIES ---- */
-    --accent-cyan: #00E5D0;
-    --accent-blue: #008CFF;
-    --accent-purple: #F0007C;
+    --accent-cyan: #00E5D0;        /* turquoise */
+    --accent-blue: #008CFF;        /* electric blue */
+    --accent-purple: #F0007C;      /* hot magenta */
     --accent-pink: #F0007C;
     --accent-magenta: #F0007C;
-    --accent-yellow: #FFC400;
-    --accent-green: #00D95F;
+    --accent-yellow: #FFC400;      /* golden yellow */
+    --accent-green: #00D95F;       /* lime status */
     --accent-lime: #00D95F;
-    --accent-orange: #FF6A00;
-    --accent-red: #FF003C;
+    --accent-orange: #FF6A00;      /* warm orange */
+    --accent-red: #FF003C;         /* bright red */
 
     /* extra arcade colors */
     --accent-purple-bright: #FF00FF;
@@ -37,7 +36,7 @@
     --accent-green-bright: #00D95F;
     --accent-orange-bright: #FF6A00;
 
-    /* ---- GLOWS – removed (hard edges) ---- */
+    /* ---- GLOWS – removed, hard edges ---- */
     --glow-cyan: none;
     --glow-purple: none;
     --glow-magenta: none;
@@ -51,7 +50,7 @@
     --text-lcd: #F5F5E8;
     --text-lcd-dim: #aaaaaa;
 
-    /* ---- BORDERS ---- */
+    /* ---- BORDERS – hard pixel edges ---- */
     --border-subtle: #2a2a2a;
     --border-default: #F0007C;
     --border-strong: #FF00FF;
@@ -71,7 +70,7 @@
     --sidebar-width: 280px;
     --header-height: 70px;
 
-    /* pixel grid overlay */
+    /* optional pixel grid overlay */
     --pixel-grid: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 4px);
 }
 
@@ -95,7 +94,7 @@ body {
     z-index: 0; pointer-events: none; opacity: 0.2;
 }
 
-/* ===== OUTER SHELL – black with magenta frame ===== */
+/* ===== OUTER SHELL ===== */
 .app-shell {
     position: relative;
     z-index: 1;
@@ -127,7 +126,7 @@ body {
     box-shadow: none;
 }
 
-/* Decorative vertical stripes (pixel rail) */
+/* decorative vertical pixel rail */
 .sidebar::before {
     content: '';
     position: absolute;
@@ -211,7 +210,6 @@ body {
     border-radius: 0;
     background: #00D95F;
     box-shadow: none;
-    animation: none;
 }
 
 .big-rank {
@@ -466,7 +464,7 @@ body {
     box-shadow: none;
 }
 
-/* Pixel grid overlay */
+/* pixel grid overlay */
 .chat-panel::after {
     content: '';
     position: absolute;
