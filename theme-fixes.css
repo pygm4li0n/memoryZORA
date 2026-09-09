@@ -124,12 +124,35 @@ html, body {
     max-width: 100%;
 }
 
-/* Input bar – lifted slightly, safe‑area aware */
+/* Input bar – lifted slightly, safe‑area aware (mobile only) */
 .input-area-bar {
     flex-shrink: 0;
     padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;
     margin-bottom: calc(15px + env(safe-area-inset-bottom)) !important;
     box-sizing: border-box;
+}
+
+/* ── Desktop‑only compact input bar ── */
+@media (min-width: 769px) {
+    .input-area-bar {
+        padding-bottom: 8px !important;   /* reset from safe‑area */
+        margin-bottom: 0 !important;
+        padding-top: 6px !important;      /* reduce top padding if desired */
+        gap: 6px;                         /* tighten spacing */
+    }
+
+    #messageInput {
+        padding: 8px 12px !important;     /* less vertical padding */
+    }
+
+    button.send-btn-main {
+        padding: 8px 18px !important;
+    }
+
+    .btn-upload-img {
+        width: 40px !important;
+        height: 40px !important;
+    }
 }
 
 /* Scroll‑to‑bottom button – above input, raised */
