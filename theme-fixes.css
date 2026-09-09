@@ -301,3 +301,21 @@ blockquote.twitter-tweet,
     font-size: 0.75rem !important;
     line-height: 1.4 !important;
 }
+
+/* =====================================================
+   DESKTOP‑ONLY ENHANCEMENTS
+   (X card 25% smaller, message bubble min width)
+===================================================== */
+@media (min-width: 769px) {
+    /* Make embedded X/Twitter cards narrower and centered */
+    .msg-bubble .twitter-tweet {
+        max-width: 75% !important;
+        margin: 8px auto !important;
+    }
+
+    /* Give message bubbles a minimum width so short messages
+       still display the full date and reaction buttons */
+    .msg-bubble {
+        min-width: 180px;
+    }
+}
