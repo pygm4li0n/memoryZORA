@@ -3,7 +3,8 @@
    – Recolored from Vintage Hi‑Fi structure
    – Preserves all layout & functionality
    – Added neon glows, pixel effects, subtle animations
-   – Fixed avatar centering & circular shape (like Gold theme)
+   – Squared avatars (as originally intended)
+   – Centered profile pic upload preview
 ===================================================== */
 
 :root {
@@ -185,11 +186,11 @@ body {
     box-shadow: 0 2px 8px rgba(240,0,124,0.3);
 }
 
-/* ===== FIXED: circular avatar with absolute centering ===== */
+/* Squared avatar with absolute centering */
 .sidebar-user-profile-big .big-avatar {
     width: 72px;
     height: 72px;
-    border-radius: 50%; /* changed from 0 to 50% for circular shape */
+    border-radius: 0; /* Squared */
     background: #000000;
     border: 3px solid #00E5D0;
     overflow: hidden;
@@ -203,7 +204,7 @@ body {
     font-family: var(--font-mono);
     box-shadow: var(--glow-cyan);
     animation: avatarGlow 2s ease-in-out infinite;
-    position: relative; /* added for absolute centering */
+    position: relative;
 }
 
 @keyframes avatarGlow {
@@ -349,11 +350,11 @@ body {
     box-shadow: 0 0 8px rgba(255,196,0,0.4);
 }
 
-/* ===== FIXED: circular user avatar in sidebar list ===== */
+/* Squared user avatar in sidebar list */
 .sidebar-user-item .user-avatar {
     width: 38px;
     height: 38px;
-    border-radius: 50%; /* changed from 0 to 50% */
+    border-radius: 0; /* Squared */
     background: #000000;
     display: flex;
     align-items: center;
@@ -809,7 +810,7 @@ body {
 .msg-avatar {
     width: 28px;
     height: 28px;
-    border-radius: 50%; /* changed from 0 to 50% for circular avatar */
+    border-radius: 0; /* Squared */
     flex-shrink: 0;
     background: #000000;
     display: flex;
@@ -1188,7 +1189,7 @@ button.send-btn-main:disabled {
 .request-avatar {
     width: 100px;
     height: 100px;
-    border-radius: 50%; /* changed from 0 to 50% for circular */
+    border-radius: 0; /* Squared */
     margin: 0 auto 16px;
     background: #000000;
     overflow: hidden;
@@ -1198,7 +1199,7 @@ button.send-btn-main:disabled {
     border: 3px solid #00E5D0;
     box-shadow: var(--glow-cyan);
     animation: avatarGlow 2s ease-in-out infinite;
-    position: relative; /* for absolute centering if needed */
+    position: relative;
 }
 .request-avatar img {
     width: 100%;
@@ -1271,10 +1272,20 @@ button.send-btn-main:disabled {
     border-color: #00E5D0;
     box-shadow: inset 0 0 5px rgba(0,0,0,0.8), 0 0 12px rgba(0,229,208,0.5);
 }
+
+/* Container to center profile picture preview */
+.profile-pic-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+}
+
 .profile-pic-preview {
     width: 80px;
     height: 80px;
-    border-radius: 50%; /* changed from 0 to 50% */
+    border-radius: 0; /* Squared */
     background: #000000;
     border: 3px solid #00E5D0;
     cursor: pointer;
@@ -1286,6 +1297,7 @@ button.send-btn-main:disabled {
     box-shadow: var(--glow-cyan);
 }
 .profile-pic-preview img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+
 .overlay-card button {
     background: #FF003C;
     color: #000000;
