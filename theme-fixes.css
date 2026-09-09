@@ -180,7 +180,7 @@ html, body {
     /* Theme button aligned exactly with pencil, closer to it */
     .sidebar-theme-btn {
         position: absolute;
-        top: 39px;               /* computed: 20px padding + 72/2 - 17 = 39 */
+        top: 36px;               /* computed: 20px padding + 72/2 - 17 = 39 */
         right: 58px;             /* 16px (pencil right) + 34px (pencil width) + 8px gap */
         display: flex;
         z-index: 30;
@@ -215,7 +215,7 @@ blockquote.twitter-tweet,
     .header-right {
         gap: 6px !important;
         position: absolute;
-        right: 10px;             /* moved slightly left from original 6px */
+        right: 14px;             /* moved slightly left from original 6px */
         top: 50%;
         transform: translateY(-50%);
         z-index: 5;
