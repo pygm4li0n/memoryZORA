@@ -169,6 +169,13 @@ html, body {
     display: flex !important;
 }
 
+/* Desktop: lower scroll-to-bottom button closer to input */
+@media (min-width: 769px) {
+    .scroll-bottom-btn {
+        bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    }
+}
+
 /* ── Sidebar on mobile – full height, footer visible, no clipping ── */
 @media (max-width: 768px) {
     .sidebar {
