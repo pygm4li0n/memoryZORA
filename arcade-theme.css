@@ -1,9 +1,7 @@
 /* =====================================================
    8-BIT ARCADE PIXEL-ART THEME
-   – Based on Vintage Hi‑Fi structure (working base)
-   – Pure black, magenta rails, cyan details, electric blue active,
-     red alerts, orange/yellow highlights, lime status.
-   – No gradients, no blur, no soft shadows, no glassmorphism.
+   – Recolored from working Vintage Hi‑Fi structure
+   – Includes .hidden and all required rules
 ===================================================== */
 
 :root {
@@ -70,12 +68,9 @@
     --sidebar-width: 280px;
     --header-height: 70px;
 
-    /* ---- REQUIRED VARIABLES (were missing) ---- */
+    /* required */
     --chat-texture: none;
     --logo-url: url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png');
-
-    /* optional pixel grid overlay */
-    --pixel-grid: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 4px);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -476,7 +471,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--pixel-grid);
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 4px);
     pointer-events: none;
     z-index: 0;
     opacity: 0.5;
@@ -1460,3 +1455,6 @@ button.send-btn-main:disabled {
 }
 .theme-select:hover { border-color: #00E5D0; }
 .theme-select:focus { outline: none; border-color: #00E5D0; }
+
+/* ---- IMPORTANT: hidden class for overlays ---- */
+.hidden { display: none !important; }
