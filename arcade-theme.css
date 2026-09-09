@@ -1,9 +1,6 @@
 /* =====================================================
-   8-BIT ARCADE PIXEL-ART THEME
-   – Adapted from Vintage Hi-Fi structure
-   – Pure black, magenta rails, cyan details, electric blue active,
-     red alerts, orange/yellow highlights, lime status.
-   – No gradients, no blur, no soft shadows, no glassmorphism.
+   8-BIT ARCADE PIXEL-ART THEME – FIXED
+   – Includes --chat-texture, --logo-url fallback
 ===================================================== */
 
 :root {
@@ -69,6 +66,10 @@
 
     --sidebar-width: 280px;
     --header-height: 70px;
+
+    /* ---- REQUIRED VARIABLES (were missing) ---- */
+    --chat-texture: none;               /* needed for messages background */
+    --logo-url: url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'); /* fallback logo */
 
     /* optional pixel grid overlay */
     --pixel-grid: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 4px);
@@ -502,6 +503,10 @@ body {
     display: block; 
     max-width: none; 
     filter: none;
+    background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 .header-logo-mobile { display: none; }
 
@@ -639,6 +644,7 @@ body {
     gap: 12px;
     scroll-behavior: smooth;
     background: #000000;
+    background-image: var(--chat-texture), repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.25) 2px, rgba(0,0,0,0.25) 3px);
     font-family: var(--font-mono);
     position: relative;
     z-index: 1;
@@ -1402,6 +1408,10 @@ button.send-btn-main:disabled {
         max-width: none;
         object-fit: contain;
         z-index: 1;
+        background-image: var(--logo-url, url('https://i.postimg.cc/HWf8LcLQ/Proyecto-nuevo-(4)-(1).png'));
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
     }
     .header-left, .header-right { position: absolute; left: 10px; z-index: 2; }
     .header-right { left: auto; right: 10px; }
