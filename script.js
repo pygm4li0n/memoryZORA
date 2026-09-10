@@ -178,11 +178,6 @@
         });
     }
 
-    function observeTweetsInWrapper(wrapper) {
-        if (!tweetObserver || !wrapper.querySelector('.twitter-tweet')) return;
-        tweetObserver.observe(wrapper);
-    }
-
     // ============================================================
     // PHANTOM
     // ============================================================
