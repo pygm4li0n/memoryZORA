@@ -319,9 +319,17 @@ blockquote.twitter-tweet,
    MESSAGE BUBBLE – minimum width so short messages show
    the full date + reactions on one row
 ===================================================== */
+.msg-wrapper {
+    overflow: visible !important;   /* never clip the reactions inside */
+}
 .msg-bubble {
     min-width: 200px;
-    overflow: hidden;   /* keeps injected tweet iframe inside */
+    overflow: visible;              /* let reactions render fully */
+    display: flex;
+    flex-direction: column;
+}
+.msg-bubble > * {
+    max-width: 100%;
 }
 @media (max-width: 480px) {
     .msg-bubble {
@@ -337,20 +345,10 @@ blockquote.twitter-tweet,
     gap: 6px !important;
     margin-top: 8px !important;
     flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+    overflow: visible !important;   /* no scrollbar, no clipping */
     max-width: 100% !important;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 2px;
+    padding-bottom: 0;
 }
-.reactions-bar::-webkit-scrollbar { height: 3px; }
-.reactions-bar::-webkit-scrollbar-thumb {
-    background: var(--bg-secondary, #233261);
-    border-radius: 10px;
-}
-.reactions-bar::-webkit-scrollbar-track { background: transparent; }
-
 .reactions-bar .reaction-btn {
     flex-shrink: 0 !important;
     white-space: nowrap !important;
@@ -373,50 +371,56 @@ blockquote.twitter-tweet,
    X / TWITTER EMBEDS
 ===================================================== */
 
-/* Force the rendered iframe to fit the bubble */
-.msg-bubble .twitter-tweet-rendered {
-    max-width: 100% !important;
-    width: 100% !important;
-    margin: 8px 0 !important;
-    display: block !important;
-}
+/* Force the rendered iframe to fit inside the bubble */
+.msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
     max-width: 100% !important;
     width: 100% !important;
     min-width: 0 !important;
-    margin: 0 !important;
+    margin: 8px 0 !important;
     display: block !important;
+    overflow: hidden;
 }
 
-/* ── Loading placeholder: styles the plain blockquote until Twitter renders ── */
+/* ── Pre-render placeholder: shows "Loading X Post…" ──
+   Twitter replaces this blockquote with the real embed once ready. */
 blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
-    margin: 8px 0 !important;
-    padding: 10px 14px !important;
-    border: 1px solid var(--border-default, #233261) !important;
-    border-left: 3px solid var(--accent-cyan, #00f0ff) !important;
-    border-radius: 10px !important;
-    background: rgba(0, 240, 255, 0.04) !important;
+    margin: 6px 0 !important;
+    padding: 14px 16px !important;
+    border: none !important;
+    background: transparent !important;
     max-width: 100% !important;
+    min-height: 60px !important;               /* reserve stable height so reactions don't jump */
+    display: flex !important;
+    align-items: center !important;
+    color: var(--text-muted, #64748b) !important;
+    font-size: 0.85rem !important;
+    font-style: italic !important;
     overflow-wrap: break-word !important;
     word-break: break-word !important;
-    font-size: 0.85rem !important;
 }
+blockquote.twitter-tweet:not(.twitter-tweet-rendered)::before {
+    content: '𝕏  Loading X Post…';
+    opacity: 0.75;
+    letter-spacing: 0.02em;
+}
+/* Hide the raw URL that's inside the blockquote */
 blockquote.twitter-tweet:not(.twitter-tweet-rendered) a {
-    color: var(--accent-cyan, #00f0ff) !important;
-    text-decoration: none !important;
-    word-break: break-all !important;
-    opacity: 0.9;
-}
-blockquote.twitter-tweet:not(.twitter-tweet-rendered) a:hover {
-    text-decoration: underline !important;
+    display: none !important;
 }
 
-/* Once rendered, remove our placeholder styling */
+/* Once Twitter renders it, remove the placeholder styling */
 blockquote.twitter-tweet.twitter-tweet-rendered {
     padding: 0 !important;
     border: none !important;
     background: transparent !important;
     margin: 8px 0 !important;
+    min-height: 0 !important;
+    display: block !important;
+    overflow: hidden !important;
+}
+blockquote.twitter-tweet.twitter-tweet-rendered::before {
+    content: none !important;
 }
 
 /* Desktop: tweet bubbles get a floor width so reactions + embed fit together */
