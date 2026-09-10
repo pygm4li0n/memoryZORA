@@ -316,33 +316,70 @@ blockquote.twitter-tweet,
 }
 
 /* =====================================================
-   DESKTOP‑ONLY ENHANCEMENTS
-   (message bubble min width + X card containment)
+   MESSAGE BUBBLE – minimum width so short messages show
+   the full date + reactions on one row
 ===================================================== */
-
-/* Give message bubbles a minimum width on desktop so short messages
-   still display the full date and reaction buttons */
-@media (min-width: 769px) {
+.msg-bubble {
+    min-width: 200px;
+    overflow: hidden;   /* keeps injected tweet iframe inside */
+}
+@media (max-width: 480px) {
     .msg-bubble {
-        min-width: 180px;
+        min-width: 160px;
     }
 }
 
-/* ── X / Twitter card containment (all viewports) ── */
-/* Prevent the injected iframe from spilling outside the bubble */
-.msg-bubble {
-    overflow: hidden;
+/* =====================================================
+   REACTIONS BAR – always horizontal, never wraps vertically
+===================================================== */
+.reactions-bar {
+    display: flex !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    max-width: 100% !important;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+}
+.reactions-bar::-webkit-scrollbar { height: 3px; }
+.reactions-bar::-webkit-scrollbar-thumb {
+    background: var(--bg-secondary, #233261);
+    border-radius: 10px;
+}
+.reactions-bar::-webkit-scrollbar-track { background: transparent; }
+
+.reactions-bar .reaction-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
 }
 
-/* Wrapper that Twitter injects around the embedded iframe */
+@media (min-width: 769px) {
+    .msg-bubble .reaction-btn {
+        padding: 3px 8px;
+        font-size: 0.68rem;
+    }
+}
+@media (max-width: 768px) {
+    .msg-bubble .reaction-btn {
+        padding: 3px 7px;
+        font-size: 0.65rem;
+    }
+}
+
+/* =====================================================
+   X / TWITTER EMBEDS
+===================================================== */
+
+/* Force the rendered iframe to fit the bubble */
 .msg-bubble .twitter-tweet-rendered {
     max-width: 100% !important;
     width: 100% !important;
     margin: 8px 0 !important;
     display: block !important;
 }
-
-/* The actual iframe rendered by Twitter – force it to fit the bubble */
 .msg-bubble iframe[id^="twitter-widget"] {
     max-width: 100% !important;
     width: 100% !important;
@@ -351,55 +388,65 @@ blockquote.twitter-tweet,
     display: block !important;
 }
 
-/* ── Desktop: give tweet bubbles more breathing room ── */
+/* ── Loading placeholder: styles the plain blockquote until Twitter renders ── */
+blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
+    margin: 8px 0 !important;
+    padding: 10px 14px !important;
+    border: 1px solid var(--border-default, #233261) !important;
+    border-left: 3px solid var(--accent-cyan, #00f0ff) !important;
+    border-radius: 10px !important;
+    background: rgba(0, 240, 255, 0.04) !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    font-size: 0.85rem !important;
+}
+blockquote.twitter-tweet:not(.twitter-tweet-rendered) a {
+    color: var(--accent-cyan, #00f0ff) !important;
+    text-decoration: none !important;
+    word-break: break-all !important;
+    opacity: 0.9;
+}
+blockquote.twitter-tweet:not(.twitter-tweet-rendered) a:hover {
+    text-decoration: underline !important;
+}
+
+/* Once rendered, remove our placeholder styling */
+blockquote.twitter-tweet.twitter-tweet-rendered {
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    margin: 8px 0 !important;
+}
+
+/* Desktop: tweet bubbles get a floor width so reactions + embed fit together */
 @media (min-width: 769px) {
     .msg-wrapper:has(.twitter-tweet),
+    .msg-wrapper:has(.twitter-tweet-rendered),
     .msg-wrapper:has(iframe[id^="twitter-widget"]) {
         max-width: 95%;
         min-width: 340px;
     }
+    .msg-wrapper:has(.twitter-tweet) .msg-bubble,
+    .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
+    .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble {
+        min-width: 340px;
+    }
 }
 
-/* ── Mobile: keep tweets full width of bubble ── */
+/* Mobile: tweets take full width, no floor width */
 @media (max-width: 768px) {
+    .msg-wrapper:has(.twitter-tweet) .msg-bubble,
+    .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
+    .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble {
+        width: 100%;
+        min-width: 0;
+    }
     .msg-bubble .twitter-tweet-rendered,
     .msg-bubble iframe[id^="twitter-widget"] {
         max-width: 100% !important;
         width: 100% !important;
     }
-}
-
-/* =====================================================
-   X/TWITTER SKELETON – loading placeholder
-===================================================== */
-.twitter-skeleton {
-    display: block;
-    max-width: 550px;
-    width: 100%;
-    min-height: 120px;
-    background: linear-gradient(
-        90deg,
-        rgba(255,255,255,0.04) 0%,
-        rgba(255,255,255,0.08) 50%,
-        rgba(255,255,255,0.04) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeletonShimmer 1.4s ease-in-out infinite;
-    border-radius: 12px;
-    border: 1px solid var(--border-default, #233261);
-    margin: 8px 0;
-    padding: 14px;
-}
-.twitter-skeleton::before {
-    content: '𝕏 Loading post…';
-    display: block;
-    font-size: 0.8rem;
-    color: var(--text-muted, #64748b);
-    font-style: italic;
-}
-@keyframes skeletonShimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
 }
 
 /* =====================================================
@@ -452,10 +499,10 @@ blockquote.twitter-tweet,
 .streak-toast {
     display: none;
     position: fixed;
-    top: calc(50% + 70px);        /* sits just below the wallet toast */
+    top: calc(50% + 70px);
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 9998;                 /* below wallet toast (9999) */
+    z-index: 9998;
     background: var(--bg-panel, #111827);
     color: var(--text-primary, #ffffff);
     border: 1px solid var(--accent-orange, #f97316);
@@ -500,7 +547,6 @@ blockquote.twitter-tweet,
     transition: all 0.25s ease;
 }
 
-/* ── Connected state ── */
 .phantom-btn.connected,
 .phantom-overlay-btn.connected {
     border-color: var(--accent-green, #22c55e) !important;
@@ -508,7 +554,6 @@ blockquote.twitter-tweet,
     background: rgba(34,197,94,0.12) !important;
 }
 
-/* Small green pulsing dot indicator on the button when connected */
 .phantom-btn.connected::after,
 .phantom-overlay-btn.connected::after {
     content: '';
@@ -529,7 +574,6 @@ blockquote.twitter-tweet,
     50%     { transform: scale(1.25); opacity: 0.75; }
 }
 
-/* Overlay button when connected – reddish disconnect style */
 .phantom-overlay-btn.connected {
     border-color: rgba(255,92,124,0.6) !important;
     background: rgba(255,92,124,0.12) !important;
@@ -542,7 +586,6 @@ blockquote.twitter-tweet,
     color: #ffb3c1;
 }
 
-/* Hover feedback */
 .phantom-btn.connected:hover {
     border-color: var(--accent-red, #ff5c7c) !important;
     box-shadow: 0 0 14px rgba(255,92,124,0.5) !important;
