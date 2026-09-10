@@ -313,7 +313,7 @@ html, body {
 .msg-wrapper {
     overflow: visible !important;
     max-width: 82% !important;
-    align-self: flex-start !important;   /* ← shrink-to-content instead of stretching */
+    align-self: flex-start !important;
 }
 
 /* Own messages: right-aligned, same shrink behavior */
@@ -602,6 +602,7 @@ html, body {
 
 /* =====================================================
    PHANTOM BUTTON – connected / disconnected states
+   Green is fixed to #22c55e on every theme
 ===================================================== */
 .phantom-btn,
 .phantom-overlay-btn {
@@ -611,7 +612,7 @@ html, body {
 
 .phantom-btn.connected,
 .phantom-overlay-btn.connected {
-    border-color: var(--accent-green, #22c55e) !important;
+    border-color: #22c55e !important;
     box-shadow: 0 0 10px rgba(34,197,94,0.5), inset 0 0 6px rgba(34,197,94,0.15) !important;
     background: rgba(34,197,94,0.12) !important;
 }
@@ -625,9 +626,9 @@ html, body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent-green, #22c55e);
+    background: #22c55e !important;                    /* fixed green – all themes */
     border: 1.5px solid var(--bg-panel, #111827);
-    box-shadow: 0 0 6px rgba(34,197,94,0.9);
+    box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34,197,94,0.8) !important;
     animation: phantomPulse 2s ease-in-out infinite;
 }
 
@@ -642,7 +643,8 @@ html, body {
     box-shadow: 0 0 10px rgba(255,92,124,0.35) !important;
 }
 .phantom-overlay-btn.connected::after {
-    background: var(--accent-green, #22c55e);
+    background: #22c55e !important;                    /* fixed green – all themes */
+    box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34,197,94,0.8) !important;
 }
 .phantom-overlay-btn.connected span {
     color: #ffb3c1;
