@@ -319,3 +319,47 @@ blockquote.twitter-tweet,
         min-width: 180px;
     }
 }
+
+/* =====================================================
+   DAILY LOGIN TRACKING – STREAK BADGE + RESET BUTTON
+===================================================== */
+
+/* ── Login streak badge in sidebar profile card ── */
+.big-streak {
+    font-size: 0.72rem;
+    color: var(--accent-orange, #f97316);
+    font-weight: 600;
+    margin-top: 4px;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    text-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
+}
+.big-streak.hidden {
+    display: none;
+}
+
+/* ── Reset login streaks button (inside Mod Settings panel) ── */
+.reset-login-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 92, 124, 0.15);
+    border: 1px solid rgba(255, 92, 124, 0.5);
+    color: #ffb3c1;
+    border-radius: var(--radius-md, 10px);
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    font-family: var(--font-main, inherit);
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+}
+.reset-login-btn:hover {
+    background: rgba(255, 92, 124, 0.3);
+    box-shadow: 0 0 10px rgba(255, 92, 124, 0.4);
+    color: #fff;
+}
+.reset-login-btn:active {
+    transform: scale(0.98);
+}
