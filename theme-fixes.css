@@ -305,20 +305,34 @@ html, body {
 }
 
 /* =====================================================
-   MESSAGES + REACTIONS – clean & simple
+   MESSAGES + REACTIONS
+   Consistent sizing for ALL messages (own + others)
 ===================================================== */
 
-/* ── Message wrapper: never clip children ── */
-.msg-wrapper {
+/* ── Wrapper: identical width cap for every message ── */
+.msg-wrapper,
+.msg-wrapper.own {
     overflow: visible !important;
+    max-width: 82% !important;
 }
 
-/* ── Message bubble: stable layout, no clipping ── */
+@media (max-width: 768px) {
+    .msg-wrapper,
+    .msg-wrapper.own {
+        max-width: 92% !important;
+    }
+}
+
+/* ── Bubble: consistent internal layout + safe wrapping ── */
 .msg-bubble {
     display: flex;
     flex-direction: column;
     min-width: 200px;
+    max-width: 100%;
     overflow: visible;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .msg-bubble > * {
     max-width: 100%;
@@ -327,6 +341,30 @@ html, body {
     .msg-bubble {
         min-width: 160px;
     }
+}
+
+/* ── Text: wrap long words and URLs for everyone ── */
+.msg-text,
+.msg-text a,
+.reply-ref-block .r-text {
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+}
+.msg-text a {
+    word-break: break-all !important;
+}
+
+/* ── Images: never exceed the bubble ── */
+.msg-image-wrap,
+.msg-image-wrap img {
+    max-width: 100% !important;
+    height: auto;
+}
+.msg-image-wrap img {
+    display: block;
+    object-fit: contain;
 }
 
 /* ── Reactions: single horizontal row, never clipped ── */
@@ -421,9 +459,7 @@ html, body {
     to { transform: rotate(360deg); }
 }
 
-/* ── Kill spinner the moment Twitter renders – covers BOTH cases ──
-   Case 1: Twitter adds .twitter-tweet-rendered to the blockquote
-   Case 2: Twitter injects an iframe but leaves the blockquote class alone */
+/* ── Kill spinner the moment Twitter renders – covers BOTH cases ── */
 .msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered::before,
 .msg-bubble blockquote.twitter-tweet:has(iframe[id^="twitter-widget"])::before {
     content: none !important;
@@ -438,17 +474,18 @@ html, body {
     padding: 0 !important;
 }
 
-/* ── Desktop: tweet bubbles get a wider floor ── */
+/* ── Desktop: tweet bubbles need a wider floor so embed fits,
+      but they stay inside the SAME 82% cap as every other message ── */
 @media (min-width: 769px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
     .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble {
         min-width: 340px;
-        max-width: 95%;
+        max-width: 100%;
     }
 }
 
-/* ── Mobile: full width, no floor ── */
+/* ── Mobile: tweet bubbles take full width of the wrapper ── */
 @media (max-width: 768px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
