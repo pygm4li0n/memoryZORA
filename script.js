@@ -113,7 +113,7 @@
     let tokenListContainer = null;
 
     // ============================================================
-    // TWITTER EMBED – FASTER LOADING
+    // TWITTER EMBED – waits for widget script, uses official load()
     // ============================================================
     let twttrReadyPromise = null;
     function waitForTwttr() {
@@ -129,57 +129,27 @@
         return twttrReadyPromise;
     }
 
-    function extractTweetId(url) {
-        const m = (url || '').match(/status\/(\d+)/);
-        return m ? m[1] : null;
-    }
-
     let tweetObserver = null;
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
-        tweetObserver = new IntersectionObserver((entries) => {
-            entries.forEach(async (entry) => {
-                if (!entry.isIntersecting) return;
-                const block = entry.target;
-                tweetObserver.unobserve(block);
-
-                const skeleton = block.querySelector('.twitter-skeleton');
-                const url = block.dataset.tweetUrl;
-                const id = extractTweetId(url);
-                if (!id) return;
-
+        tweetObserver = new IntersectionObserver(async (entries) => {
+            for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                const wrapper = entry.target;
+                tweetObserver.unobserve(wrapper);
                 try {
-                    const twttr = await waitForTwttr();
-                    const target = skeleton || block;
-                    await twttr.widgets.createTweet(id, target.parentNode, {
-                        theme: 'dark',
-                        align: 'left',
-                        dnt: true,
-                        conversation: 'none'
-                    });
-                    if (skeleton && skeleton.parentNode) skeleton.remove();
+                    const twttr = await waitForTwttr();   // ← critical: wait for script
+                    twttr.widgets.load(wrapper);          // ← official Twitter render method
                 } catch (err) {
-                    console.warn('Tweet render failed:', err);
+                    console.warn('Twitter widget failed:', err);
                 }
-            });
+            }
         }, { rootMargin: '300px' });
     }
 
     function observeTweetsInWrapper(wrapper) {
-        if (!tweetObserver) return;
-        const tweetBlocks = wrapper.querySelectorAll('.twitter-tweet');
-        tweetBlocks.forEach(block => {
-            if (block.dataset.observed) return;
-            block.dataset.observed = '1';
-            if (!block.querySelector('.twitter-skeleton')) {
-                const skeleton = document.createElement('div');
-                skeleton.className = 'twitter-skeleton';
-                block.appendChild(skeleton);
-            }
-            const linkEl = block.querySelector('a');
-            block.dataset.tweetUrl = linkEl?.href || block.dataset.tweetUrl || '';
-            tweetObserver.observe(block);
-        });
+        if (!tweetObserver || !wrapper.querySelector('.twitter-tweet')) return;
+        tweetObserver.observe(wrapper);
     }
 
     // ============================================================
@@ -208,23 +178,19 @@
         }
     }
 
-    // ── UPDATED: toggles .connected class, caches wallet address ──
     function updatePhantomUI() {
         const connected = !!(phantomConnected && phantomWalletPublicKey);
         const addr = connected ? phantomWalletPublicKey.toBase58() : '';
         const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
 
-        // Header wallet
         walletAddressSpan.textContent = connected ? `👛 ${shortAddr}` : '';
         phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
         phantomConnectBtn.classList.toggle('connected', connected);
 
-        // Sidebar wallet
         if (sidebarWalletAddress) {
             sidebarWalletAddress.textContent = connected ? `👛 ${shortAddr}` : '';
         }
 
-        // Overlay button
         if (phantomConnectBtnOverlay) {
             walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
             phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
@@ -234,7 +200,6 @@
                 : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connect Phantom</span>`;
         }
 
-        // Cache wallet for instant display on next reload
         try {
             if (connected) localStorage.setItem('msn_cached_wallet', addr);
             else localStorage.removeItem('msn_cached_wallet');
@@ -301,7 +266,6 @@
         return getBadge(bal);
     }
 
-    // ── NEUTRALIZED: rank badge in sidebar profile card is now handled by login-tracking.js (wallet-based) ──
     function updateUserRank(balance) {
         return;
     }
@@ -372,7 +336,6 @@
         }
     }
 
-    // ── UPDATED: silent-then-interactive connect ──
     async function connectPhantom() {
         const provider = getPhantomProvider();
         if (!provider) {
@@ -380,7 +343,6 @@
             return;
         }
 
-        // Silent attempt: if previously trusted, connect instantly
         try {
             const resp = await provider.connect({ onlyIfTrusted: true });
             phantomWalletPublicKey = resp.publicKey;
@@ -390,7 +352,6 @@
             return;
         } catch (silentErr) { /* fall through */ }
 
-        // Interactive fallback
         try {
             const resp = await provider.connect({ onlyIfTrusted: false });
             phantomWalletPublicKey = resp.publicKey;
@@ -745,7 +706,6 @@
     function escapeHtml(t) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(t).replace(/[&<>"']/g, m=>map[m]); }
     function trunc(t, l=45) { return t && t.length>l ? t.substring(0,l)+'…' : t||''; }
 
-    // ── UPDATED: 8000ms toast duration ──
     function showError(msg) {
         errorToast.textContent = '⚠️ ' + msg;
         errorToast.classList.add('visible');
@@ -926,7 +886,7 @@
         }
     }
 
-    // ── UPDATED: uses data-tweet-url for direct createTweet ──
+    // ── Uses Twitter's canonical blockquote + link text ──
     function renderMessageContent(text) {
         if (!text) return '';
         const xUrlRegex = /https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([^\/\s]+\/status\/\d+)/gi;
@@ -938,7 +898,7 @@
         }
         for (const match of matches) {
             const url = match[0];
-            html += `<blockquote class="twitter-tweet" data-tweet-url="${escapeHtml(url)}"><a href="${escapeHtml(url)}"></a></blockquote>`;
+            html += `<blockquote class="twitter-tweet"><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></blockquote>`;
         }
         return html;
     }
@@ -1787,12 +1747,11 @@
     });
 
     // ============================================================
-    // INIT – UPDATED: non-blocking wallet reconnect
+    // INIT – non-blocking wallet reconnect
     // ============================================================
     async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
-        // Kick off wallet reconnect in parallel — do NOT await
         (async () => {
             const provider = getPhantomProvider();
             if (!provider) return;
@@ -1803,7 +1762,7 @@
                 updatePhantomUI();
                 fetchAndDisplayAllTokens();
             } catch (e) {
-                // Not trusted yet — user will click to connect
+                // Not trusted yet
             }
         })();
 
