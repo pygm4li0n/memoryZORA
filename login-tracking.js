@@ -13,9 +13,7 @@
     let lastTrackedWallet = null;
     let streakToastTimeout = null;
 
-    // ─────────────────────────────────────────────
-    // Wallet helper
-    // ─────────────────────────────────────────────
+    // ── Wallet helpers ──
     function getWalletAddress() {
         try {
             if (window.phantom?.solana?.publicKey) return window.phantom.solana.publicKey.toBase58();
@@ -24,9 +22,13 @@
         return null;
     }
 
-    // ─────────────────────────────────────────────
-    // Dedicated streak toast (separate from wallet connect toast)
-    // ─────────────────────────────────────────────
+    function getCachedWallet() {
+        try {
+            return localStorage.getItem('msn_cached_wallet');
+        } catch (e) { return null; }
+    }
+
+    // ── Dedicated streak toast ──
     function getOrCreateStreakToast() {
         let el = document.getElementById('streakToast');
         if (el) return el;
@@ -40,17 +42,14 @@
     function showStreakToast(msg) {
         const el = getOrCreateStreakToast();
         el.textContent = msg;
-        // Reset animation so it can replay if triggered multiple times
         el.classList.remove('visible');
         void el.offsetWidth;
         el.classList.add('visible');
         clearTimeout(streakToastTimeout);
-        streakToastTimeout = setTimeout(() => el.classList.remove('visible'), 4500);
+        streakToastTimeout = setTimeout(() => el.classList.remove('visible'), 6500);
     }
 
-    // ─────────────────────────────────────────────
-    // Streak badge (sidebar profile card)
-    // ─────────────────────────────────────────────
+    // ── Streak badge ──
     function updateStreakBadge(streak) {
         const el = document.getElementById('sidebarBigStreak');
         if (!el) return;
@@ -63,9 +62,7 @@
         }
     }
 
-    // ─────────────────────────────────────────────
-    // Rank badge (wallet balance based)
-    // ─────────────────────────────────────────────
+    // ── Rank badge ──
     function getBadge(balance) {
         if (balance >= 1000000) return { emoji: '🐋', name: 'Whale' };
         if (balance >= 250000)  return { emoji: '🐬', name: 'Dolphin' };
@@ -86,9 +83,7 @@
         el.classList.remove('hidden');
     }
 
-    // ─────────────────────────────────────────────
-    // Fetch real token balance from chain
-    // ─────────────────────────────────────────────
+    // ── Chain balance ──
     async function fetchWalletBalance(wallet) {
         try {
             const connection = new solanaWeb3.Connection(SOLANA_RPC);
@@ -110,9 +105,6 @@
         }
     }
 
-    // ─────────────────────────────────────────────
-    // Show cached balance instantly on reload
-    // ─────────────────────────────────────────────
     async function loadCachedBalance(wallet) {
         try {
             const { data, error } = await sb.rpc('get_wallet_balance', { p_wallet: wallet });
@@ -122,67 +114,43 @@
         } catch (e) { /* ignore */ }
     }
 
-    // ─────────────────────────────────────────────
-    // Track daily login (streak) – toast only on NEW day
-    // ─────────────────────────────────────────────
+    // ── Streak (toast only on new day) ──
     async function trackDailyLogin(wallet) {
         try {
-            const { data, error } = await sb.rpc('track_daily_login_wallet', {
-                p_wallet: wallet
-            });
-
-            if (error) {
-                console.warn('Login tracking failed:', error);
-                return;
-            }
-
+            const { data, error } = await sb.rpc('track_daily_login_wallet', { p_wallet: wallet });
+            if (error) { console.warn('Login tracking failed:', error); return; }
             if (!data || !data.streak) return;
 
-            // Always update the badge
             updateStreakBadge(data.streak);
 
-            // Only show the streak toast when it's a NEW day
-            // (prevents duplicate toasts on refresh or reconnect)
             if (!data.already_logged) {
                 const msg = data.streak === 1
                     ? `🔥 Day 1 login streak!`
                     : `🔥 Day ${data.streak} login streak!`;
                 showStreakToast(msg);
             }
-        } catch (err) {
-            console.error('Login tracking error:', err);
-        }
+        } catch (err) { console.error('Login tracking error:', err); }
     }
 
-    // ─────────────────────────────────────────────
-    // Refresh balance: chain → badge → DB cache
-    // ─────────────────────────────────────────────
+    // ── Balance refresh ──
     async function refreshBalance(wallet) {
         const balance = await fetchWalletBalance(wallet);
         if (balance === null) return;
-
         updateRankBadge(balance);
-
         try {
             await sb.rpc('update_wallet_balance', { p_wallet: wallet, p_balance: balance });
         } catch (e) { /* ignore */ }
     }
 
-    // ─────────────────────────────────────────────
-    // Clear badges on disconnect
-    // ─────────────────────────────────────────────
     function clearBadges() {
         updateStreakBadge(0);
         updateRankBadge(null);
     }
 
-    // ─────────────────────────────────────────────
-    // Main poll: track when wallet changes / connects
-    // ─────────────────────────────────────────────
+    // ── Poll ──
     function checkAndTrack() {
-        const wallet = getWalletAddress();
+        const wallet = getWalletAddress() || getCachedWallet();
 
-        // Wallet disconnected – hide badges
         if (!wallet) {
             if (lastTrackedWallet) {
                 lastTrackedWallet = null;
@@ -191,7 +159,6 @@
             return;
         }
 
-        // New wallet session – run all tasks
         if (wallet !== lastTrackedWallet) {
             lastTrackedWallet = wallet;
             loadCachedBalance(wallet);
@@ -203,34 +170,18 @@
     setInterval(checkAndTrack, 1500);
     setTimeout(checkAndTrack, 800);
 
-    // ─────────────────────────────────────────────
-    // React instantly to Phantom connect/disconnect/account change
-    // ─────────────────────────────────────────────
+    // ── Phantom listeners ──
     function attachPhantomListeners() {
         const provider = window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null);
         if (!provider) return;
 
-        provider.on?.('connect', () => {
-            lastTrackedWallet = null;
-            checkAndTrack();
-        });
-
-        provider.on?.('disconnect', () => {
-            lastTrackedWallet = null;
-            clearBadges();
-        });
-
-        provider.on?.('accountChanged', () => {
-            lastTrackedWallet = null;
-            clearBadges();
-            checkAndTrack();
-        });
+        provider.on?.('connect',        () => { lastTrackedWallet = null; checkAndTrack(); });
+        provider.on?.('disconnect',     () => { lastTrackedWallet = null; clearBadges(); });
+        provider.on?.('accountChanged', () => { lastTrackedWallet = null; clearBadges(); checkAndTrack(); });
     }
     attachPhantomListeners();
 
-    // ─────────────────────────────────────────────
-    // Reset button in Mod Settings
-    // ─────────────────────────────────────────────
+    // ── Reset button ──
     function attachResetListener() {
         const resetBtn = document.getElementById('modResetLoginBtn');
         if (!resetBtn || resetBtn.dataset.listenerAttached) return;
