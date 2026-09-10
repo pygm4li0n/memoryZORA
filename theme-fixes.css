@@ -360,72 +360,6 @@ html, body {
    X / TWITTER EMBEDS – spinner while loading, clean embed when ready
 ===================================================== */
 
-/* ── Pre-render: blockquote reserves space + shows spinner ── */
-.msg-bubble blockquote.twitter-tweet {
-    position: relative;
-    display: block;
-    margin: 8px 0 !important;
-    padding: 12px 0 !important;
-    border: 0 !important;
-    background: none !important;
-    box-shadow: none !important;
-    min-height: 60px;
-    max-width: 100%;
-    overflow: hidden;
-}
-
-/* Hide the URL text but keep it in the DOM — Twitter needs to read its href */
-.msg-bubble blockquote.twitter-tweet a {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
-}
-
-/* Spinning loader shown while waiting for Twitter */
-.msg-bubble blockquote.twitter-tweet:not(.twitter-tweet-rendered)::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 26px;
-    height: 26px;
-    margin: -13px 0 0 -13px;
-    border: 3px solid rgba(0, 240, 255, 0.18);
-    border-top-color: var(--accent-cyan, #00f0ff);
-    border-radius: 50%;
-    animation: tweetSpinner 0.8s linear infinite;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
-}
-@keyframes tweetSpinner {
-    to { transform: rotate(360deg); }
-}
-
-/* ── CRITICAL: hide the spinner as soon as ANY tweet renders in the bubble ──
-   Twitter doesn't always add .twitter-tweet-rendered to the original
-   blockquote — it sometimes leaves it as an orphan and inserts a new
-   rendered element as a sibling. This kills the spinner in every case. */
-.msg-bubble:has(iframe[id^="twitter-widget"]) blockquote.twitter-tweet::before,
-.msg-bubble:has(.twitter-tweet-rendered) blockquote.twitter-tweet::before {
-    content: none !important;
-    animation: none !important;
-    display: none !important;
-}
-
-/* Collapse the orphan blockquote so it takes zero space */
-.msg-bubble:has(iframe[id^="twitter-widget"]) blockquote.twitter-tweet:not(.twitter-tweet-rendered),
-.msg-bubble:has(.twitter-tweet-rendered) blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
-    display: none !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
 /* ── Rendered embed: fits the bubble cleanly ── */
 .msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
@@ -438,13 +372,65 @@ html, body {
     box-shadow: none !important;
 }
 
-/* Once Twitter renders it, ensure no spinner lingers */
-.msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered {
+/* ── Pre-render blockquote: reserve space + hold the spinner ── */
+.msg-bubble blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
+    position: relative;
+    display: block;
+    margin: 8px 0 !important;
     padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    min-height: 100px;
+    max-width: 100%;
+    overflow: visible;
+}
+
+/* ── Hide the URL visually but keep it in the DOM for Twitter's parser ── */
+.msg-bubble blockquote.twitter-tweet a {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* ── Spinner ── */
+.msg-bubble blockquote.twitter-tweet:not(.twitter-tweet-rendered)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 28px;
+    height: 28px;
+    margin: -14px 0 0 -14px;
+    border: 3px solid rgba(0, 240, 255, 0.2);
+    border-top-color: var(--accent-cyan, #00f0ff);
+    border-radius: 50%;
+    animation: tweetSpinner 0.8s linear infinite;
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+}
+@keyframes tweetSpinner {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Once Twitter renders it, reset the blockquote ── */
+.msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered {
+    position: static;
+    margin: 8px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
     min-height: 0 !important;
+    overflow: visible;
 }
 .msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered::before {
     content: none !important;
+    display: none !important;
 }
 
 /* ── Desktop: tweet bubbles get a wider floor ── */
