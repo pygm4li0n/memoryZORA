@@ -129,7 +129,7 @@
         return twttrReadyPromise;
     }
 
-        // ── Staggered queue: process one tweet at a time so we don't hammer Twitter ──
+    // ── Staggered queue: process one tweet at a time so we don't hammer Twitter ──
     const tweetQueue = [];
     let tweetQueueRunning = false;
 
@@ -145,18 +145,15 @@
             } catch (err) {
                 console.warn('Twitter widget failed:', err);
             }
-            // Small pause between tweets so Twitter isn't overwhelmed
             await new Promise(r => setTimeout(r, 250));
         }
         tweetQueueRunning = false;
     }
 
-        let tweetObserver = null;
+    let tweetObserver = null;
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
 
-        // Extend the trigger zone only DOWNWARD by 80px.
-        // Tweets above the current scroll position are ignored until you scroll up.
         tweetObserver = new IntersectionObserver((entries) => {
             // Sort by distance from viewport center so the most visible tweet loads first
             const visible = entries.filter(e => e.isIntersecting);
@@ -177,7 +174,7 @@
             }
             processTweetQueue();
         }, {
-            rootMargin: '0px 0px 80px 0px',  // 80px below viewport only — nothing above
+            rootMargin: '0px 0px 80px 0px',
             threshold: 0
         });
     }
@@ -188,7 +185,7 @@
         tweetBlocks.forEach(block => {
             if (block.dataset.observed) return;
             block.dataset.observed = '1';
-            tweetObserver.observe(block);   // observe the tweet block itself
+            tweetObserver.observe(block);
         });
     }
 
@@ -655,7 +652,23 @@
     updateTokenInfo();
     setInterval(updateTokenInfo, 60000);
 
+    // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
+
+    // ── Pin chat to bottom while async content (images, tweets) loads ──
+    function pinToBottom(container, durationMs = 3000) {
+        if (!container) return;
+        const start = Date.now();
+        const tick = () => {
+            // Stop if user manually scrolled up
+            const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
+            if (!nearBottom) return;
+            container.scrollTop = container.scrollHeight;
+            if (Date.now() - start < durationMs) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    }
+
     function updateScrollButtonVisibility(container) {
         if (!scrollBottomBtn) return;
         const threshold = 80;
@@ -926,7 +939,6 @@
         }
     }
 
-    // ── Uses Twitter's canonical blockquote + link text ──
     function renderMessageContent(text) {
         if (!text) return '';
         const xUrlRegex = /https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([^\/\s]+\/status\/\d+)/gi;
@@ -1328,6 +1340,7 @@
             await fetchAvatars(users);
             for (const msg of data) await renderMessage(msg, true, false);
             scrollContainerToBottom(privateContainer);
+            pinToBottom(privateContainer, 3000);
             updateScrollButtonVisibility(privateContainer);
         }
         loadReactions('private_message_reactions', true);
@@ -1549,6 +1562,7 @@
                 });
                 for (const msg of data) await renderMessage(msg, false, false);
                 scrollContainerToBottom(publicContainer);
+                pinToBottom(publicContainer, 3000);   // keep pinned while tweets/images load
                 updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
