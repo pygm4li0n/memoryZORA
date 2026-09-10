@@ -113,7 +113,7 @@
     let tokenListContainer = null;
 
     // ============================================================
-    // TWITTER EMBED – waits for widget script, uses official load()
+    // TWITTER EMBED – pre-warmed, viewport-only loading
     // ============================================================
     let twttrReadyPromise = null;
     function waitForTwttr() {
@@ -122,14 +122,18 @@
             if (window.twttr && window.twttr.widgets) return resolve(window.twttr);
             const check = () => {
                 if (window.twttr && window.twttr.widgets) resolve(window.twttr);
-                else setTimeout(check, 100);
+                else setTimeout(check, 50);
             };
             check();
         });
         return twttrReadyPromise;
     }
 
-    // ── Staggered queue: process one tweet at a time so we don't hammer Twitter ──
+    // Pre-warm: start waiting immediately so the widget is ready by the time
+    // the first tweet scrolls into view.
+    waitForTwttr();
+
+    // ── Staggered queue: process one tweet at a time ──
     const tweetQueue = [];
     let tweetQueueRunning = false;
 
@@ -145,7 +149,7 @@
             } catch (err) {
                 console.warn('Twitter widget failed:', err);
             }
-            await new Promise(r => setTimeout(r, 250));
+            await new Promise(r => setTimeout(r, 100));
         }
         tweetQueueRunning = false;
     }
@@ -155,7 +159,6 @@
         if (tweetObserver || !('IntersectionObserver' in window)) return;
 
         tweetObserver = new IntersectionObserver((entries) => {
-            // Sort by distance from viewport center so the most visible tweet loads first
             const visible = entries.filter(e => e.isIntersecting);
             visible.sort((a, b) => {
                 const ra = a.boundingClientRect;
@@ -174,7 +177,7 @@
             }
             processTweetQueue();
         }, {
-            rootMargin: '0px 0px 80px 0px',
+            rootMargin: '0px',
             threshold: 0
         });
     }
@@ -655,12 +658,10 @@
     // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
-    // ── Pin chat to bottom while async content (images, tweets) loads ──
     function pinToBottom(container, durationMs = 3000) {
         if (!container) return;
         const start = Date.now();
         const tick = () => {
-            // Stop if user manually scrolled up
             const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
             if (!nearBottom) return;
             container.scrollTop = container.scrollHeight;
@@ -1562,7 +1563,7 @@
                 });
                 for (const msg of data) await renderMessage(msg, false, false);
                 scrollContainerToBottom(publicContainer);
-                pinToBottom(publicContainer, 3000);   // keep pinned while tweets/images load
+                pinToBottom(publicContainer, 3000);
                 updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
@@ -1801,24 +1802,32 @@
     });
 
     // ============================================================
-    // INIT – non-blocking wallet reconnect
+    // INIT – fast wallet reconnect + pre-warmed Twitter widget
     // ============================================================
     async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
-        (async () => {
-            const provider = getPhantomProvider();
-            if (!provider) return;
-            try {
-                const resp = await provider.connect({ onlyIfTrusted: true });
-                phantomWalletPublicKey = resp.publicKey;
+        // ── Fast wallet reconnect: synchronous check first, then silent background connect ──
+        const provider = getPhantomProvider();
+        if (provider) {
+            if (provider.isConnected && provider.publicKey) {
+                // Already connected in this tab — instant
+                phantomWalletPublicKey = provider.publicKey;
                 phantomConnected = true;
                 updatePhantomUI();
                 fetchAndDisplayAllTokens();
-            } catch (e) {
-                // Not trusted yet
+            } else {
+                // Try silent reconnect in background (non-blocking)
+                provider.connect({ onlyIfTrusted: true })
+                    .then(resp => {
+                        phantomWalletPublicKey = resp.publicKey;
+                        phantomConnected = true;
+                        updatePhantomUI();
+                        fetchAndDisplayAllTokens();
+                    })
+                    .catch(() => { /* not trusted — user clicks to connect */ });
             }
-        })();
+        }
 
         setupTweetObserver();
 
