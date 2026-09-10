@@ -6,7 +6,7 @@
 
     // State
     const STORAGE_KEY_NAME = 'msn_chat_username';
-    const LAST_USERNAME_KEY = 'msn_last_username';   // <-- NEW
+    const LAST_USERNAME_KEY = 'msn_last_username';
     const CLIENT_ID_KEY = 'msn_chat_client_id';
     const ACTIVE_CHAT_KEY = 'msn_active_private_chat';
     let username = localStorage.getItem(STORAGE_KEY_NAME) || '';
@@ -16,7 +16,7 @@
         localStorage.setItem(CLIENT_ID_KEY, clientId);
     }
 
-    // Phantom state (moved earlier)
+    // Phantom state
     let phantomWalletPublicKey = null;
     let phantomConnected = false;
     let hasTokenAccess = false;
@@ -27,7 +27,7 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // DOM elements (same as before)
+    // DOM elements
     const sidebarWalletAddress = document.getElementById('sidebarWalletAddress');
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
@@ -112,27 +112,79 @@
     const solanaConnection = new solanaWeb3.Connection(SOLANA_RPC_ENDPOINT);
     let tokenListContainer = null;
 
-    // IntersectionObserver for lazy loading Twitter embeds
+    // ============================================================
+    // TWITTER EMBED – FASTER LOADING
+    // ============================================================
+    let twttrReadyPromise = null;
+    function waitForTwttr() {
+        if (twttrReadyPromise) return twttrReadyPromise;
+        twttrReadyPromise = new Promise((resolve) => {
+            if (window.twttr && window.twttr.widgets) return resolve(window.twttr);
+            const check = () => {
+                if (window.twttr && window.twttr.widgets) resolve(window.twttr);
+                else setTimeout(check, 100);
+            };
+            check();
+        });
+        return twttrReadyPromise;
+    }
+
+    function extractTweetId(url) {
+        const m = (url || '').match(/status\/(\d+)/);
+        return m ? m[1] : null;
+    }
+
     let tweetObserver = null;
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
         tweetObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const wrapper = entry.target;
-                    if (window.twttr && window.twttr.widgets) {
-                        window.twttr.widgets.load(wrapper);
-                    }
-                    tweetObserver.unobserve(wrapper);
+            entries.forEach(async (entry) => {
+                if (!entry.isIntersecting) return;
+                const block = entry.target;
+                tweetObserver.unobserve(block);
+
+                const skeleton = block.querySelector('.twitter-skeleton');
+                const url = block.dataset.tweetUrl;
+                const id = extractTweetId(url);
+                if (!id) return;
+
+                try {
+                    const twttr = await waitForTwttr();
+                    const target = skeleton || block;
+                    await twttr.widgets.createTweet(id, target.parentNode, {
+                        theme: 'dark',
+                        align: 'left',
+                        dnt: true,
+                        conversation: 'none'
+                    });
+                    if (skeleton && skeleton.parentNode) skeleton.remove();
+                } catch (err) {
+                    console.warn('Tweet render failed:', err);
                 }
             });
-        }, { rootMargin: '200px' });
-    }
-    function observeTweetsInWrapper(wrapper) {
-        if (!tweetObserver || !wrapper.querySelector('.twitter-tweet')) return;
-        tweetObserver.observe(wrapper);
+        }, { rootMargin: '300px' });
     }
 
+    function observeTweetsInWrapper(wrapper) {
+        if (!tweetObserver) return;
+        const tweetBlocks = wrapper.querySelectorAll('.twitter-tweet');
+        tweetBlocks.forEach(block => {
+            if (block.dataset.observed) return;
+            block.dataset.observed = '1';
+            if (!block.querySelector('.twitter-skeleton')) {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'twitter-skeleton';
+                block.appendChild(skeleton);
+            }
+            const linkEl = block.querySelector('a');
+            block.dataset.tweetUrl = linkEl?.href || block.dataset.tweetUrl || '';
+            tweetObserver.observe(block);
+        });
+    }
+
+    // ============================================================
+    // PHANTOM
+    // ============================================================
     function getPhantomProvider() {
         if ('phantom' in window) {
             const provider = window.phantom?.solana;
@@ -156,31 +208,41 @@
         }
     }
 
+    // ── UPDATED: toggles .connected class, caches wallet address ──
     function updatePhantomUI() {
-    const connected = phantomConnected && phantomWalletPublicKey;
-    const addr = connected ? phantomWalletPublicKey.toBase58() : '';
-    const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
+        const connected = !!(phantomConnected && phantomWalletPublicKey);
+        const addr = connected ? phantomWalletPublicKey.toBase58() : '';
+        const shortAddr = connected ? `${addr.slice(0, 4)}...${addr.slice(-4)}` : '';
 
-    // Header wallet (desktop)
-    walletAddressSpan.textContent = connected ? `👛 ${shortAddr}` : '';
-    phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+        // Header wallet
+        walletAddressSpan.textContent = connected ? `👛 ${shortAddr}` : '';
+        phantomConnectBtn.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+        phantomConnectBtn.classList.toggle('connected', connected);
 
-    // Sidebar wallet (mobile)
-    if (sidebarWalletAddress) {
-        sidebarWalletAddress.textContent = connected ? `👛 ${shortAddr}` : '';
+        // Sidebar wallet
+        if (sidebarWalletAddress) {
+            sidebarWalletAddress.textContent = connected ? `👛 ${shortAddr}` : '';
+        }
+
+        // Overlay button
+        if (phantomConnectBtnOverlay) {
+            walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
+            phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
+            phantomConnectBtnOverlay.classList.toggle('connected', connected);
+            phantomConnectBtnOverlay.innerHTML = connected
+                ? `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Disconnect</span>`
+                : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connect Phantom</span>`;
+        }
+
+        // Cache wallet for instant display on next reload
+        try {
+            if (connected) localStorage.setItem('msn_cached_wallet', addr);
+            else localStorage.removeItem('msn_cached_wallet');
+        } catch (e) { /* ignore */ }
+
+        checkIfModWallet();
+        updateChatAccessibility();
     }
-
-    if (phantomConnectBtnOverlay) {
-        walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
-        phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
-        phantomConnectBtnOverlay.innerHTML = connected 
-            ? `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Disconnect</span>`
-            : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connect Phantom</span>`;
-    }
-
-    checkIfModWallet();
-    updateChatAccessibility();
-}
 
     function createTokenListContainer() {
         if (tokenListContainer) return tokenListContainer;
@@ -238,15 +300,10 @@
         if (bal === null || bal === undefined) return null;
         return getBadge(bal);
     }
+
+    // ── NEUTRALIZED: rank badge in sidebar profile card is now handled by login-tracking.js (wallet-based) ──
     function updateUserRank(balance) {
-        if (!sidebarBigRank) return;
-        if (balance === null || balance === undefined) {
-            sidebarBigRank.classList.add('hidden');
-            return;
-        }
-        const badge = getBadge(balance);
-        sidebarBigRank.textContent = `${badge.emoji} ${badge.name}`;
-        sidebarBigRank.classList.remove('hidden');
+        return;
     }
 
     async function fetchAndDisplayAllTokens() {
@@ -315,19 +372,32 @@
         }
     }
 
+    // ── UPDATED: silent-then-interactive connect ──
     async function connectPhantom() {
         const provider = getPhantomProvider();
         if (!provider) {
             showError('Phantom wallet not installed. Please install it from phantom.app');
             return;
         }
+
+        // Silent attempt: if previously trusted, connect instantly
+        try {
+            const resp = await provider.connect({ onlyIfTrusted: true });
+            phantomWalletPublicKey = resp.publicKey;
+            phantomConnected = true;
+            updatePhantomUI();
+            fetchAndDisplayAllTokens();
+            return;
+        } catch (silentErr) { /* fall through */ }
+
+        // Interactive fallback
         try {
             const resp = await provider.connect({ onlyIfTrusted: false });
             phantomWalletPublicKey = resp.publicKey;
             phantomConnected = true;
             updatePhantomUI();
             const addr = phantomWalletPublicKey.toBase58();
-showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
+            showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
             await fetchAndDisplayAllTokens();
         } catch (err) {
             console.error('Phantom connection error:', err);
@@ -615,7 +685,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         } catch (err) { console.error('Error loading accepted chats:', err); }
     }
 
-    // Particle animation (unchanged)
+    // Particle animation
     const particleCanvas = document.getElementById('particleCanvas');
     const pCtx = particleCanvas.getContext('2d');
     let particles = [];
@@ -674,11 +744,15 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
 
     function escapeHtml(t) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(t).replace(/[&<>"']/g, m=>map[m]); }
     function trunc(t, l=45) { return t && t.length>l ? t.substring(0,l)+'…' : t||''; }
+
+    // ── UPDATED: 8000ms toast duration ──
     function showError(msg) {
-        errorToast.textContent = '⚠️ ' + msg; errorToast.classList.add('visible');
+        errorToast.textContent = '⚠️ ' + msg;
+        errorToast.classList.add('visible');
         clearTimeout(errorToast._timeout);
-        errorToast._timeout = setTimeout(() => errorToast.classList.remove('visible'), 6000);
+        errorToast._timeout = setTimeout(() => errorToast.classList.remove('visible'), 8000);
     }
+
     function setConnection(state) {
         isConnected = (state === 'connected');
         if(state === 'connected') {
@@ -732,7 +806,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         return (user || '?')[0].toUpperCase();
     }
 
-    // Image handling (unchanged)
+    // Image handling
     function resizeImage(file, maxDim=750) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -781,7 +855,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         fileInput.value = '';
     }
 
-    // Reactions (unchanged)
+    // Reactions
     async function loadReactions(table, isPrivate) {
         const { data, error } = await supabase.from(table).select('*');
         if (error) return;
@@ -852,6 +926,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         }
     }
 
+    // ── UPDATED: uses data-tweet-url for direct createTweet ──
     function renderMessageContent(text) {
         if (!text) return '';
         const xUrlRegex = /https?:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/([^\/\s]+\/status\/\d+)/gi;
@@ -863,7 +938,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         }
         for (const match of matches) {
             const url = match[0];
-            html += `<blockquote class="twitter-tweet"><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></blockquote>`;
+            html += `<blockquote class="twitter-tweet" data-tweet-url="${escapeHtml(url)}"><a href="${escapeHtml(url)}"></a></blockquote>`;
         }
         return html;
     }
@@ -1063,7 +1138,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         }
     }
 
-    // Typing indicators (unchanged)
+    // Typing indicators
     function startTyping() {
         if (!username || !typingChannel) return;
         const tab = currentTab === 'private' && activePrivateChat ? 'private' : 'public';
@@ -1132,7 +1207,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         typingChannel.subscribe();
     }
 
-    // Presence (unchanged)
+    // Presence
     function setupPresence() {
         if (presenceChannel) return;
         if (!username) return;
@@ -1330,7 +1405,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         </div>`;
     }
 
-    // Private chat requests (unchanged)
+    // Private chat requests
     function showRequestOverlay(fromUser, requestId) {
         currentRequestData = { from_user: fromUser, id: requestId };
         const url = getAvatarURL(fromUser);
@@ -1582,7 +1657,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
     async function applyUsername(name) {
         username = name;
         localStorage.setItem(STORAGE_KEY_NAME, name);
-        localStorage.setItem(LAST_USERNAME_KEY, name);   // <-- Store last username
+        localStorage.setItem(LAST_USERNAME_KEY, name);
 
         let avatarUrlToUse = currentAvatarUrl;
         if(profilePicFile) {
@@ -1614,7 +1689,7 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         updateChatAccessibility();
     }
 
-    // Event listeners (unchanged)
+    // Event listeners
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
     cancelReplyBtn.addEventListener('click', () => setReplyingTo(null));
@@ -1678,7 +1753,6 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         currentAvatarUrl = prevAvatar;
 
         localStorage.removeItem(STORAGE_KEY_NAME);
-        // Keep LAST_USERNAME_KEY for prefill
         username = '';
         inputAreaBar.classList.add('hidden');
         nameOverlay.classList.remove('hidden');
@@ -1712,11 +1786,27 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         }
     });
 
-    // Init
+    // ============================================================
+    // INIT – UPDATED: non-blocking wallet reconnect
+    // ============================================================
     async function init() {
-        // Wallet auto-connect FIRST
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
-        initPhantomAutoConnect();
+
+        // Kick off wallet reconnect in parallel — do NOT await
+        (async () => {
+            const provider = getPhantomProvider();
+            if (!provider) return;
+            try {
+                const resp = await provider.connect({ onlyIfTrusted: true });
+                phantomWalletPublicKey = resp.publicKey;
+                phantomConnected = true;
+                updatePhantomUI();
+                fetchAndDisplayAllTokens();
+            } catch (e) {
+                // Not trusted yet — user will click to connect
+            }
+        })();
+
         setupTweetObserver();
 
         await loadSettings();
@@ -1726,7 +1816,6 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
         inputAreaBar.classList.add('hidden');
 
         if(username) {
-            // existing user flow (same)
             const { data: profile } = await supabase.from('profiles').select('avatar_url, token_balance, wallet_address').eq('username', username).single();
             if(profile && profile.avatar_url) {
                 avatarCache[username] = profile.avatar_url;
@@ -1767,7 +1856,6 @@ showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
                 setActivePrivateChat(savedActiveChat);
             }
         } else {
-            // Prefill overlay with last used identity
             const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
             if (lastUsername) {
                 nameInput.value = lastUsername;
