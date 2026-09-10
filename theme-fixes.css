@@ -305,7 +305,7 @@ html, body {
 }
 
 /* =====================================================
-   MESSAGES + REACTIONS + X EMBEDS – clean & simple
+   MESSAGES + REACTIONS – clean & simple
 ===================================================== */
 
 /* ── Message wrapper: never clip children ── */
@@ -356,10 +356,57 @@ html, body {
     }
 }
 
-/* ── X / Twitter: let the widget render naturally ──
-   No borders, no backgrounds, no placeholders.
-   Just constrain width so it fits the bubble. */
-.msg-bubble .twitter-tweet,
+/* =====================================================
+   X / TWITTER EMBEDS – spinner while loading, clean embed when ready
+===================================================== */
+
+/* ── Pre-render: blockquote reserves space + shows spinner ── */
+.msg-bubble blockquote.twitter-tweet {
+    position: relative;
+    display: block;
+    margin: 8px 0 !important;
+    padding: 12px 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    min-height: 60px;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Hide the URL text but keep it in the DOM — Twitter needs to read its href */
+.msg-bubble blockquote.twitter-tweet a {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Spinning loader shown while waiting for Twitter */
+.msg-bubble blockquote.twitter-tweet:not(.twitter-tweet-rendered)::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+    border: 3px solid rgba(0, 240, 255, 0.18);
+    border-top-color: var(--accent-cyan, #00f0ff);
+    border-radius: 50%;
+    animation: tweetSpinner 0.8s linear infinite;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+}
+@keyframes tweetSpinner {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Rendered embed: fits the bubble cleanly ── */
 .msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
     max-width: 100% !important;
@@ -367,36 +414,20 @@ html, body {
     min-width: 0 !important;
     margin: 8px 0 !important;
     display: block !important;
-}
-
-/* Neutralize browser default blockquote styling */
-.msg-bubble blockquote.twitter-tweet {
-    margin: 8px 0 !important;
-    padding: 0 !important;
     border: 0 !important;
-    background: none !important;
     box-shadow: none !important;
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
-    white-space: normal !important;
 }
 
-/* Before Twitter renders: hide the raw URL entirely.
-   Nothing shows — no bar, no text, just reserved space.
-   Twitter fills it within ~1s. */
-.msg-bubble blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
-    min-height: 100px;
-    opacity: 0;
-    overflow: hidden;
+/* Once Twitter renders it, ensure no spinner lingers */
+.msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered {
+    padding: 0 !important;
+    min-height: 0 !important;
+}
+.msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered::before {
+    content: none !important;
 }
 
-/* The raw URL link inside the blockquote — always hidden */
-.msg-bubble blockquote.twitter-tweet a {
-    display: none !important;
-}
-
-/* ── Desktop: give tweet bubbles a wider floor so embed fits ── */
+/* ── Desktop: tweet bubbles get a wider floor ── */
 @media (min-width: 769px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
@@ -406,7 +437,7 @@ html, body {
     }
 }
 
-/* ── Mobile: tweet bubbles take full width ── */
+/* ── Mobile: full width, no floor ── */
 @media (max-width: 768px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
