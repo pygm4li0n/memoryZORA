@@ -84,6 +84,39 @@
                 display: flex;
             }
         }
+
+        /* ── Login streak badge (new) ── */
+        .big-streak {
+            font-size: 0.72rem;
+            color: var(--accent-orange, #f97316);
+            font-weight: 600;
+            margin-top: 4px;
+            letter-spacing: 0.03em;
+        }
+        .big-streak.hidden {
+            display: none;
+        }
+
+        /* ── Reset login streaks button (mod panel, new) ── */
+        .reset-login-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 92, 124, 0.15);
+            border: 1px solid rgba(255, 92, 124, 0.5);
+            color: #ffb3c1;
+            border-radius: var(--radius-md, 10px);
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-family: var(--font-main, inherit);
+            letter-spacing: 0.05em;
+        }
+        .reset-login-btn:hover {
+            background: rgba(255, 92, 124, 0.3);
+            box-shadow: 0 0 10px rgba(255, 92, 124, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -140,6 +173,8 @@
                 <textarea id="modAnnouncementInput" rows="3" maxlength="300" placeholder="Type your announcement..."></textarea>
                 <button id="modPostAnnouncementBtn">POST ANNOUNCEMENT</button>
             </div>
+            <!-- NEW: Reset login streaks button -->
+            <button id="modResetLoginBtn" class="reset-login-btn">🔄 Reset All Login Streaks</button>
             <button id="modSaveSettingsBtn">SAVE SETTINGS</button>
             <button id="modCloseSettingsBtn">Close</button>
         </div>
@@ -152,6 +187,8 @@
                 <div class="big-info">
                     <div class="big-name" id="sidebarBigName">You</div>
                     <div class="big-rank hidden" id="sidebarBigRank"></div>
+                    <!-- NEW: Login streak badge -->
+                    <div class="big-streak hidden" id="sidebarBigStreak"></div>
                     <div class="big-status"><span class="status-dot"></span> Online</div>
                 </div>
                 <button class="btn-icon edit-profile-btn" id="sidebarChangeNameBtn" title="Change name">✎</button>
@@ -282,6 +319,8 @@
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
+    <!-- NEW: daily login tracking (must be after script.js) -->
+    <script src="login-tracking.js"></script>
 
     <!-- Theme switching script (updated for overlay) -->
     <script>
