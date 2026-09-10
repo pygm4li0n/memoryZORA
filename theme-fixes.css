@@ -236,17 +236,6 @@ html, body {
     line-height: 1.2;
 }
 
-/* ── X / Twitter links – wrap and don’t overflow ── */
-.twitter-tweet,
-blockquote.twitter-tweet,
-.msg-text a,
-.reply-ref-block .r-text {
-    max-width: 100% !important;
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
-    white-space: normal !important;
-}
-
 /* ── Mobile header: keep both phantom & theme picker visible, compact, emoji-only theme selector ── */
 @media (max-width: 768px) {
     .header-right .badge-pill,
@@ -278,7 +267,7 @@ blockquote.twitter-tweet,
         height: 24px;
         object-fit: contain;
     }
-    /* Theme selector in header (still present but we can keep as is or hide) */
+    /* Theme selector in header */
     .header-right .theme-select {
         appearance: none;
         -webkit-appearance: none;
@@ -316,17 +305,20 @@ blockquote.twitter-tweet,
 }
 
 /* =====================================================
-   MESSAGE BUBBLE – minimum width so short messages show
-   the full date + reactions on one row
+   MESSAGES + REACTIONS + X EMBEDS – clean & simple
 ===================================================== */
+
+/* ── Message wrapper: never clip children ── */
 .msg-wrapper {
-    overflow: visible !important;   /* never clip the reactions inside */
+    overflow: visible !important;
 }
+
+/* ── Message bubble: stable layout, no clipping ── */
 .msg-bubble {
-    min-width: 200px;
-    overflow: visible;              /* let reactions render fully */
     display: flex;
     flex-direction: column;
+    min-width: 200px;
+    overflow: visible;
 }
 .msg-bubble > * {
     max-width: 100%;
@@ -337,17 +329,14 @@ blockquote.twitter-tweet,
     }
 }
 
-/* =====================================================
-   REACTIONS BAR – always horizontal, never wraps vertically
-===================================================== */
+/* ── Reactions: single horizontal row, never clipped ── */
 .reactions-bar {
     display: flex !important;
     gap: 6px !important;
     margin-top: 8px !important;
     flex-wrap: nowrap !important;
-    overflow: visible !important;   /* no scrollbar, no clipping */
+    overflow: visible !important;
     max-width: 100% !important;
-    padding-bottom: 0;
 }
 .reactions-bar .reaction-btn {
     flex-shrink: 0 !important;
@@ -367,11 +356,10 @@ blockquote.twitter-tweet,
     }
 }
 
-/* =====================================================
-   X / TWITTER EMBEDS
-===================================================== */
-
-/* Force the rendered iframe to fit inside the bubble */
+/* ── X / Twitter: let the widget render naturally ──
+   No borders, no backgrounds, no placeholders.
+   Just constrain width so it fits the bubble. */
+.msg-bubble .twitter-tweet,
 .msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
     max-width: 100% !important;
@@ -379,66 +367,46 @@ blockquote.twitter-tweet,
     min-width: 0 !important;
     margin: 8px 0 !important;
     display: block !important;
+}
+
+/* Neutralize browser default blockquote styling */
+.msg-bubble blockquote.twitter-tweet {
+    margin: 8px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+}
+
+/* Before Twitter renders: hide the raw URL entirely.
+   Nothing shows — no bar, no text, just reserved space.
+   Twitter fills it within ~1s. */
+.msg-bubble blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
+    min-height: 100px;
+    opacity: 0;
     overflow: hidden;
 }
 
-/* ── Pre-render placeholder: shows "Loading X Post…" ──
-   Twitter replaces this blockquote with the real embed once ready. */
-blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
-    margin: 6px 0 !important;
-    padding: 14px 16px !important;
-    border: none !important;
-    background: transparent !important;
-    max-width: 100% !important;
-    min-height: 60px !important;               /* reserve stable height so reactions don't jump */
-    display: flex !important;
-    align-items: center !important;
-    color: var(--text-muted, #64748b) !important;
-    font-size: 0.85rem !important;
-    font-style: italic !important;
-    overflow-wrap: break-word !important;
-    word-break: break-word !important;
-}
-blockquote.twitter-tweet:not(.twitter-tweet-rendered)::before {
-    content: '𝕏  Loading X Post…';
-    opacity: 0.75;
-    letter-spacing: 0.02em;
-}
-/* Hide the raw URL that's inside the blockquote */
-blockquote.twitter-tweet:not(.twitter-tweet-rendered) a {
+/* The raw URL link inside the blockquote — always hidden */
+.msg-bubble blockquote.twitter-tweet a {
     display: none !important;
 }
 
-/* Once Twitter renders it, remove the placeholder styling */
-blockquote.twitter-tweet.twitter-tweet-rendered {
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    margin: 8px 0 !important;
-    min-height: 0 !important;
-    display: block !important;
-    overflow: hidden !important;
-}
-blockquote.twitter-tweet.twitter-tweet-rendered::before {
-    content: none !important;
-}
-
-/* Desktop: tweet bubbles get a floor width so reactions + embed fit together */
+/* ── Desktop: give tweet bubbles a wider floor so embed fits ── */
 @media (min-width: 769px) {
-    .msg-wrapper:has(.twitter-tweet),
-    .msg-wrapper:has(.twitter-tweet-rendered),
-    .msg-wrapper:has(iframe[id^="twitter-widget"]) {
-        max-width: 95%;
-        min-width: 340px;
-    }
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
     .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble {
         min-width: 340px;
+        max-width: 95%;
     }
 }
 
-/* Mobile: tweets take full width, no floor width */
+/* ── Mobile: tweet bubbles take full width ── */
 @media (max-width: 768px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
