@@ -151,19 +151,33 @@
         tweetQueueRunning = false;
     }
 
-    let tweetObserver = null;
+        let tweetObserver = null;
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
+
+        // Extend the trigger zone only DOWNWARD by 80px.
+        // Tweets above the current scroll position are ignored until you scroll up.
         tweetObserver = new IntersectionObserver((entries) => {
-            for (const entry of entries) {
-                if (!entry.isIntersecting) continue;
+            // Sort by distance from viewport center so the most visible tweet loads first
+            const visible = entries.filter(e => e.isIntersecting);
+            visible.sort((a, b) => {
+                const ra = a.boundingClientRect;
+                const rb = b.boundingClientRect;
+                const vh = window.innerHeight;
+                return Math.abs((ra.top + ra.bottom)/2 - vh/2)
+                     - Math.abs((rb.top + rb.bottom)/2 - vh/2);
+            });
+
+            for (const entry of visible) {
                 const block = entry.target;
+                if (block.dataset.queued) continue;
+                block.dataset.queued = '1';
                 tweetObserver.unobserve(block);
                 tweetQueue.push(block);
             }
             processTweetQueue();
         }, {
-            rootMargin: '150px 0px',   // only start when tweet is ~150px from viewport
+            rootMargin: '0px 0px 80px 0px',  // 80px below viewport only — nothing above
             threshold: 0
         });
     }
