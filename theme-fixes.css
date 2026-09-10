@@ -304,19 +304,57 @@ blockquote.twitter-tweet,
 
 /* =====================================================
    DESKTOP‑ONLY ENHANCEMENTS
-   (X card 25% smaller, message bubble min width)
+   (message bubble min width + X card containment)
 ===================================================== */
-@media (min-width: 769px) {
-    /* Make embedded X/Twitter cards narrower and centered */
-    .msg-bubble .twitter-tweet {
-        max-width: 75% !important;
-        margin: 8px auto !important;
-    }
 
-    /* Give message bubbles a minimum width so short messages
-       still display the full date and reaction buttons */
+/* Give message bubbles a minimum width on desktop so short messages
+   still display the full date and reaction buttons */
+@media (min-width: 769px) {
     .msg-bubble {
         min-width: 180px;
+    }
+}
+
+/* ── X / Twitter card containment (all viewports) ── */
+/* Prevent the injected iframe from spilling outside the bubble */
+.msg-bubble {
+    overflow: hidden;
+}
+
+/* Wrapper that Twitter injects around the embedded iframe */
+.msg-bubble .twitter-tweet-rendered {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 8px 0 !important;   /* left-align, don't auto-center */
+    display: block !important;
+}
+
+/* The actual iframe rendered by Twitter – force it to fit the bubble */
+.msg-bubble iframe[id^="twitter-widget"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+/* ── Desktop: give tweet bubbles more breathing room ──
+   Twitter's iframe has a hard minimum (~300px), so allow
+   bubbles containing a tweet to expand a bit wider. */
+@media (min-width: 769px) {
+    .msg-wrapper:has(.twitter-tweet),
+    .msg-wrapper:has(iframe[id^="twitter-widget"]) {
+        max-width: 95%;
+        min-width: 340px;
+    }
+}
+
+/* ── Mobile: keep tweets full width of bubble ── */
+@media (max-width: 768px) {
+    .msg-bubble .twitter-tweet-rendered,
+    .msg-bubble iframe[id^="twitter-widget"] {
+        max-width: 100% !important;
+        width: 100% !important;
     }
 }
 
