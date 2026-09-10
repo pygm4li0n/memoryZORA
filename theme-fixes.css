@@ -406,6 +406,26 @@ html, body {
     to { transform: rotate(360deg); }
 }
 
+/* ── CRITICAL: hide the spinner as soon as ANY tweet renders in the bubble ──
+   Twitter doesn't always add .twitter-tweet-rendered to the original
+   blockquote — it sometimes leaves it as an orphan and inserts a new
+   rendered element as a sibling. This kills the spinner in every case. */
+.msg-bubble:has(iframe[id^="twitter-widget"]) blockquote.twitter-tweet::before,
+.msg-bubble:has(.twitter-tweet-rendered) blockquote.twitter-tweet::before {
+    content: none !important;
+    animation: none !important;
+    display: none !important;
+}
+
+/* Collapse the orphan blockquote so it takes zero space */
+.msg-bubble:has(iframe[id^="twitter-widget"]) blockquote.twitter-tweet:not(.twitter-tweet-rendered),
+.msg-bubble:has(.twitter-tweet-rendered) blockquote.twitter-tweet:not(.twitter-tweet-rendered) {
+    display: none !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
 /* ── Rendered embed: fits the bubble cleanly ── */
 .msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
