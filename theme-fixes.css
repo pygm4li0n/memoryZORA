@@ -309,17 +309,28 @@ html, body {
    Consistent sizing for ALL messages (own + others)
 ===================================================== */
 
-/* ── Wrapper: identical width cap for every message ── */
-.msg-wrapper,
+/* ── Wrapper: other users' messages hug their content ── */
+.msg-wrapper {
+    overflow: visible !important;
+    max-width: 82% !important;
+    align-self: flex-start !important;   /* ← shrink-to-content instead of stretching */
+}
+
+/* Own messages: right-aligned, same shrink behavior */
 .msg-wrapper.own {
     overflow: visible !important;
     max-width: 82% !important;
+    align-self: flex-end !important;
 }
 
 @media (max-width: 768px) {
-    .msg-wrapper,
+    .msg-wrapper {
+        max-width: 92% !important;
+        align-self: flex-start !important;
+    }
     .msg-wrapper.own {
         max-width: 92% !important;
+        align-self: flex-end !important;
     }
 }
 
