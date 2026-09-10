@@ -129,22 +129,53 @@
         return twttrReadyPromise;
     }
 
+        // ── Staggered queue: process one tweet at a time so we don't hammer Twitter ──
+    const tweetQueue = [];
+    let tweetQueueRunning = false;
+
+    async function processTweetQueue() {
+        if (tweetQueueRunning) return;
+        tweetQueueRunning = true;
+        while (tweetQueue.length > 0) {
+            const block = tweetQueue.shift();
+            if (!block || !block.isConnected) continue;
+            try {
+                const twttr = await waitForTwttr();
+                twttr.widgets.load(block.parentNode);
+            } catch (err) {
+                console.warn('Twitter widget failed:', err);
+            }
+            // Small pause between tweets so Twitter isn't overwhelmed
+            await new Promise(r => setTimeout(r, 250));
+        }
+        tweetQueueRunning = false;
+    }
+
     let tweetObserver = null;
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
-        tweetObserver = new IntersectionObserver(async (entries) => {
+        tweetObserver = new IntersectionObserver((entries) => {
             for (const entry of entries) {
                 if (!entry.isIntersecting) continue;
-                const wrapper = entry.target;
-                tweetObserver.unobserve(wrapper);
-                try {
-                    const twttr = await waitForTwttr();   // ← critical: wait for script
-                    twttr.widgets.load(wrapper);          // ← official Twitter render method
-                } catch (err) {
-                    console.warn('Twitter widget failed:', err);
-                }
+                const block = entry.target;
+                tweetObserver.unobserve(block);
+                tweetQueue.push(block);
             }
-        }, { rootMargin: '300px' });
+            processTweetQueue();
+        }, {
+            rootMargin: '150px 0px',   // only start when tweet is ~150px from viewport
+            threshold: 0
+        });
+    }
+
+    function observeTweetsInWrapper(wrapper) {
+        if (!tweetObserver) return;
+        const tweetBlocks = wrapper.querySelectorAll('.twitter-tweet');
+        tweetBlocks.forEach(block => {
+            if (block.dataset.observed) return;
+            block.dataset.observed = '1';
+            tweetObserver.observe(block);   // observe the tweet block itself
+        });
     }
 
     function observeTweetsInWrapper(wrapper) {
