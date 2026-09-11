@@ -27,8 +27,7 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ── Real visible viewport height for Phantom/Safari ──
-    // Phantom's WebView misreports 100dvh — visualViewport.height is the truth.
+    // ── Real visible viewport height (fallback if inline <head> script didn't run) ──
     function updateAppHeight() {
         const vv = window.visualViewport;
         const h = vv ? vv.height : window.innerHeight;
@@ -41,6 +40,7 @@
     }
     window.addEventListener('resize', updateAppHeight);
     window.addEventListener('orientationchange', () => setTimeout(updateAppHeight, 100));
+    [50, 200, 500, 1200, 2500].forEach(ms => setTimeout(updateAppHeight, ms));
 
     // DOM elements
     const sidebarWalletAddress = document.getElementById('sidebarWalletAddress');
@@ -144,12 +144,8 @@
         return twttrReadyPromise;
     }
 
-    // Pre-warm
     waitForTwttr();
 
-    // ── Staggered queue: process one tweet at a time ──
-    // After each tweet renders, if the user was at the bottom, snap back down
-    // (tweet iframes expand and push content — this keeps chat anchored).
     const tweetQueue = [];
     let tweetQueueRunning = false;
 
@@ -160,7 +156,6 @@
             const block = tweetQueue.shift();
             if (!block || !block.isConnected) continue;
 
-            // Snapshot "was the user at the bottom?" BEFORE the tweet expands
             const pubNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 200;
             const privNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 200;
 
@@ -171,10 +166,8 @@
                 console.warn('Twitter widget failed:', err);
             }
 
-            // Let the iframe finish rendering
             await new Promise(r => setTimeout(r, 400));
 
-            // Re-snap only if the user hadn't scrolled away
             if (pubNearBottom) publicContainer.scrollTop = publicContainer.scrollHeight;
             if (privNearBottom) privateContainer.scrollTop = privateContainer.scrollHeight;
 
@@ -687,47 +680,30 @@
     // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
-    function pinToBottom(container, durationMs = 3000) {
+    // ── Bulletproof pin-to-bottom ──
+    // Re-snaps at multiple staggered delays to survive Phantom's late layout
+    // settle and tweet iframe expansion.
+    function pinToBottom(container, durationMs = 4000) {
         if (!container) return;
         const start = Date.now();
+
+        // Continuous rAF for the duration
         const tick = () => {
-            const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 120;
-            if (!nearBottom) return;
-            container.scrollTop = container.scrollHeight;
+            const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+            if (nearBottom) container.scrollTop = container.scrollHeight;
             if (Date.now() - start < durationMs) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
-    }
 
-    // Re-pin when Phantom's viewport shifts (safe-area, bottom nav, keyboard)
-    function repinOnViewportSettle(container) {
-        if (!container) return;
+        // Also staggered snapshots for backgrounds/throttled tabs
         const isMobile = window.innerWidth <= 768;
-        container.scrollTop = container.scrollHeight;
         const delays = isMobile
-            ? [50, 150, 300, 600, 1000, 1800, 3000, 5000]
-            : [50, 150, 400, 900];
-        delays.forEach(ms => {
-            setTimeout(() => {
-                const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-                if (nearBottom) container.scrollTop = container.scrollHeight;
-            }, ms);
-        });
-        if (!container.__repinAttached) {
-            container.__repinAttached = true;
-            const onResize = () => {
-                requestAnimationFrame(() => {
-                    const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
-                    if (nearBottom) container.scrollTop = container.scrollHeight;
-                });
-            };
-            window.addEventListener('resize', onResize);
-            window.addEventListener('orientationchange', onResize);
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', onResize);
-                window.visualViewport.addEventListener('scroll', onResize);
-            }
-        }
+            ? [0, 30, 80, 150, 300, 500, 800, 1200, 1800, 2500, 3500, 4500]
+            : [0, 30, 80, 200, 500, 1000];
+        delays.forEach(ms => setTimeout(() => {
+            const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+            if (nearBottom) container.scrollTop = container.scrollHeight;
+        }, ms));
     }
 
     function updateScrollButtonVisibility(container) {
@@ -1401,8 +1377,7 @@
             await fetchAvatars(users);
             for (const msg of data) await renderMessage(msg, true, false);
             scrollContainerToBottom(privateContainer);
-            pinToBottom(privateContainer, 3000);
-            repinOnViewportSettle(privateContainer);
+            pinToBottom(privateContainer, 4000);
             updateScrollButtonVisibility(privateContainer);
         }
         loadReactions('private_message_reactions', true);
@@ -1624,8 +1599,7 @@
                 });
                 for (const msg of data) await renderMessage(msg, false, false);
                 scrollContainerToBottom(publicContainer);
-                pinToBottom(publicContainer, 3000);
-                repinOnViewportSettle(publicContainer);
+                pinToBottom(publicContainer, 4000);
                 updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
@@ -1869,7 +1843,6 @@
     async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
-        // ── Fast wallet reconnect ──
         const provider = getPhantomProvider();
         if (provider) {
             if (provider.isConnected && provider.publicKey) {
