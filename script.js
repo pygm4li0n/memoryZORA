@@ -156,9 +156,6 @@
             const block = tweetQueue.shift();
             if (!block || !block.isConnected) continue;
 
-            const pubNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 200;
-            const privNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 200;
-
             try {
                 const twttr = await waitForTwttr();
                 twttr.widgets.load(block.parentNode);
@@ -166,10 +163,16 @@
                 console.warn('Twitter widget failed:', err);
             }
 
+            // Wait for Twitter's iframe to insert + size itself
             await new Promise(r => setTimeout(r, 400));
 
-            if (pubNearBottom) publicContainer.scrollTop = publicContainer.scrollHeight;
-            if (privNearBottom) privateContainer.scrollTop = privateContainer.scrollHeight;
+            // Force snap after the tweet expanded — the auto-scroll loop
+            // is doing this too, but making it instant here avoids a
+            // visible jump where the content shifts up for one frame.
+            if (autoScroll) {
+                publicContainer.scrollTop = publicContainer.scrollHeight;
+                privateContainer.scrollTop = privateContainer.scrollHeight;
+            }
 
             await new Promise(r => setTimeout(r, 100));
         }
@@ -680,30 +683,50 @@
     // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
-    // ── Bulletproof pin-to-bottom ──
-    // Re-snaps at multiple staggered delays to survive Phantom's late layout
-    // settle and tweet iframe expansion.
-    function pinToBottom(container, durationMs = 4000) {
-        if (!container) return;
-        const start = Date.now();
+    // ── Persistent auto-scroll state ──
+    // true  = force-pin to bottom whenever content changes
+    // false = user scrolled away; do not fight them
+    let autoScroll = true;
 
-        // Continuous rAF for the duration
+    function attachAutoScrollListeners() {
+        [publicContainer, privateContainer].forEach(container => {
+            container.addEventListener('touchmove', () => { autoScroll = false; }, { passive: true });
+            container.addEventListener('wheel', () => { autoScroll = false; }, { passive: true });
+            container.addEventListener('keydown', () => { autoScroll = false; }, { passive: true });
+
+            container.addEventListener('scroll', () => {
+                const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 30;
+                if (atBottom) autoScroll = true;
+            });
+        });
+    }
+    attachAutoScrollListeners();
+
+    // ── Persistent snap-to-bottom loop ──
+    // Runs every animation frame. When autoScroll is true, it forces the
+    // container to the bottom — surviving tweet expansion, image loads, etc.
+    // When autoScroll is false (user scrolled up), it does nothing.
+    function startAutoScrollLoop() {
         const tick = () => {
-            const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
-            if (nearBottom) container.scrollTop = container.scrollHeight;
-            if (Date.now() - start < durationMs) requestAnimationFrame(tick);
+            if (autoScroll) {
+                const c = currentTab === 'private' ? privateContainer : publicContainer;
+                c.scrollTop = c.scrollHeight;
+                const other = c === publicContainer ? privateContainer : publicContainer;
+                if (other && !other.classList.contains('hidden')) {
+                    other.scrollTop = other.scrollHeight;
+                }
+            }
+            requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
+    }
+    startAutoScrollLoop();
 
-        // Also staggered snapshots for backgrounds/throttled tabs
-        const isMobile = window.innerWidth <= 768;
-        const delays = isMobile
-            ? [0, 30, 80, 150, 300, 500, 800, 1200, 1800, 2500, 3500, 4500]
-            : [0, 30, 80, 200, 500, 1000];
-        delays.forEach(ms => setTimeout(() => {
-            const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
-            if (nearBottom) container.scrollTop = container.scrollHeight;
-        }, ms));
+    // Kept for compatibility — no-op now that the loop is always running
+    function pinToBottom(container, durationMs = 4000) {
+        if (container && autoScroll) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     function updateScrollButtonVisibility(container) {
@@ -720,6 +743,7 @@
     });
     scrollBottomBtn.addEventListener('click', () => {
         const container = currentTab === 'public' ? publicContainer : privateContainer;
+        autoScroll = true;   // re-enable auto-scroll when user clicks scroll-to-bottom
         container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
         setTimeout(() => updateScrollButtonVisibility(container), 300);
     });
