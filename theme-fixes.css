@@ -137,11 +137,11 @@ html, body {
     max-width: 100%;
 }
 
-/* Input bar – lifted slightly, safe‑area aware (mobile only) */
+/* ── Input bar – close to the bottom, safe-area aware ── */
 .input-area-bar {
     flex-shrink: 0;
-    padding-bottom: calc(25px + env(safe-area-inset-bottom)) !important;
-    margin-bottom: calc(15px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    margin-bottom: 0 !important;
     box-sizing: border-box;
 }
 
@@ -192,8 +192,8 @@ html, body {
 /* ── Sidebar on mobile – full height, footer visible, no clipping ── */
 @media (max-width: 768px) {
     .sidebar {
-        height: calc(100dvh - 25px - env(safe-area-inset-bottom)) !important;
-        max-height: calc(100dvh - 25px - env(safe-area-inset-bottom)) !important;
+        height: calc(100dvh - env(safe-area-inset-bottom)) !important;
+        max-height: calc(100dvh - env(safe-area-inset-bottom)) !important;
         padding-bottom: 0 !important;
         margin-bottom: 0 !important;
         box-sizing: border-box;
@@ -213,7 +213,7 @@ html, body {
 
     .sidebar-footer {
         flex-shrink: 0;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
         min-height: 40px;
         display: flex;
         align-items: center;
@@ -626,7 +626,7 @@ html, body {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #22c55e !important;                    /* fixed green – all themes */
+    background: #22c55e !important;
     border: 1.5px solid var(--bg-panel, #111827);
     box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34,197,94,0.8) !important;
     animation: phantomPulse 2s ease-in-out infinite;
@@ -643,7 +643,7 @@ html, body {
     box-shadow: 0 0 10px rgba(255,92,124,0.35) !important;
 }
 .phantom-overlay-btn.connected::after {
-    background: #22c55e !important;                    /* fixed green – all themes */
+    background: #22c55e !important;
     box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34,197,94,0.8) !important;
 }
 .phantom-overlay-btn.connected span {
