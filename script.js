@@ -27,7 +27,7 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ── Real visible viewport height (fallback if inline <head> script didn't run) ──
+    // ── Real visible viewport height ──
     function updateAppHeight() {
         const vv = window.visualViewport;
         const h = vv ? vv.height : window.innerHeight;
@@ -128,7 +128,7 @@
     let tokenListContainer = null;
 
     // ============================================================
-    // TWITTER EMBED – pre-warmed, viewport-only loading
+    // TWITTER EMBED
     // ============================================================
     let twttrReadyPromise = null;
     function waitForTwttr() {
@@ -143,7 +143,6 @@
         });
         return twttrReadyPromise;
     }
-
     waitForTwttr();
 
     const tweetQueue = [];
@@ -155,25 +154,18 @@
         while (tweetQueue.length > 0) {
             const block = tweetQueue.shift();
             if (!block || !block.isConnected) continue;
-
             try {
                 const twttr = await waitForTwttr();
                 twttr.widgets.load(block.parentNode);
             } catch (err) {
                 console.warn('Twitter widget failed:', err);
             }
-
-            // Wait for Twitter's iframe to insert + size itself
             await new Promise(r => setTimeout(r, 400));
-
-            // Force snap after the tweet expanded — the auto-scroll loop
-            // is doing this too, but making it instant here avoids a
-            // visible jump where the content shifts up for one frame.
+            // If user hasn't touched the chat and auto-scroll is on, re-snap
             if (autoScroll) {
-                publicContainer.scrollTop = publicContainer.scrollHeight;
-                privateContainer.scrollTop = privateContainer.scrollHeight;
+                const c = currentTab === 'private' ? privateContainer : publicContainer;
+                c.scrollTop = c.scrollHeight;
             }
-
             await new Promise(r => setTimeout(r, 100));
         }
         tweetQueueRunning = false;
@@ -182,7 +174,6 @@
     let tweetObserver = null;
     function setupTweetObserver() {
         if (tweetObserver || !('IntersectionObserver' in window)) return;
-
         tweetObserver = new IntersectionObserver((entries) => {
             const visible = entries.filter(e => e.isIntersecting);
             visible.sort((a, b) => {
@@ -192,7 +183,6 @@
                 return Math.abs((ra.top + ra.bottom)/2 - vh/2)
                      - Math.abs((rb.top + rb.bottom)/2 - vh/2);
             });
-
             for (const entry of visible) {
                 const block = entry.target;
                 if (block.dataset.queued) continue;
@@ -201,10 +191,7 @@
                 tweetQueue.push(block);
             }
             processTweetQueue();
-        }, {
-            rootMargin: '0px',
-            threshold: 0
-        });
+        }, { rootMargin: '0px', threshold: 0 });
     }
 
     function observeTweetsInWrapper(wrapper) {
@@ -330,10 +317,7 @@
         if (bal === null || bal === undefined) return null;
         return getBadge(bal);
     }
-
-    function updateUserRank(balance) {
-        return;
-    }
+    function updateUserRank(balance) { return; }
 
     async function fetchAndDisplayAllTokens() {
         if (!phantomWalletPublicKey) return;
@@ -383,11 +367,8 @@
     function updateChatAccessibility() {
         let canChat = false;
         if (username) {
-            if (modTokenRequirement <= 0) {
-                canChat = true;
-            } else {
-                canChat = phantomConnected && hasTokenAccess;
-            }
+            if (modTokenRequirement <= 0) canChat = true;
+            else canChat = phantomConnected && hasTokenAccess;
         }
         messageInput.disabled = !canChat;
         sendBtn.disabled = !canChat;
@@ -403,11 +384,7 @@
 
     async function connectPhantom() {
         const provider = getPhantomProvider();
-        if (!provider) {
-            showError('Phantom wallet not installed. Please install it from phantom.app');
-            return;
-        }
-
+        if (!provider) { showError('Phantom wallet not installed. Please install it from phantom.app'); return; }
         try {
             const resp = await provider.connect({ onlyIfTrusted: true });
             phantomWalletPublicKey = resp.publicKey;
@@ -416,7 +393,6 @@
             fetchAndDisplayAllTokens();
             return;
         } catch (silentErr) { /* fall through */ }
-
         try {
             const resp = await provider.connect({ onlyIfTrusted: false });
             phantomWalletPublicKey = resp.publicKey;
@@ -443,12 +419,9 @@
         if (cooldownInterval) { clearInterval(cooldownInterval); cooldownInterval = null; }
         hideCooldown();
     }
-
     function togglePhantomConnection() {
-        if (phantomConnected) disconnectPhantom();
-        else connectPhantom();
+        if (phantomConnected) disconnectPhantom(); else connectPhantom();
     }
-
     phantomConnectBtn.addEventListener('click', togglePhantomConnection);
     if (phantomConnectBtnOverlay) phantomConnectBtnOverlay.addEventListener('click', togglePhantomConnection);
 
@@ -466,12 +439,8 @@
     modSettingsBtn.addEventListener('click', () => {
         modTokenRequirementInput.value = modTokenRequirement;
         modCooldownSelect.value = modCooldownSeconds.toString();
-        if (modAnnouncementInput) {
-            modAnnouncementInput.value = modAnnouncement || '';
-        }
-        if (modAnnouncementSection) {
-            modAnnouncementSection.classList.toggle('hidden', !isModWallet);
-        }
+        if (modAnnouncementInput) modAnnouncementInput.value = modAnnouncement || '';
+        if (modAnnouncementSection) modAnnouncementSection.classList.toggle('hidden', !isModWallet);
         modSettingsOverlay.classList.remove('hidden');
     });
     modCloseSettingsBtn.addEventListener('click', () => modSettingsOverlay.classList.add('hidden'));
@@ -502,9 +471,7 @@
 
     async function postModAnnouncement(message) {
         try {
-            const { error } = await supabase
-                .from('settings')
-                .upsert({ id: 1, mod_announcement: message }, { onConflict: 'id' });
+            const { error } = await supabase.from('settings').upsert({ id: 1, mod_announcement: message }, { onConflict: 'id' });
             if (error) throw error;
             modAnnouncement = message;
             showError('✅ Announcement posted!');
@@ -515,37 +482,29 @@
     }
     modPostAnnouncementBtn.addEventListener('click', async () => {
         const msg = modAnnouncementInput.value.trim();
-        if (!msg) {
-            showError('Please enter an announcement.');
-            return;
-        }
+        if (!msg) { showError('Please enter an announcement.'); return; }
         await postModAnnouncement(msg);
         modAnnouncementInput.value = '';
     });
 
     async function loadSettings() {
         try {
-            const { data, error } = await supabase
-                .from('settings')
+            const { data, error } = await supabase.from('settings')
                 .select('token_requirement, cooldown_seconds, mod_announcement')
-                .eq('id', 1)
-                .single();
+                .eq('id', 1).single();
             if (!error && data) {
                 modTokenRequirement = data.token_requirement;
                 modCooldownSeconds = data.cooldown_seconds;
                 modAnnouncement = data.mod_announcement || '';
                 updateModAnnouncementDisplay(modAnnouncement);
             }
-        } catch (err) {
-            console.error('Error loading settings:', err);
-        }
+        } catch (err) { console.error('Error loading settings:', err); }
         updateChatAccessibility();
     }
 
     function subscribeToSettings() {
         if (settingsChannel) supabase.removeChannel(settingsChannel);
-        settingsChannel = supabase
-            .channel('settings-changes')
+        settingsChannel = supabase.channel('settings-changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, payload => {
                 const newData = payload.new;
                 if (newData && newData.id === 1) {
@@ -556,8 +515,7 @@
                     updateChatAccessibility();
                     if (phantomConnected) fetchAndDisplayAllTokens();
                 }
-            })
-            .subscribe();
+            }).subscribe();
     }
 
     function linkifyText(text) {
@@ -683,38 +641,46 @@
     // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
-    // ── Persistent auto-scroll state ──
-    // true  = force-pin to bottom whenever content changes
-    // false = user scrolled away; do not fight them
+    // ══════════════════════════════════════════════════════════════
+    // AUTO-SCROLL LOGIC
+    // ─────────────────────────────────────────────────────────────
+    // autoScroll = true  → keep pinned to bottom while content loads
+    // autoScroll = false → user has taken control; do NOT touch scrollTop
+    //
+    // Rules:
+    //  - Starts TRUE (fresh page load pins to bottom)
+    //  - Any user touch / wheel / key → turns FALSE immediately
+    //  - Stays FALSE until explicitly re-enabled (↓ button or send message)
+    //  - Never re-enables itself just from scrolling near the bottom
+    // ══════════════════════════════════════════════════════════════
     let autoScroll = true;
+
+    function disableAutoScroll() {
+        if (autoScroll) autoScroll = false;
+    }
 
     function attachAutoScrollListeners() {
         [publicContainer, privateContainer].forEach(container => {
-            container.addEventListener('touchmove', () => { autoScroll = false; }, { passive: true });
-            container.addEventListener('wheel', () => { autoScroll = false; }, { passive: true });
-            container.addEventListener('keydown', () => { autoScroll = false; }, { passive: true });
-
-            container.addEventListener('scroll', () => {
-                const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 30;
-                if (atBottom) autoScroll = true;
-            });
+            // Instant disable on ANY user interaction gesture
+            container.addEventListener('touchstart', disableAutoScroll, { passive: true });
+            container.addEventListener('pointerdown', disableAutoScroll, { passive: true });
+            container.addEventListener('touchmove', disableAutoScroll, { passive: true });
+            container.addEventListener('wheel', disableAutoScroll, { passive: true });
+            container.addEventListener('keydown', disableAutoScroll, { passive: true });
+            // Note: NO scroll listener here — we do NOT re-enable autoScroll
+            // just because the user scrolled near the bottom. It only turns
+            // back on via the ↓ button or when sending a message.
         });
     }
     attachAutoScrollListeners();
 
-    // ── Persistent snap-to-bottom loop ──
-    // Runs every animation frame. When autoScroll is true, it forces the
-    // container to the bottom — surviving tweet expansion, image loads, etc.
-    // When autoScroll is false (user scrolled up), it does nothing.
+    // Loop runs every frame but only touches scrollTop while autoScroll is true.
     function startAutoScrollLoop() {
         const tick = () => {
             if (autoScroll) {
                 const c = currentTab === 'private' ? privateContainer : publicContainer;
-                c.scrollTop = c.scrollHeight;
-                const other = c === publicContainer ? privateContainer : publicContainer;
-                if (other && !other.classList.contains('hidden')) {
-                    other.scrollTop = other.scrollHeight;
-                }
+                const atBottom = c.scrollHeight - c.scrollTop - c.clientHeight < 2;
+                if (!atBottom) c.scrollTop = c.scrollHeight;
             }
             requestAnimationFrame(tick);
         };
@@ -722,7 +688,7 @@
     }
     startAutoScrollLoop();
 
-    // Kept for compatibility — no-op now that the loop is always running
+    // Kept for compatibility with loadMessages / loadPrivateMessages calls
     function pinToBottom(container, durationMs = 4000) {
         if (container && autoScroll) {
             container.scrollTop = container.scrollHeight;
@@ -741,9 +707,10 @@
             else if (container === privateContainer && currentTab === 'private') updateScrollButtonVisibility(container);
         });
     });
+
     scrollBottomBtn.addEventListener('click', () => {
         const container = currentTab === 'public' ? publicContainer : privateContainer;
-        autoScroll = true;   // re-enable auto-scroll when user clicks scroll-to-bottom
+        autoScroll = true;   // user explicitly wants bottom → re-enable
         container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
         setTimeout(() => updateScrollButtonVisibility(container), 300);
     });
@@ -860,7 +827,6 @@
         else return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
     }
 
-    // Avatar handling
     async function fetchAvatars(usernames) {
         const unique = [...new Set(usernames.filter(u => u && (!avatarCache[u] || !(u in userBalances))))];
         if (unique.length === 0) return;
@@ -880,7 +846,6 @@
         return (user || '?')[0].toUpperCase();
     }
 
-    // Image handling
     function resizeImage(file, maxDim=750) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -929,7 +894,6 @@
         fileInput.value = '';
     }
 
-    // Reactions
     async function loadReactions(table, isPrivate) {
         const { data, error } = await supabase.from(table).select('*');
         if (error) return;
@@ -978,7 +942,6 @@
         else await supabase.from(table).insert({ message_id: messageId, username, emoji });
     }
 
-    // Message rendering & actions
     async function scrollToMessage(msgId) {
         const container = currentTab === 'public' ? publicContainer : privateContainer;
         let target = container.querySelector(`.msg-wrapper[data-msg-id="${msgId}"]`);
@@ -1078,9 +1041,7 @@
         wrapper.appendChild(bubble);
         container.appendChild(wrapper);
 
-        if (shouldScroll) {
-            container.scrollTop = container.scrollHeight;
-        }
+        if (shouldScroll) container.scrollTop = container.scrollHeight;
 
         observeTweetsInWrapper(wrapper);
 
@@ -1211,7 +1172,6 @@
         }
     }
 
-    // Typing indicators
     function startTyping() {
         if (!username || !typingChannel) return;
         const tab = currentTab === 'private' && activePrivateChat ? 'private' : 'public';
@@ -1252,17 +1212,11 @@
         const dots = '<span class="typing-dots"><span></span><span></span><span></span></span>';
         if (currentTab === 'public') {
             const count = typersPublic.length;
-            if (count === 1) {
-                text = `${escapeHtml(typersPublic[0])} is typing... ${dots}`;
-            } else if (count === 2) {
-                text = `${escapeHtml(typersPublic[0])} and ${escapeHtml(typersPublic[1])} are typing... ${dots}`;
-            } else if (count > 2) {
-                text = `2 or more are typing... ${dots}`;
-            }
+            if (count === 1) text = `${escapeHtml(typersPublic[0])} is typing... ${dots}`;
+            else if (count === 2) text = `${escapeHtml(typersPublic[0])} and ${escapeHtml(typersPublic[1])} are typing... ${dots}`;
+            else if (count > 2) text = `2 or more are typing... ${dots}`;
         } else if (currentTab === 'private' && activePrivateChat) {
-            if (typersPrivate[activePrivateChat]) {
-                text = `${escapeHtml(activePrivateChat)} is typing... ${dots}`;
-            }
+            if (typersPrivate[activePrivateChat]) text = `${escapeHtml(activePrivateChat)} is typing... ${dots}`;
         }
         if (!text) {
             typingIndicator.classList.add('hidden');
@@ -1280,7 +1234,6 @@
         typingChannel.subscribe();
     }
 
-    // Presence
     function setupPresence() {
         if (presenceChannel) return;
         if (!username) return;
@@ -1321,7 +1274,6 @@
         }
     }
 
-    // Tabs & Private Chat
     function switchTab(tabName) {
         currentTab = tabName;
         const tabs = chatTabs.querySelectorAll('.chat-tab');
@@ -1333,6 +1285,7 @@
             privateContainer.classList.add('hidden');
             privateIndicatorBar.classList.add('hidden');
             messageInput.placeholder = 'Type a message...';
+            autoScroll = true;   // re-enable on tab switch
             setTimeout(() => { scrollContainerToBottom(publicContainer); updateScrollButtonVisibility(publicContainer); }, 150);
         } else {
             publicContainer.classList.add('hidden');
@@ -1345,6 +1298,7 @@
                 privateIndicatorBar.classList.add('hidden');
                 messageInput.placeholder = 'Select a partner from the sidebar first.';
             }
+            autoScroll = true;   // re-enable on tab switch
             setTimeout(() => { scrollContainerToBottom(privateContainer); updateScrollButtonVisibility(privateContainer); }, 150);
         }
         updateTypingIndicator();
@@ -1400,6 +1354,7 @@
             const users = [...new Set(data.flatMap(m => [m.from_user, m.to_user]))];
             await fetchAvatars(users);
             for (const msg of data) await renderMessage(msg, true, false);
+            autoScroll = true;
             scrollContainerToBottom(privateContainer);
             pinToBottom(privateContainer, 4000);
             updateScrollButtonVisibility(privateContainer);
@@ -1407,7 +1362,6 @@
         loadReactions('private_message_reactions', true);
     }
 
-    // Sidebar UI
     async function updateSidebarUI() {
         const usersToFetch = [];
         if (username) usersToFetch.push(username);
@@ -1479,7 +1433,6 @@
         </div>`;
     }
 
-    // Private chat requests
     function showRequestOverlay(fromUser, requestId) {
         currentRequestData = { from_user: fromUser, id: requestId };
         const url = getAvatarURL(fromUser);
@@ -1506,10 +1459,7 @@
     });
 
     async function handlePrivateChatClick(targetUser) {
-        if(acceptedPrivateChats.has(targetUser)) {
-            setActivePrivateChat(targetUser);
-            return;
-        }
+        if(acceptedPrivateChats.has(targetUser)) { setActivePrivateChat(targetUser); return; }
         if(pendingPrivateRequests.has(targetUser)) {
             const req = pendingPrivateRequests.get(targetUser);
             if(req.status === 'pending' && req.from_user === targetUser) {
@@ -1522,20 +1472,11 @@
     async function sendPrivateRequest(toUser) {
         const { data: existing } = await supabase
             .from('private_chat_requests')
-            .select('id')
-            .eq('from_user', username)
-            .eq('to_user', toUser)
-            .eq('status', 'pending')
-            .maybeSingle();
-        if (existing) {
-            showError('📩 Request already sent');
-            return;
-        }
+            .select('id').eq('from_user', username).eq('to_user', toUser).eq('status', 'pending').maybeSingle();
+        if (existing) { showError('📩 Request already sent'); return; }
         try {
             const { error } = await supabase.from('private_chat_requests').insert({
-                from_user: username,
-                to_user: toUser,
-                status: 'pending'
+                from_user: username, to_user: toUser, status: 'pending'
             });
             if(error) { showError('Request failed: ' + error.message); return; }
             showError('📩 Request sent to ' + toUser);
@@ -1544,16 +1485,12 @@
     }
     async function acceptPrivateRequest(fromUser, requestId) {
         try {
-            const { error } = await supabase.from('private_chat_requests')
-                .update({status:'accepted'})
-                .eq('id', requestId);
+            const { error } = await supabase.from('private_chat_requests').update({status:'accepted'}).eq('id', requestId);
             if(error) throw error;
             pendingPrivateRequests.delete(fromUser);
             acceptedPrivateChats.add(fromUser);
             saveAcceptedChats();
-            if (activePrivateChat !== fromUser) {
-                setActivePrivateChat(fromUser);
-            }
+            if (activePrivateChat !== fromUser) setActivePrivateChat(fromUser);
             updateSidebarUI();
             showError('✅ Chat with ' + fromUser + ' active!');
         } catch(err) { showError('Accept error: '+err.message); }
@@ -1562,9 +1499,7 @@
         if(!username) return;
         try {
             const { data, error } = await supabase.from('private_chat_requests')
-                .select('*')
-                .or(`to_user.eq.${username},from_user.eq.${username}`)
-                .order('created_at', {ascending:false});
+                .select('*').or(`to_user.eq.${username},from_user.eq.${username}`).order('created_at', {ascending:false});
             if(error) return;
             pendingPrivateRequests.clear();
             (data||[]).forEach(req => {
@@ -1573,9 +1508,7 @@
                 }
             });
             updateSidebarUI();
-        } catch(err) {
-            console.error('Error loading pending requests:', err);
-        }
+        } catch(err) { console.error('Error loading pending requests:', err); }
     }
     function subscribeToPrivateRequests() {
         if(!username) return;
@@ -1601,15 +1534,12 @@
             }).subscribe();
     }
 
-    // Load and send messages
     async function loadMessages() {
         setConnection('connecting');
         try {
             const { data, error } = await supabase
                 .from('message_feed')
-                .select('*')
-                .order('sort_order', { ascending: false })
-                .range(0, 29);
+                .select('*').order('sort_order', { ascending: false }).range(0, 29);
             if (error) throw error;
             data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
             publicContainer.innerHTML = '';
@@ -1622,6 +1552,7 @@
                     if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
                 });
                 for (const msg of data) await renderMessage(msg, false, false);
+                autoScroll = true;   // fresh load → pin to bottom
                 scrollContainerToBottom(publicContainer);
                 pinToBottom(publicContainer, 4000);
                 updateScrollButtonVisibility(publicContainer);
@@ -1686,6 +1617,8 @@
             clearAttachedImage();
             stopTyping();
             startCooldown(modCooldownSeconds);
+            // User just sent a message — pin to bottom to see it
+            autoScroll = true;
         } catch (err) {
             showError('Send failed: ' + err.message);
         } finally {
@@ -1698,10 +1631,10 @@
         if (realtimeChannel) supabase.removeChannel(realtimeChannel);
         realtimeChannel = supabase.channel('public-msgs')
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages' }, payload => {
-                renderMessage(payload.new, false, true);
+                const wasAuto = autoScroll;
+                renderMessage(payload.new, false, wasAuto);
                 setConnection('connected');
-                const isNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 80;
-                if (isNearBottom) scrollContainerToBottom(publicContainer);
+                if (wasAuto) scrollContainerToBottom(publicContainer);
             })
             .subscribe();
         if (privMsgChannel) supabase.removeChannel(privMsgChannel);
@@ -1709,9 +1642,9 @@
             .on('postgres_changes', { event:'INSERT', schema:'public', table:'private_messages' }, payload => {
                 const msg = payload.new;
                 if (activePrivateChat && ((msg.from_user === username && msg.to_user === activePrivateChat) || (msg.from_user === activePrivateChat && msg.to_user === username))) {
-                    renderMessage(msg, true, true);
-                    const isNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 80;
-                    if (isNearBottom) scrollContainerToBottom(privateContainer);
+                    const wasAuto = autoScroll;
+                    renderMessage(msg, true, wasAuto);
+                    if (wasAuto) scrollContainerToBottom(privateContainer);
                 }
             })
             .subscribe();
@@ -1745,12 +1678,8 @@
         await supabase.from('profiles').upsert({ username: name, avatar_url: avatarUrlToUse });
         avatarCache[name] = avatarUrlToUse;
         if (sidebarBigAvatar) {
-            if (avatarUrlToUse) {
-                sidebarBigAvatar.innerHTML = `<img src="${avatarUrlToUse}" style="width:100%;height:100%;object-fit:cover;">`;
-            } else {
-                const initial = (name[0]||'?').toUpperCase();
-                sidebarBigAvatar.innerHTML = initial;
-            }
+            if (avatarUrlToUse) sidebarBigAvatar.innerHTML = `<img src="${avatarUrlToUse}" style="width:100%;height:100%;object-fit:cover;">`;
+            else sidebarBigAvatar.innerHTML = (name[0]||'?').toUpperCase();
         }
         if (sidebarBigName) sidebarBigName.textContent = name;
 
@@ -1834,11 +1763,8 @@
         nameInput.value = prevName || '';
         nameInput.focus();
 
-        if (prevAvatar) {
-            profilePicPreview.innerHTML = `<img src="${prevAvatar}" alt="Profile">`;
-        } else {
-            profilePicPreview.innerHTML = '<span>📷</span>';
-        }
+        if (prevAvatar) profilePicPreview.innerHTML = `<img src="${prevAvatar}" alt="Profile">`;
+        else profilePicPreview.innerHTML = '<span>📷</span>';
         profilePicFile = null;
 
         setReplyingTo(null);
@@ -1848,9 +1774,7 @@
         updateSidebarUI();
     });
     if (mobileEditBtn) {
-        mobileEditBtn.addEventListener('click', () => {
-            sidebarChangeNameBtn.click();
-        });
+        mobileEditBtn.addEventListener('click', () => { sidebarChangeNameBtn.click(); });
     }
 
     sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
@@ -1861,9 +1785,6 @@
         }
     });
 
-    // ============================================================
-    // INIT – fast wallet reconnect + pre-warmed Twitter widget
-    // ============================================================
     async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
@@ -1901,8 +1822,7 @@
                 currentAvatarUrl = profile.avatar_url;
                 if (sidebarBigAvatar) sidebarBigAvatar.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
             } else {
-                const initial = (username[0]||'?').toUpperCase();
-                if (sidebarBigAvatar) sidebarBigAvatar.innerHTML = initial;
+                if (sidebarBigAvatar) sidebarBigAvatar.innerHTML = (username[0]||'?').toUpperCase();
             }
             if (profile && profile.wallet_address) {
                 userBalances[username] = profile.token_balance || 0;
@@ -1938,11 +1858,7 @@
             const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
             if (lastUsername) {
                 nameInput.value = lastUsername;
-                const { data: lastProfile } = await supabase
-                    .from('profiles')
-                    .select('avatar_url')
-                    .eq('username', lastUsername)
-                    .single();
+                const { data: lastProfile } = await supabase.from('profiles').select('avatar_url').eq('username', lastUsername).single();
                 if (lastProfile && lastProfile.avatar_url) {
                     currentAvatarUrl = lastProfile.avatar_url;
                     profilePicPreview.innerHTML = `<img src="${lastProfile.avatar_url}" alt="Profile">`;
