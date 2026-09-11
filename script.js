@@ -27,6 +27,21 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // ── Real visible viewport height for Phantom/Safari ──
+    // Phantom's WebView misreports 100dvh — visualViewport.height is the truth.
+    function updateAppHeight() {
+        const vv = window.visualViewport;
+        const h = vv ? vv.height : window.innerHeight;
+        document.documentElement.style.setProperty('--app-height', h + 'px');
+    }
+    updateAppHeight();
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateAppHeight);
+        window.visualViewport.addEventListener('scroll', updateAppHeight);
+    }
+    window.addEventListener('resize', updateAppHeight);
+    window.addEventListener('orientationchange', () => setTimeout(updateAppHeight, 100));
+
     // DOM elements
     const sidebarWalletAddress = document.getElementById('sidebarWalletAddress');
     const publicContainer = document.getElementById('publicMessagesContainer');
@@ -129,11 +144,12 @@
         return twttrReadyPromise;
     }
 
-    // Pre-warm: start waiting immediately so the widget is ready by the time
-    // the first tweet scrolls into view.
+    // Pre-warm
     waitForTwttr();
 
     // ── Staggered queue: process one tweet at a time ──
+    // After each tweet renders, if the user was at the bottom, snap back down
+    // (tweet iframes expand and push content — this keeps chat anchored).
     const tweetQueue = [];
     let tweetQueueRunning = false;
 
@@ -143,12 +159,25 @@
         while (tweetQueue.length > 0) {
             const block = tweetQueue.shift();
             if (!block || !block.isConnected) continue;
+
+            // Snapshot "was the user at the bottom?" BEFORE the tweet expands
+            const pubNearBottom = publicContainer.scrollHeight - publicContainer.scrollTop - publicContainer.clientHeight < 200;
+            const privNearBottom = privateContainer.scrollHeight - privateContainer.scrollTop - privateContainer.clientHeight < 200;
+
             try {
                 const twttr = await waitForTwttr();
                 twttr.widgets.load(block.parentNode);
             } catch (err) {
                 console.warn('Twitter widget failed:', err);
             }
+
+            // Let the iframe finish rendering
+            await new Promise(r => setTimeout(r, 400));
+
+            // Re-snap only if the user hadn't scrolled away
+            if (pubNearBottom) publicContainer.scrollTop = publicContainer.scrollHeight;
+            if (privNearBottom) privateContainer.scrollTop = privateContainer.scrollHeight;
+
             await new Promise(r => setTimeout(r, 100));
         }
         tweetQueueRunning = false;
@@ -668,6 +697,37 @@
             if (Date.now() - start < durationMs) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
+    }
+
+    // Re-pin when Phantom's viewport shifts (safe-area, bottom nav, keyboard)
+    function repinOnViewportSettle(container) {
+        if (!container) return;
+        const isMobile = window.innerWidth <= 768;
+        container.scrollTop = container.scrollHeight;
+        const delays = isMobile
+            ? [50, 150, 300, 600, 1000, 1800, 3000, 5000]
+            : [50, 150, 400, 900];
+        delays.forEach(ms => {
+            setTimeout(() => {
+                const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+                if (nearBottom) container.scrollTop = container.scrollHeight;
+            }, ms);
+        });
+        if (!container.__repinAttached) {
+            container.__repinAttached = true;
+            const onResize = () => {
+                requestAnimationFrame(() => {
+                    const nearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+                    if (nearBottom) container.scrollTop = container.scrollHeight;
+                });
+            };
+            window.addEventListener('resize', onResize);
+            window.addEventListener('orientationchange', onResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onResize);
+                window.visualViewport.addEventListener('scroll', onResize);
+            }
+        }
     }
 
     function updateScrollButtonVisibility(container) {
@@ -1342,6 +1402,7 @@
             for (const msg of data) await renderMessage(msg, true, false);
             scrollContainerToBottom(privateContainer);
             pinToBottom(privateContainer, 3000);
+            repinOnViewportSettle(privateContainer);
             updateScrollButtonVisibility(privateContainer);
         }
         loadReactions('private_message_reactions', true);
@@ -1564,6 +1625,7 @@
                 for (const msg of data) await renderMessage(msg, false, false);
                 scrollContainerToBottom(publicContainer);
                 pinToBottom(publicContainer, 3000);
+                repinOnViewportSettle(publicContainer);
                 updateScrollButtonVisibility(publicContainer);
             }
             setConnection('connected');
@@ -1807,17 +1869,15 @@
     async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
-        // ── Fast wallet reconnect: synchronous check first, then silent background connect ──
+        // ── Fast wallet reconnect ──
         const provider = getPhantomProvider();
         if (provider) {
             if (provider.isConnected && provider.publicKey) {
-                // Already connected in this tab — instant
                 phantomWalletPublicKey = provider.publicKey;
                 phantomConnected = true;
                 updatePhantomUI();
                 fetchAndDisplayAllTokens();
             } else {
-                // Try silent reconnect in background (non-blocking)
                 provider.connect({ onlyIfTrusted: true })
                     .then(resp => {
                         phantomWalletPublicKey = resp.publicKey;
@@ -1825,7 +1885,7 @@
                         updatePhantomUI();
                         fetchAndDisplayAllTokens();
                     })
-                    .catch(() => { /* not trusted — user clicks to connect */ });
+                    .catch(() => { /* not trusted */ });
             }
         }
 
