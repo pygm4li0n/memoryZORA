@@ -4,6 +4,9 @@
    badge alignment, theme button alignment, header buttons
 ===================================================== */
 
+/* Root variable — populated by inline script in <head> */
+:root { --app-height: 100vh; }
+
 /* Prevent horizontal overflow globally */
 html, body {
     overflow-x: hidden !important;
@@ -192,88 +195,95 @@ html, body {
 
 /* =====================================================
    MOBILE – force-fit to the REAL visible viewport
-   (--app-height is set by script.js from visualViewport.height)
+   --app-height is set by inline <script> in <head> of index.html
+   (do NOT use env(safe-area-inset-bottom) here — Phantom
+    already accounts for it, so adding it double-counts and
+    lifts the input bar above the visible bottom.)
 ===================================================== */
 @media (max-width: 768px) {
 
     html, body {
         position: fixed !important;
-        top: 0;
-        left: 0;
-        right: 0;
+        top: 0; left: 0; right: 0;
         width: 100%;
-        height: var(--app-height, 100dvh) !important;
-        max-height: var(--app-height, 100dvh) !important;
-        overflow: hidden;
+        height: var(--app-height) !important;
+        max-height: var(--app-height) !important;
+        overflow: hidden !important;
     }
 
+    /* Shell = exact visible area */
     .app-shell {
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
+        top: 0 !important; left: 0 !important; right: 0 !important;
         width: 100% !important;
-        height: var(--app-height, 100dvh) !important;
-        max-height: var(--app-height, 100dvh) !important;
-        display: flex;
+        height: var(--app-height) !important;
+        max-height: var(--app-height) !important;
+        display: flex !important;
+        overflow: hidden !important;
     }
 
+    /* Chat panel = column, fills shell */
     .chat-panel {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        height: 100%;
-        min-height: 0;
-        overflow: hidden;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 auto !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
+    /* Messages = the scrollable middle region */
     .messages-container {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
         padding: 0 14px 6px !important;
+        margin: 0 !important;
     }
 
-    /* Input bar pinned to the real visible bottom */
+    /* Input bar = pinned flush at the real bottom */
     .input-area-bar {
-        flex-shrink: 0;
-        padding: 8px 14px !important;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-        margin-bottom: 0 !important;
-        box-sizing: border-box;
+        flex: 0 0 auto !important;
+        padding: 6px 12px 8px !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        background: var(--bg-panel, #111827);
     }
 
-    /* ── Sidebar fills the real visible viewport ── */
+    /* Sidebar = fills the real visible viewport */
     .sidebar {
         position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
+        top: 0 !important; left: 0 !important;
         width: 80% !important;
         max-width: 320px !important;
-        height: var(--app-height, 100dvh) !important;
-        max-height: var(--app-height, 100dvh) !important;
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
+        height: var(--app-height) !important;
+        max-height: var(--app-height) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
         -webkit-overflow-scrolling: touch;
     }
 
     .sidebar-users {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
     }
 
+    /* Sidebar footer = flush at the real bottom */
     .sidebar-footer {
-        flex-shrink: 0;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-        min-height: 40px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        flex: 0 0 auto !important;
+        padding: 6px 12px 8px !important;
+        margin: 0 !important;
+        min-height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
     }
 
     /* Theme button in sidebar */
@@ -287,7 +297,7 @@ html, body {
 
     /* Scroll-to-bottom arrow — sits just above the input bar */
     .scroll-bottom-btn {
-        bottom: calc(90px + env(safe-area-inset-bottom)) !important;
+        bottom: 60px !important;
         right: 16px !important;
     }
 
