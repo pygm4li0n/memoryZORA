@@ -1,8 +1,10 @@
 /* ============================================================
-   NEON TERMINAL — retro-futuristic cyberpunk theme
-   Drop-in replacement for style.css. Toggle from theme picker.
-   Loaded AFTER style.css, BEFORE theme-fixes.css.
+   NEON TERMINAL — retro-futuristic cyberpunk SKIN
+   Self-contained: pulls in style.css as its base layout,
+   then layers the neon overrides on top.
+   Selected from the theme picker.
 ============================================================ */
+@import url('style.css?v=73');
 
 /* ── 1. ROOT VARIABLES ─────────────────────────────────── */
 :root {
@@ -1103,7 +1105,7 @@ body::before {
     50%      { box-shadow: 0 0 10px rgba(0,229,255,0.6), 0 0 24px rgba(0,229,255,0.25); }
 }
 
-/* ── 13. RANKINGS OVERLAY (theme color overlay) ────────── */
+/* ── 13. RANKINGS OVERLAY ──────────────────────────────── */
 .rankings-card {
     background: linear-gradient(135deg, #0d0d1e 0%, #08080f 100%) !important;
 }
