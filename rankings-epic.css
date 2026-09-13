@@ -1,0 +1,383 @@
+/* =====================================================
+   RANKINGS — EPIC REVAMP
+   Overrides .rankings-* to create a proper leaderboard.
+   Works with any theme (uses CSS variables).
+   Auto-generates rank badges via counter() — no JS change.
+===================================================== */
+
+/* ── CARD ──────────────────────────────────────────── */
+.rankings-card {
+    max-width: 780px !important;
+    width: 94% !important;
+    padding: 26px 26px 22px !important;
+    background: linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-panel) 45%, var(--bg-deep) 100%) !important;
+}
+
+/* ── HEADER ────────────────────────────────────────── */
+.rankings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+}
+.rankings-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 140px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-yellow), transparent);
+    box-shadow: 0 0 12px rgba(246, 187, 22, 0.6);
+}
+
+.rankings-header h3 {
+    font-size: 1.15rem !important;
+    letter-spacing: 0.18em !important;
+    color: var(--accent-yellow) !important;
+    text-shadow:
+        0 0 10px rgba(246, 187, 22, 0.6),
+        0 0 22px rgba(246, 187, 22, 0.25) !important;
+    font-weight: 800 !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 !important;
+}
+
+.rankings-close-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    border-radius: var(--radius-sm) !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.95rem !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+}
+.rankings-close-btn:hover {
+    border-color: var(--accent-red) !important;
+    color: var(--accent-red) !important;
+    background: rgba(255, 32, 42, 0.1) !important;
+    box-shadow: 0 0 14px rgba(255, 32, 42, 0.4) !important;
+    transform: rotate(90deg);
+}
+
+/* ── BODY GRID ─────────────────────────────────────── */
+.rankings-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+/* ── COLUMN TITLES — differentiated colors ─────────── */
+.rankings-column-title {
+    font-size: 0.7rem !important;
+    letter-spacing: 0.22em !important;
+    font-weight: 800 !important;
+    padding: 0 0 10px !important;
+    margin-bottom: 14px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    font-family: var(--font-mono);
+}
+
+/* TOP HOLDERS — cyan/blue (money) */
+.rankings-column:nth-child(1) .rankings-column-title {
+    color: var(--accent-cyan) !important;
+    text-shadow: 0 0 8px rgba(1, 225, 234, 0.55) !important;
+}
+.rankings-column:nth-child(1) .rankings-column-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 70px;
+    height: 2px;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(1, 225, 234, 0.75);
+}
+
+/* TOP ACTIVITY — orange (heat / energy) */
+.rankings-column:nth-child(2) .rankings-column-title {
+    color: var(--accent-orange) !important;
+    text-shadow: 0 0 8px rgba(255, 138, 0, 0.55) !important;
+}
+.rankings-column:nth-child(2) .rankings-column-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 70px;
+    height: 2px;
+    background: var(--accent-orange);
+    box-shadow: 0 0 10px rgba(255, 138, 0, 0.75);
+}
+
+/* ── LIST CONTAINER ────────────────────────────────── */
+.rankings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 460px;
+    overflow-y: auto;
+    padding-right: 4px;
+    counter-reset: rank;                /* powers the auto rank badge */
+}
+.rankings-list::-webkit-scrollbar { width: 6px; }
+.rankings-list::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 3px; }
+.rankings-list::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 3px;
+}
+.rankings-list::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+/* ── EMPTY / LOADING STATE ─────────────────────────── */
+.rankings-empty {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 44px 12px !important;
+    color: var(--text-muted) !important;
+    font-size: 0.72rem !important;
+    font-style: normal !important;
+    text-align: center;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase;
+    background: rgba(1, 9, 26, 0.4);
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+}
+.rankings-empty::before {
+    content: '//';
+    color: var(--accent-cyan);
+    opacity: 0.5;
+    font-size: 1.1rem;
+    letter-spacing: 0.35em;
+}
+
+/* ── ROW (each entry) ──────────────────────────────── */
+.rankings-list > *:not(.rankings-empty) {
+    counter-increment: rank;
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px 10px 10px !important;
+    border-radius: var(--radius-md) !important;
+    background: linear-gradient(135deg, rgba(1, 9, 26, 0.9) 0%, rgba(1, 2, 10, 0.95) 100%) !important;
+    border: 1px solid var(--border-subtle) !important;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 52px;
+}
+
+/* Auto-generated rank badge */
+.rankings-list > *:not(.rankings-empty)::before {
+    content: counter(rank, decimal-leading-zero);
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    transition: all 0.2s ease;
+}
+
+/* Hover lift */
+.rankings-list > *:not(.rankings-empty):hover {
+    border-color: var(--accent-cyan) !important;
+    background: linear-gradient(135deg, rgba(1, 225, 234, 0.07) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
+    transform: translateX(3px);
+    box-shadow:
+        0 0 16px rgba(1, 225, 234, 0.20),
+        inset 0 0 14px rgba(1, 225, 234, 0.05);
+}
+.rankings-list > *:not(.rankings-empty):hover::before {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(1, 225, 234, 0.55);
+}
+
+/* Avatar inside a row (if JS renders one) */
+.rankings-list > *:not(.rankings-empty) img,
+.rankings-list > *:not(.rankings-empty) .rank-avatar,
+.rankings-list > *:not(.rankings-empty) .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border-default);
+    background: var(--bg-input);
+}
+
+/* Value (right-aligned, bold) */
+.rankings-list > *:not(.rankings-empty) span:last-child,
+.rankings-list > *:not(.rankings-empty) > div:last-child {
+    margin-left: auto;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 6px rgba(1, 225, 234, 0.5);
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+/* ── TOP 3 — MEDALS ────────────────────────────────── */
+
+/* 1st — GOLD */
+.rankings-list > *:not(.rankings-empty):nth-child(1) {
+    border-color: rgba(246, 187, 22, 0.5) !important;
+    background: linear-gradient(135deg, rgba(246, 187, 22, 0.10) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
+    box-shadow:
+        0 0 20px rgba(246, 187, 22, 0.22),
+        inset 0 0 18px rgba(246, 187, 22, 0.06);
+    padding: 12px 16px 12px 10px !important;
+    min-height: 60px;
+}
+.rankings-list > *:not(.rankings-empty):nth-child(1)::before {
+    color: #FFD54A;
+    border-color: rgba(246, 187, 22, 0.6);
+    background: linear-gradient(180deg, rgba(246, 187, 22, 0.15) 0%, rgba(246, 187, 22, 0.04) 100%);
+    box-shadow: 0 0 14px rgba(246, 187, 22, 0.55);
+    text-shadow: 0 0 8px rgba(246, 187, 22, 0.85);
+    width: 38px;
+    height: 38px;
+    font-size: 0.78rem;
+}
+.rankings-list > *:not(.rankings-empty):nth-child(1) span:last-child,
+.rankings-list > *:not(.rankings-empty):nth-child(1) > div:last-child {
+    color: #FFD54A;
+    text-shadow: 0 0 10px rgba(246, 187, 22, 0.75);
+}
+
+/* Shine sweep across the #1 row */
+.rankings-list > *:not(.rankings-empty):nth-child(1)::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -120%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(246, 187, 22, 0.14) 50%,
+        transparent 100%);
+    animation: rankShine 4.5s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes rankShine {
+    0%, 65%, 100% { left: -120%; }
+    40%           { left: 120%; }
+}
+
+/* 2nd — SILVER */
+.rankings-list > *:not(.rankings-empty):nth-child(2) {
+    border-color: rgba(200, 220, 240, 0.38) !important;
+    background: linear-gradient(135deg, rgba(200, 220, 240, 0.06) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
+    box-shadow:
+        0 0 14px rgba(200, 220, 240, 0.14),
+        inset 0 0 14px rgba(200, 220, 240, 0.04);
+}
+.rankings-list > *:not(.rankings-empty):nth-child(2)::before {
+    color: #D4E2F2;
+    border-color: rgba(200, 220, 240, 0.55);
+    background: linear-gradient(180deg, rgba(200, 220, 240, 0.10) 0%, rgba(200, 220, 240, 0.03) 100%);
+    box-shadow: 0 0 10px rgba(200, 220, 240, 0.4);
+    text-shadow: 0 0 6px rgba(200, 220, 240, 0.65);
+}
+.rankings-list > *:not(.rankings-empty):nth-child(2) span:last-child,
+.rankings-list > *:not(.rankings-empty):nth-child(2) > div:last-child {
+    color: #D4E2F2;
+    text-shadow: 0 0 8px rgba(200, 220, 240, 0.65);
+}
+
+/* 3rd — BRONZE */
+.rankings-list > *:not(.rankings-empty):nth-child(3) {
+    border-color: rgba(205, 127, 50, 0.42) !important;
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.08) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
+    box-shadow:
+        0 0 14px rgba(205, 127, 50, 0.16),
+        inset 0 0 14px rgba(205, 127, 50, 0.04);
+}
+.rankings-list > *:not(.rankings-empty):nth-child(3)::before {
+    color: #EAA265;
+    border-color: rgba(205, 127, 50, 0.55);
+    background: linear-gradient(180deg, rgba(205, 127, 50, 0.12) 0%, rgba(205, 127, 50, 0.04) 100%);
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+    text-shadow: 0 0 6px rgba(205, 127, 50, 0.65);
+}
+.rankings-list > *:not(.rankings-empty):nth-child(3) span:last-child,
+.rankings-list > *:not(.rankings-empty):nth-child(3) > div:last-child {
+    color: #EAA265;
+    text-shadow: 0 0 8px rgba(205, 127, 50, 0.65);
+}
+
+/* ── RESPONSIVE ────────────────────────────────────── */
+@media (max-width: 768px) {
+    .rankings-card {
+        max-width: 440px !important;
+        width: 94% !important;
+        padding: 20px 16px 18px !important;
+    }
+    .rankings-body {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .rankings-header h3 {
+        font-size: 1rem !important;
+        letter-spacing: 0.14em !important;
+    }
+    .rankings-list {
+        max-height: 300px;
+    }
+    .rankings-list > *:not(.rankings-empty) {
+        padding: 8px 12px 8px 8px !important;
+        min-height: 46px;
+        gap: 10px;
+    }
+    .rankings-list > *:not(.rankings-empty)::before {
+        width: 30px;
+        height: 30px;
+        font-size: 0.66rem;
+    }
+    .rankings-list > *:not(.rankings-empty):nth-child(1) {
+        min-height: 52px;
+    }
+    .rankings-list > *:not(.rankings-empty):nth-child(1)::before {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* ── REDUCED MOTION ────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .rankings-list > *:not(.rankings-empty):nth-child(1)::after {
+        animation: none;
+    }
+}
