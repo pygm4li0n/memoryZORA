@@ -4,7 +4,6 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const XP_PER_LEVEL = 100;
     const TIER_EMOJI = { Whale: '🐋', Dolphin: '🐬', Crab: '🦀', Shrimp: '🦐' };
     let lastUsername = null;
 
@@ -12,13 +11,27 @@
         return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
 
+    // Curve: total XP to reach level L = 25 * (L-1) * L
+    // Lv.2 = 50, Lv.3 = 150, Lv.4 = 300, Lv.5 = 500, Lv.10 = 2250 ...
+    function xpForLevel(L) { return L <= 1 ? 0 : 25 * (L - 1) * L; }
+
     // ───── LEVEL BADGE ─────
-    function updateLevelBadge(level, xp) {
+    function updateLevelBadge(level, xp, inLevel, needed) {
         const el = document.getElementById('sidebarBigLevel');
         if (!el) return;
-        if (!level || level < 1) { el.textContent = ''; el.classList.add('hidden'); return; }
-        const currentInLevel = xp - (level - 1) * XP_PER_LEVEL;
-        el.textContent = `⭐ Lv.${level}  (${currentInLevel}/${XP_PER_LEVEL})`;
+        if (!level || level < 1) {
+            el.textContent = '';
+            el.classList.add('hidden');
+            return;
+        }
+        // Fallback: if server didn't provide in_level/needed, compute locally
+        if (inLevel == null || needed == null) {
+            const thisLvl = xpForLevel(level);
+            const nextLvl = xpForLevel(level + 1);
+            inLevel = (xp || 0) - thisLvl;
+            needed  = nextLvl - thisLvl;
+        }
+        el.textContent = `⭐ Lv.${level}  (${inLevel}/${needed})`;
         el.classList.remove('hidden');
     }
 
@@ -27,7 +40,7 @@
         try {
             const { data, error } = await sb.rpc('get_xp', { p_username: username });
             if (error || !data) return;
-            updateLevelBadge(data.level, data.xp);
+            updateLevelBadge(data.level, data.xp, data.in_level, data.needed);
         } catch (err) { console.warn('XP load error:', err); }
     }
 
@@ -70,7 +83,8 @@
                 return;
             }
             el.innerHTML = data.map(row => {
-                const medal = row.position === 1 ? '🥇' : row.position === 2 ? '🥈' : row.position === 3 ? '🥉' : `#${row.position}`;
+                const pos = row.position ?? row.rank;
+                const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `#${pos}`;
                 const emoji = TIER_EMOJI[row.holder_tier] || '🦐';
                 const bal = Number(row.token_balance || 0).toLocaleString();
                 return `<div class="ranking-row">
@@ -94,7 +108,8 @@
                 return;
             }
             el.innerHTML = data.map(row => {
-                const medal = row.position === 1 ? '🥇' : row.position === 2 ? '🥈' : row.position === 3 ? '🥉' : `#${row.position}`;
+                const pos = row.position ?? row.rank;
+                const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `#${pos}`;
                 return `<div class="ranking-row">
                     <span class="rk-pos">${medal}</span>
                     <span class="rk-tier">🔥</span>
@@ -108,18 +123,24 @@
 
     function refreshBoth() { loadHoldersBoard(); loadActivityBoard(); }
 
-    // ───── ADD XP (called from script.js) ─────
-    window.addXP = async function (amount) {
+    // ───── ADD XP (called from script.js with a message id) ─────
+    window.addXP = async function (messageId) {
         const username = localStorage.getItem('msn_chat_username');
-        if (!username || !amount) return null;
+        if (!username || !messageId) return null;
         try {
             const { data, error } = await sb.rpc('add_xp', {
                 p_username: username,
-                p_amount: amount
+                p_message_id: messageId
             });
             if (error) { console.warn('add_xp failed:', error); return null; }
-            if (data && data.error) return null;
-            updateLevelBadge(data.level, data.xp);
+            if (!data || data.error) return null;
+
+            // Only update the badge if the server actually granted something.
+            // Silent no-ops on: too_short, cooldown, duplicate, hourly_cap, daily_cap.
+            if (data.granted > 0) {
+                updateLevelBadge(data.level, data.xp, data.in_level, data.needed);
+            }
+
             if (data.leveled_up) {
                 const toast = document.getElementById('streakToast') ||
                               document.getElementById('errorToast');
