@@ -1617,6 +1617,7 @@
             clearAttachedImage();
             stopTyping();
             startCooldown(modCooldownSeconds);
+            if (window.addXP) window.addXP(5);
             // User just sent a message — pin to bottom to see it
             autoScroll = true;
         } catch (err) {
