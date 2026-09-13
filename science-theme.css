@@ -3,9 +3,23 @@
    – 90s computer / lab control-panel aesthetic
    – Same structure as Vintage Hi-Fi base
    – Cyan, magenta, neon green, deep navy
+
+   FIXES APPLIED (load flicker):
+   1. html.booting guard — freezes all animation until
+      the first stable frame (requires 1-line JS, see bottom)
+   2. body: removed background-attachment: fixed
+   3. .app-shell: added height: 100dvh fallback
+   4. .chat-header-bar::after: will-change: opacity
+   5. .typing-dots span: will-change + backface-visibility
 ===================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+/* ⚑ FIX: also add this to <head> so the font is discovered
+   before first paint — see notes at the bottom of this file:
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+*/
 
 :root {
     /* ===== PRIMARY PALETTE ===== */
@@ -89,6 +103,18 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
 
+/* ⚑ FIX 1: boot guard.
+   Holds every animation/transition until the first stable frame.
+   Add class="booting" to <html> in your markup, then remove it
+   with the one-liner at the bottom of this file.
+   If the class is never added, this rule does nothing. */
+html.booting *,
+html.booting *::before,
+html.booting *::after {
+    animation: none !important;
+    transition: none !important;
+}
+
 body {
     font-family: var(--font-main);
     background: var(--bg-deep);
@@ -102,7 +128,10 @@ body {
         linear-gradient(90deg, rgba(0, 229, 255, 0.025) 1px, transparent 1px),
         radial-gradient(ellipse at 50% 0%, #0a1a30 0%, #050914 60%, #02040a 100%);
     background-size: 32px 32px, 32px 32px, 100% 100%;
-    background-attachment: fixed;
+    /* ⚑ FIX 2: background-attachment: fixed removed.
+       Nothing scrolls (html/body overflow:hidden, shell is 100vw×100vh),
+       so the background is already viewport-sized. 'fixed' only forced
+       a full-viewport repaint on every layout tick on WebKit. */
     color: var(--text-primary);
     letter-spacing: 0.02em;
 }
@@ -120,6 +149,9 @@ body {
     display: flex;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* ⚑ FIX 3: stops the input bar being clipped
+                       under the URL bar on mobile. Desktop resolves
+                       to the same value. Old WebKit keeps 100vh. */
     max-width: 100%;
     max-height: 100%;
     background: var(--bg-panel);
@@ -589,6 +621,8 @@ body {
     background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
     opacity: 0.5;
     animation: chromeShimmer 7s ease-in-out infinite;
+    will-change: opacity; /* ⚑ FIX 4: promote up front so the browser
+                             doesn't flash while lazily promoting it */
     pointer-events: none;
 }
 
@@ -1686,6 +1720,8 @@ button.send-btn-main:disabled {
     margin: 0 2px;
     animation: typingDot 1.2s infinite ease-in-out;
     box-shadow: 0 0 6px var(--accent-cyan);
+    will-change: transform, opacity; /* ⚑ FIX 5: promote up front */
+    backface-visibility: hidden;     /* ⚑ FIX 5: avoid repaint flash */
 }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
