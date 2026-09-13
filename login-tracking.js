@@ -49,16 +49,41 @@
         streakToastTimeout = setTimeout(() => el.classList.remove('visible'), 6500);
     }
 
-    // ── Streak badge ──
+    // ── Streak: 7-fire display (desktop only) ──
+    const MAX_FIRES = 7;
+
     function updateStreakBadge(streak) {
-        const el = document.getElementById('sidebarBigStreak');
-        if (!el) return;
-        if (streak && streak > 0) {
-            el.textContent = `🔥 ${streak} day streak`;
-            el.classList.remove('hidden');
+        const container = document.getElementById('sidebarStreakDisplay');
+        const firesEl = document.getElementById('streakFires');
+        const overflowEl = document.getElementById('streakOverflow');
+
+        if (!container || !firesEl || !overflowEl) return;
+
+        // Hide if no streak
+        if (!streak || streak <= 0) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        container.classList.remove('hidden');
+
+        const filled = Math.min(streak, MAX_FIRES);
+
+        // Build the 7 fire slots — filled ones glow, empty ones are dimmed
+        let html = '';
+        for (let i = 0; i < MAX_FIRES; i++) {
+            const isFilled = i < filled;
+            html += `<span class="fire-slot ${isFilled ? 'fire-filled' : 'fire-empty'}">🔥</span>`;
+        }
+        firesEl.innerHTML = html;
+
+        // Overflow: show `× N` when streak exceeds 7
+        if (streak > MAX_FIRES) {
+            overflowEl.textContent = `× ${streak}`;
+            overflowEl.classList.remove('hidden');
         } else {
-            el.textContent = '';
-            el.classList.add('hidden');
+            overflowEl.textContent = '';
+            overflowEl.classList.add('hidden');
         }
     }
 
