@@ -285,7 +285,7 @@ html, body {
     /* Theme button in sidebar */
     .sidebar-theme-btn {
         position: absolute;
-        top: 33px;
+        top: 38px;
         right: 58px;
         display: flex;
         z-index: 30;
