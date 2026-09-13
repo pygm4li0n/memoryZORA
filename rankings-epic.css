@@ -1,383 +1,824 @@
-/* =====================================================
-   RANKINGS — EPIC REVAMP
-   Overrides .rankings-* to create a proper leaderboard.
-   Works with any theme (uses CSS variables).
-   Auto-generates rank badges via counter() — no JS change.
-===================================================== */
+/* =========================================================
+   RANKINGS — EPIC EDITION
+   ---------------------------------------------------------
+   · Built for large leaderboards (100+ entries)
+   · Auto rank numbers via counter() — no JS change
+   · Tier system:
+       DIAMOND   ranks 1–3   (podium, huge, animated)
+       PLATINUM  ranks 4–10  (medium, gold-trimmed)
+       GOLD      ranks 11–25 (compact, warm glow)
+       SILVER    ranks 26–50 (compressed)
+       BRONZE    ranks 51+   (minimal density)
+   · Column colors: holders = cyan, activity = orange
+   · Uses theme CSS variables so it fits every skin
+   · Performance: contain + will-change hints, no content-visibility
+     (kept off so counter() never desyncs)
+========================================================= */
 
-/* ── CARD ──────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   1. CARD SHELL
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-card {
-    max-width: 780px !important;
-    width: 94% !important;
-    padding: 26px 26px 22px !important;
-    background: linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-panel) 45%, var(--bg-deep) 100%) !important;
+    max-width: 860px !important;
+    width: 95% !important;
+    padding: 28px 28px 24px !important;
+    background:
+        radial-gradient(ellipse at top left, rgba(1, 225, 234, 0.06) 0%, transparent 45%),
+        radial-gradient(ellipse at bottom right, rgba(227, 23, 205, 0.05) 0%, transparent 45%),
+        linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-panel) 45%, var(--bg-deep) 100%) !important;
+    border: 1px solid var(--border-default) !important;
+    position: relative;
+    overflow: hidden;
 }
 
-/* ── HEADER ────────────────────────────────────────── */
+/* Sweeping accent line across the top of the card */
+.rankings-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--accent-cyan) 20%,
+        var(--accent-purple) 50%,
+        var(--accent-magenta) 80%,
+        transparent 100%);
+    box-shadow: 0 0 14px rgba(1, 225, 234, 0.5);
+    pointer-events: none;
+    z-index: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   2. HEADER
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding-bottom: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
     border-bottom: 1px solid var(--border-subtle);
     position: relative;
 }
+
 .rankings-header::after {
     content: '';
     position: absolute;
     bottom: -1px;
     left: 0;
-    width: 140px;
+    width: 180px;
     height: 2px;
     background: linear-gradient(90deg, var(--accent-yellow), transparent);
-    box-shadow: 0 0 12px rgba(246, 187, 22, 0.6);
+    box-shadow: 0 0 14px rgba(246, 187, 22, 0.7);
 }
 
 .rankings-header h3 {
-    font-size: 1.15rem !important;
-    letter-spacing: 0.18em !important;
+    font-size: 1.25rem !important;
+    letter-spacing: 0.22em !important;
     color: var(--accent-yellow) !important;
     text-shadow:
-        0 0 10px rgba(246, 187, 22, 0.6),
-        0 0 22px rgba(246, 187, 22, 0.25) !important;
-    font-weight: 800 !important;
+        0 0 12px rgba(246, 187, 22, 0.65),
+        0 0 28px rgba(246, 187, 22, 0.25) !important;
+    font-weight: 900 !important;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin: 0 !important;
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
 }
 
 .rankings-close-btn {
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
-    max-width: 34px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
     border-radius: var(--radius-sm) !important;
     background: var(--bg-input) !important;
     border: 1px solid var(--border-default) !important;
     color: var(--text-secondary) !important;
-    font-size: 0.95rem !important;
+    font-size: 1rem !important;
     padding: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s ease;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
 }
 .rankings-close-btn:hover {
     border-color: var(--accent-red) !important;
     color: var(--accent-red) !important;
-    background: rgba(255, 32, 42, 0.1) !important;
-    box-shadow: 0 0 14px rgba(255, 32, 42, 0.4) !important;
-    transform: rotate(90deg);
+    background: rgba(255, 32, 42, 0.12) !important;
+    box-shadow: 0 0 16px rgba(255, 32, 42, 0.45) !important;
+    transform: rotate(90deg) scale(1.08);
 }
 
-/* ── BODY GRID ─────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   3. GRID
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-body {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 22px;
+    gap: 26px;
 }
 
-/* ── COLUMN TITLES — differentiated colors ─────────── */
+
+/* ═══════════════════════════════════════════════════════
+   4. COLUMN TITLES
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-column-title {
-    font-size: 0.7rem !important;
-    letter-spacing: 0.22em !important;
-    font-weight: 800 !important;
-    padding: 0 0 10px !important;
+    font-size: 0.74rem !important;
+    letter-spacing: 0.26em !important;
+    font-weight: 900 !important;
+    padding: 0 0 12px !important;
     margin-bottom: 14px !important;
     border-bottom: 1px solid var(--border-subtle) !important;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     position: relative;
-    font-family: var(--font-mono);
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    /* Sticky column header — stays put while the list scrolls */
+    position: sticky;
+    top: 0;
+    background: var(--bg-panel);
+    z-index: 4;
+    padding-top: 4px !important;
+    margin-top: -4px;
 }
 
-/* TOP HOLDERS — cyan/blue (money) */
+.rankings-column-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 90px;
+    height: 2px;
+}
+
+/* TOP HOLDERS — cyan */
 .rankings-column:nth-child(1) .rankings-column-title {
     color: var(--accent-cyan) !important;
-    text-shadow: 0 0 8px rgba(1, 225, 234, 0.55) !important;
+    text-shadow: 0 0 10px rgba(1, 225, 234, 0.6) !important;
 }
 .rankings-column:nth-child(1) .rankings-column-title::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 70px;
-    height: 2px;
     background: var(--accent-cyan);
-    box-shadow: 0 0 10px rgba(1, 225, 234, 0.75);
+    box-shadow: 0 0 12px rgba(1, 225, 234, 0.85);
 }
 
-/* TOP ACTIVITY — orange (heat / energy) */
+/* TOP ACTIVITY — orange */
 .rankings-column:nth-child(2) .rankings-column-title {
     color: var(--accent-orange) !important;
-    text-shadow: 0 0 8px rgba(255, 138, 0, 0.55) !important;
+    text-shadow: 0 0 10px rgba(255, 138, 0, 0.6) !important;
 }
 .rankings-column:nth-child(2) .rankings-column-title::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 70px;
-    height: 2px;
     background: var(--accent-orange);
-    box-shadow: 0 0 10px rgba(255, 138, 0, 0.75);
+    box-shadow: 0 0 12px rgba(255, 138, 0, 0.85);
 }
 
-/* ── LIST CONTAINER ────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   5. SCROLL LIST CONTAINER
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 460px;
+    gap: 6px;
+    max-height: 560px;
     overflow-y: auto;
-    padding-right: 4px;
-    counter-reset: rank;                /* powers the auto rank badge */
+    overflow-x: hidden;
+    padding: 4px 6px 4px 2px;
+    counter-reset: rank;
+    scroll-behavior: smooth;
+    /* Soft fade at top/bottom — signals more content */
+    -webkit-mask-image: linear-gradient(180deg,
+        transparent 0,
+        #000 14px,
+        #000 calc(100% - 14px),
+        transparent 100%);
+            mask-image: linear-gradient(180deg,
+        transparent 0,
+        #000 14px,
+        #000 calc(100% - 14px),
+        transparent 100%);
 }
-.rankings-list::-webkit-scrollbar { width: 6px; }
-.rankings-list::-webkit-scrollbar-track { background: var(--bg-deep); border-radius: 3px; }
-.rankings-list::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: 3px;
-}
-.rankings-list::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
 
-/* ── EMPTY / LOADING STATE ─────────────────────────── */
+.rankings-list::-webkit-scrollbar { width: 8px; }
+.rankings-list::-webkit-scrollbar-track {
+    background: var(--bg-deep);
+    border-radius: 4px;
+}
+.rankings-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--border-default), var(--border-subtle));
+    border-radius: 4px;
+    border: 1px solid var(--bg-deep);
+}
+.rankings-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+    box-shadow: 0 0 8px rgba(1, 225, 234, 0.6);
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   6. EMPTY / LOADING STATE
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-empty {
     display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 44px 12px !important;
+    gap: 14px;
+    padding: 52px 16px !important;
     color: var(--text-muted) !important;
     font-size: 0.72rem !important;
     font-style: normal !important;
     text-align: center;
-    letter-spacing: 0.18em !important;
+    letter-spacing: 0.22em !important;
     text-transform: uppercase;
-    background: rgba(1, 9, 26, 0.4);
+    background:
+        linear-gradient(rgba(1, 9, 26, 0.5) 0%, rgba(1, 2, 10, 0.7) 100%);
     border: 1px dashed var(--border-subtle);
     border-radius: var(--radius-md);
     font-family: var(--font-mono);
+    position: relative;
+    overflow: hidden;
 }
 .rankings-empty::before {
     content: '//';
     color: var(--accent-cyan);
-    opacity: 0.5;
-    font-size: 1.1rem;
-    letter-spacing: 0.35em;
+    opacity: 0.55;
+    font-size: 1.2rem;
+    letter-spacing: 0.4em;
+    text-shadow: 0 0 8px rgba(1, 225, 234, 0.5);
+}
+/* Subtle scanning bar on the empty state */
+.rankings-empty::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -40%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(1, 225, 234, 0.08) 50%,
+        transparent 100%);
+    animation: emptyScan 2.6s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes emptyScan {
+    0%   { left: -40%; }
+    100% { left: 140%; }
 }
 
-/* ── ROW (each entry) ──────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   7. ROW — BASE
+   ═══════════════════════════════════════════════════════ */
+
 .rankings-list > *:not(.rankings-empty) {
     counter-increment: rank;
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: auto auto 1fr auto;
     align-items: center;
     gap: 12px;
     padding: 10px 14px 10px 10px !important;
     border-radius: var(--radius-md) !important;
-    background: linear-gradient(135deg, rgba(1, 9, 26, 0.9) 0%, rgba(1, 2, 10, 0.95) 100%) !important;
+    background: linear-gradient(135deg,
+        rgba(1, 9, 26, 0.9) 0%,
+        rgba(1, 2, 10, 0.95) 100%) !important;
     border: 1px solid var(--border-subtle) !important;
     font-family: var(--font-mono);
-    font-size: 0.82rem;
-    transition: all 0.2s ease;
+    font-size: 0.83rem;
+    transition:
+        transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        background 0.22s ease;
     position: relative;
     overflow: hidden;
     min-height: 52px;
+    /* Paint isolation keeps big lists fast */
+    contain: layout style paint;
+    will-change: transform;
 }
 
-/* Auto-generated rank badge */
+/* ── Auto rank badge (generated by counter) ── */
 .rankings-list > *:not(.rankings-empty)::before {
     content: counter(rank, decimal-leading-zero);
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
     font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
+    font-weight: 900;
+    letter-spacing: 0.04em;
     color: var(--text-muted);
     background: var(--bg-input);
     border: 1px solid var(--border-subtle);
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
+    grid-column: 1;
 }
 
-/* Hover lift */
+/* ── Chevron affordance on hover ── */
+.rankings-list > *:not(.rankings-empty)::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    right: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.22s ease, box-shadow 0.22s ease;
+    pointer-events: none;
+}
+
+/* ── Hover state ── */
 .rankings-list > *:not(.rankings-empty):hover {
     border-color: var(--accent-cyan) !important;
-    background: linear-gradient(135deg, rgba(1, 225, 234, 0.07) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
-    transform: translateX(3px);
+    background: linear-gradient(135deg,
+        rgba(1, 225, 234, 0.08) 0%,
+        rgba(1, 9, 26, 0.98) 100%) !important;
+    transform: translateX(4px) scale(1.008);
     box-shadow:
-        0 0 16px rgba(1, 225, 234, 0.20),
-        inset 0 0 14px rgba(1, 225, 234, 0.05);
+        0 0 20px rgba(1, 225, 234, 0.22),
+        inset 0 0 18px rgba(1, 225, 234, 0.05),
+        0 6px 18px rgba(0, 0, 0, 0.4);
+    z-index: 2;
 }
 .rankings-list > *:not(.rankings-empty):hover::before {
     color: var(--accent-cyan);
     border-color: var(--accent-cyan);
-    box-shadow: 0 0 10px rgba(1, 225, 234, 0.55);
+    box-shadow: 0 0 12px rgba(1, 225, 234, 0.6);
+}
+.rankings-list > *:not(.rankings-empty):hover::after {
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px var(--accent-cyan);
 }
 
-/* Avatar inside a row (if JS renders one) */
+/* ── Avatar (if JS renders one) ── */
 .rankings-list > *:not(.rankings-empty) img,
 .rankings-list > *:not(.rankings-empty) .rank-avatar,
 .rankings-list > *:not(.rankings-empty) .avatar {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: var(--radius-sm);
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid var(--border-default);
     background: var(--bg-input);
+    grid-column: 2;
+    transition: border-color 0.22s, box-shadow 0.22s;
+}
+.rankings-list > *:not(.rankings-empty):hover img,
+.rankings-list > *:not(.rankings-empty):hover .rank-avatar,
+.rankings-list > *:not(.rankings-empty):hover .avatar {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(1, 225, 234, 0.4);
 }
 
-/* Value (right-aligned, bold) */
+/* ── Value (last span/div — right-aligned) ── */
 .rankings-list > *:not(.rankings-empty) span:last-child,
 .rankings-list > *:not(.rankings-empty) > div:last-child {
     margin-left: auto;
-    font-weight: 800;
+    font-weight: 900;
     color: var(--accent-cyan);
-    text-shadow: 0 0 6px rgba(1, 225, 234, 0.5);
-    font-size: 0.82rem;
-    letter-spacing: 0.05em;
+    text-shadow: 0 0 8px rgba(1, 225, 234, 0.55);
+    font-size: 0.84rem;
+    letter-spacing: 0.06em;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    grid-column: 4;
 }
 
-/* ── TOP 3 — MEDALS ────────────────────────────────── */
 
-/* 1st — GOLD */
-.rankings-list > *:not(.rankings-empty):nth-child(1) {
-    border-color: rgba(246, 187, 22, 0.5) !important;
-    background: linear-gradient(135deg, rgba(246, 187, 22, 0.10) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
+/* ═══════════════════════════════════════════════════════
+   8. TIER 1 — DIAMOND (ranks 1–3, podium)
+   ═══════════════════════════════════════════════════════ */
+
+/* Shared podium traits */
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) {
+    min-height: 64px;
+    padding: 12px 16px 12px 12px !important;
+    border-width: 1px !important;
+    animation: podiumIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty)::before {
+    width: 42px;
+    height: 42px;
+    font-size: 0.82rem;
+    border-width: 1px;
+}
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) img,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .avatar {
+    width: 40px;
+    height: 40px;
+    border-width: 2px;
+}
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) > div:last-child {
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+}
+
+/* Staggered entry delay */
+.rankings-list > *:nth-child(1):not(.rankings-empty) { animation-delay: 0.00s; }
+.rankings-list > *:nth-child(2):not(.rankings-empty) { animation-delay: 0.07s; }
+.rankings-list > *:nth-child(3):not(.rankings-empty) { animation-delay: 0.14s; }
+
+@keyframes podiumIn {
+    from {
+        opacity: 0;
+        transform: translateX(-14px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* ── 1st place — GOLD ── */
+.rankings-list > *:nth-child(1):not(.rankings-empty) {
+    min-height: 76px;
+    padding: 14px 18px 14px 12px !important;
+    border-color: rgba(246, 187, 22, 0.55) !important;
+    background: linear-gradient(135deg,
+        rgba(246, 187, 22, 0.13) 0%,
+        rgba(1, 9, 26, 0.95) 60%,
+        rgba(1, 2, 10, 0.98) 100%) !important;
     box-shadow:
-        0 0 20px rgba(246, 187, 22, 0.22),
-        inset 0 0 18px rgba(246, 187, 22, 0.06);
-    padding: 12px 16px 12px 10px !important;
-    min-height: 60px;
+        0 0 24px rgba(246, 187, 22, 0.28),
+        inset 0 0 22px rgba(246, 187, 22, 0.07);
 }
-.rankings-list > *:not(.rankings-empty):nth-child(1)::before {
+.rankings-list > *:nth-child(1):not(.rankings-empty)::before {
+    content: '①';
     color: #FFD54A;
-    border-color: rgba(246, 187, 22, 0.6);
-    background: linear-gradient(180deg, rgba(246, 187, 22, 0.15) 0%, rgba(246, 187, 22, 0.04) 100%);
-    box-shadow: 0 0 14px rgba(246, 187, 22, 0.55);
-    text-shadow: 0 0 8px rgba(246, 187, 22, 0.85);
-    width: 38px;
-    height: 38px;
-    font-size: 0.78rem;
+    border-color: rgba(246, 187, 22, 0.7);
+    background: linear-gradient(180deg,
+        rgba(246, 187, 22, 0.22) 0%,
+        rgba(246, 187, 22, 0.05) 100%);
+    box-shadow:
+        0 0 18px rgba(246, 187, 22, 0.6),
+        inset 0 0 10px rgba(246, 187, 22, 0.15);
+    text-shadow: 0 0 10px rgba(246, 187, 22, 0.9);
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
 }
-.rankings-list > *:not(.rankings-empty):nth-child(1) span:last-child,
-.rankings-list > *:not(.rankings-empty):nth-child(1) > div:last-child {
+.rankings-list > *:nth-child(1):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(1):not(.rankings-empty) > div:last-child {
     color: #FFD54A;
-    text-shadow: 0 0 10px rgba(246, 187, 22, 0.75);
+    text-shadow: 0 0 12px rgba(246, 187, 22, 0.85);
+    font-size: 0.98rem;
+}
+.rankings-list > *:nth-child(1):not(.rankings-empty) img,
+.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(1):not(.rankings-empty) .avatar {
+    width: 46px;
+    height: 46px;
+    border-color: rgba(246, 187, 22, 0.7);
+    box-shadow: 0 0 14px rgba(246, 187, 22, 0.5);
 }
 
-/* Shine sweep across the #1 row */
-.rankings-list > *:not(.rankings-empty):nth-child(1)::after {
+/* Golden shine sweep on the champion */
+.rankings-list > *:nth-child(1):not(.rankings-empty) > *:first-child::before,
+.rankings-list > *:nth-child(1):not(.rankings-empty)::after {
+    /* keep ::after for the accent bar; use a wrapper shine via extra layer */
+}
+.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-shine,
+.rankings-list > *:nth-child(1):not(.rankings-empty) .shine {
+    /* placeholder for JS-injected shine element if you ever add one */
+}
+
+/* Crown ornament on the champion row */
+.rankings-list > *:nth-child(1):not(.rankings-empty) {
+    /* subtle top border glow to feel like a crown */
+    border-top-color: rgba(255, 213, 74, 0.9) !important;
+}
+
+/* ── 2nd place — SILVER ── */
+.rankings-list > *:nth-child(2):not(.rankings-empty) {
+    border-color: rgba(200, 220, 240, 0.45) !important;
+    background: linear-gradient(135deg,
+        rgba(200, 220, 240, 0.08) 0%,
+        rgba(1, 9, 26, 0.95) 100%) !important;
+    box-shadow:
+        0 0 18px rgba(200, 220, 240, 0.16),
+        inset 0 0 18px rgba(200, 220, 240, 0.05);
+}
+.rankings-list > *:nth-child(2):not(.rankings-empty)::before {
+    content: '②';
+    color: #E4EEFA;
+    border-color: rgba(200, 220, 240, 0.6);
+    background: linear-gradient(180deg,
+        rgba(200, 220, 240, 0.14) 0%,
+        rgba(200, 220, 240, 0.03) 100%);
+    box-shadow: 0 0 14px rgba(200, 220, 240, 0.45);
+    text-shadow: 0 0 8px rgba(200, 220, 240, 0.7);
+    font-size: 1rem;
+}
+.rankings-list > *:nth-child(2):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(2):not(.rankings-empty) > div:last-child {
+    color: #E4EEFA;
+    text-shadow: 0 0 10px rgba(200, 220, 240, 0.7);
+}
+.rankings-list > *:nth-child(2):not(.rankings-empty) img,
+.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(2):not(.rankings-empty) .avatar {
+    border-color: rgba(200, 220, 240, 0.6);
+    box-shadow: 0 0 10px rgba(200, 220, 240, 0.4);
+}
+
+/* ── 3rd place — BRONZE ── */
+.rankings-list > *:nth-child(3):not(.rankings-empty) {
+    border-color: rgba(205, 127, 50, 0.48) !important;
+    background: linear-gradient(135deg,
+        rgba(205, 127, 50, 0.10) 0%,
+        rgba(1, 9, 26, 0.95) 100%) !important;
+    box-shadow:
+        0 0 18px rgba(205, 127, 50, 0.18),
+        inset 0 0 18px rgba(205, 127, 50, 0.05);
+}
+.rankings-list > *:nth-child(3):not(.rankings-empty)::before {
+    content: '③';
+    color: #F0B27A;
+    border-color: rgba(205, 127, 50, 0.6);
+    background: linear-gradient(180deg,
+        rgba(205, 127, 50, 0.16) 0%,
+        rgba(205, 127, 50, 0.04) 100%);
+    box-shadow: 0 0 14px rgba(205, 127, 50, 0.45);
+    text-shadow: 0 0 8px rgba(205, 127, 50, 0.7);
+    font-size: 1rem;
+}
+.rankings-list > *:nth-child(3):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(3):not(.rankings-empty) > div:last-child {
+    color: #F0B27A;
+    text-shadow: 0 0 10px rgba(205, 127, 50, 0.7);
+}
+.rankings-list > *:nth-child(3):not(.rankings-empty) img,
+.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(3):not(.rankings-empty) .avatar {
+    border-color: rgba(205, 127, 50, 0.6);
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+}
+
+/* ── DIVIDER below the podium ── */
+.rankings-list > *:nth-child(3):not(.rankings-empty) {
+    margin-bottom: 16px;
+    position: relative;
+}
+.rankings-list > *:nth-child(3):not(.rankings-empty)::after {
+    /* override the default ::after accent bar for this row */
     content: '';
     position: absolute;
-    top: 0; left: -120%;
-    width: 100%;
-    height: 100%;
+    top: auto;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    width: auto;
     background: linear-gradient(90deg,
         transparent 0%,
-        rgba(246, 187, 22, 0.14) 50%,
+        var(--border-default) 20%,
+        var(--border-default) 80%,
         transparent 100%);
-    animation: rankShine 4.5s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(1, 225, 234, 0.15);
     pointer-events: none;
 }
-@keyframes rankShine {
-    0%, 65%, 100% { left: -120%; }
-    40%           { left: 120%; }
+
+
+/* ═══════════════════════════════════════════════════════
+   9. TIER 2 — PLATINUM (ranks 4–10)
+   ═══════════════════════════════════════════════════════ */
+
+.rankings-list > *:nth-child(n+4):nth-child(-n+10):not(.rankings-empty) {
+    border-color: rgba(1, 225, 234, 0.22) !important;
+    background: linear-gradient(135deg,
+        rgba(1, 225, 234, 0.035) 0%,
+        rgba(1, 9, 26, 0.94) 100%) !important;
+}
+.rankings-list > *:nth-child(n+4):nth-child(-n+10):not(.rankings-empty)::before {
+    color: rgba(1, 225, 234, 0.85);
+    border-color: rgba(1, 225, 234, 0.35);
+    box-shadow: 0 0 8px rgba(1, 225, 234, 0.25);
 }
 
-/* 2nd — SILVER */
-.rankings-list > *:not(.rankings-empty):nth-child(2) {
-    border-color: rgba(200, 220, 240, 0.38) !important;
-    background: linear-gradient(135deg, rgba(200, 220, 240, 0.06) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
+
+/* ═══════════════════════════════════════════════════════
+   10. TIER 3 — GOLD (ranks 11–25) — compact
+   ═══════════════════════════════════════════════════════ */
+
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) {
+    min-height: 46px;
+    padding: 8px 12px 8px 8px !important;
+    font-size: 0.8rem;
+    border-color: rgba(246, 187, 22, 0.18) !important;
+    background: linear-gradient(135deg,
+        rgba(246, 187, 22, 0.025) 0%,
+        rgba(1, 9, 26, 0.9) 100%) !important;
+}
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty)::before {
+    width: 30px;
+    height: 30px;
+    font-size: 0.66rem;
+    color: rgba(246, 187, 22, 0.75);
+    border-color: rgba(246, 187, 22, 0.28);
+}
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) img,
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) .avatar {
+    width: 28px;
+    height: 28px;
+}
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) > div:last-child {
+    font-size: 0.78rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   11. TIER 4 — SILVER (ranks 26–50) — compressed
+   ═══════════════════════════════════════════════════════ */
+
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty) {
+    min-height: 42px;
+    padding: 6px 12px 6px 8px !important;
+    font-size: 0.78rem;
+    border-color: rgba(141, 167, 199, 0.14) !important;
+    background: rgba(1, 9, 26, 0.85) !important;
+    box-shadow: none;
+}
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty)::before {
+    width: 28px;
+    height: 28px;
+    font-size: 0.64rem;
+    color: rgba(141, 167, 199, 0.8);
+    border-color: rgba(141, 167, 199, 0.22);
+}
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty) img,
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty) .avatar {
+    width: 26px;
+    height: 26px;
+    border-color: rgba(141, 167, 199, 0.22);
+}
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(n+26):nth-child(-n+50):not(.rankings-empty) > div:last-child {
+    font-size: 0.76rem;
+    color: rgba(141, 167, 199, 0.9);
+    text-shadow: none;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   12. TIER 5 — BRONZE (ranks 51+) — minimal density
+   ═══════════════════════════════════════════════════════ */
+
+.rankings-list > *:nth-child(n+51):not(.rankings-empty) {
+    min-height: 38px;
+    padding: 5px 10px 5px 6px !important;
+    font-size: 0.74rem;
+    border-color: rgba(141, 167, 199, 0.08) !important;
+    background: rgba(1, 9, 26, 0.7) !important;
+    box-shadow: none;
+    gap: 10px;
+}
+.rankings-list > *:nth-child(n+51):not(.rankings-empty)::before {
+    width: 24px;
+    height: 24px;
+    font-size: 0.58rem;
+    color: rgba(66, 96, 128, 0.9);
+    border-color: rgba(66, 96, 128, 0.3);
+    background: transparent;
+}
+.rankings-list > *:nth-child(n+51):not(.rankings-empty) img,
+.rankings-list > *:nth-child(n+51):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(n+51):not(.rankings-empty) .avatar {
+    width: 22px;
+    height: 22px;
+    border-color: rgba(66, 96, 128, 0.25);
+}
+.rankings-list > *:nth-child(n+51):not(.rankings-empty) span:last-child,
+.rankings-list > *:nth-child(n+51):not(.rankings-empty) > div:last-child {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-shadow: none;
+}
+/* Slower, subtler hover for dense rows */
+.rankings-list > *:nth-child(n+51):not(.rankings-empty):hover {
+    transform: translateX(3px);
     box-shadow:
-        0 0 14px rgba(200, 220, 240, 0.14),
-        inset 0 0 14px rgba(200, 220, 240, 0.04);
-}
-.rankings-list > *:not(.rankings-empty):nth-child(2)::before {
-    color: #D4E2F2;
-    border-color: rgba(200, 220, 240, 0.55);
-    background: linear-gradient(180deg, rgba(200, 220, 240, 0.10) 0%, rgba(200, 220, 240, 0.03) 100%);
-    box-shadow: 0 0 10px rgba(200, 220, 240, 0.4);
-    text-shadow: 0 0 6px rgba(200, 220, 240, 0.65);
-}
-.rankings-list > *:not(.rankings-empty):nth-child(2) span:last-child,
-.rankings-list > *:not(.rankings-empty):nth-child(2) > div:last-child {
-    color: #D4E2F2;
-    text-shadow: 0 0 8px rgba(200, 220, 240, 0.65);
+        0 0 10px rgba(1, 225, 234, 0.12),
+        0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
-/* 3rd — BRONZE */
-.rankings-list > *:not(.rankings-empty):nth-child(3) {
-    border-color: rgba(205, 127, 50, 0.42) !important;
-    background: linear-gradient(135deg, rgba(205, 127, 50, 0.08) 0%, rgba(1, 9, 26, 0.95) 100%) !important;
-    box-shadow:
-        0 0 14px rgba(205, 127, 50, 0.16),
-        inset 0 0 14px rgba(205, 127, 50, 0.04);
-}
-.rankings-list > *:not(.rankings-empty):nth-child(3)::before {
-    color: #EAA265;
-    border-color: rgba(205, 127, 50, 0.55);
-    background: linear-gradient(180deg, rgba(205, 127, 50, 0.12) 0%, rgba(205, 127, 50, 0.04) 100%);
-    box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
-    text-shadow: 0 0 6px rgba(205, 127, 50, 0.65);
-}
-.rankings-list > *:not(.rankings-empty):nth-child(3) span:last-child,
-.rankings-list > *:not(.rankings-empty):nth-child(3) > div:last-child {
-    color: #EAA265;
-    text-shadow: 0 0 8px rgba(205, 127, 50, 0.65);
+
+/* ═══════════════════════════════════════════════════════
+   13. RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+    .rankings-card { max-width: 92% !important; }
+    .rankings-body { gap: 18px; }
 }
 
-/* ── RESPONSIVE ────────────────────────────────────── */
 @media (max-width: 768px) {
     .rankings-card {
-        max-width: 440px !important;
-        width: 94% !important;
+        max-width: 460px !important;
+        width: 95% !important;
         padding: 20px 16px 18px !important;
     }
     .rankings-body {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 20px;
     }
     .rankings-header h3 {
         font-size: 1rem !important;
-        letter-spacing: 0.14em !important;
+        letter-spacing: 0.16em !important;
+    }
+    .rankings-close-btn {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
     }
     .rankings-list {
-        max-height: 300px;
+        max-height: 340px;
     }
+    /* Loosen podium sizing on mobile */
     .rankings-list > *:not(.rankings-empty) {
-        padding: 8px 12px 8px 8px !important;
         min-height: 46px;
+        padding: 8px 12px 8px 8px !important;
         gap: 10px;
+        grid-template-columns: auto auto 1fr auto;
     }
     .rankings-list > *:not(.rankings-empty)::before {
         width: 30px;
         height: 30px;
         font-size: 0.66rem;
     }
-    .rankings-list > *:not(.rankings-empty):nth-child(1) {
-        min-height: 52px;
+    .rankings-list > *:nth-child(1):not(.rankings-empty) {
+        min-height: 62px;
+        padding: 10px 14px 10px 10px !important;
     }
-    .rankings-list > *:not(.rankings-empty):nth-child(1)::before {
-        width: 32px;
-        height: 32px;
+    .rankings-list > *:nth-child(1):not(.rankings-empty)::before {
+        width: 40px;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) {
+        min-height: 56px;
+    }
+    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) img,
+    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-avatar,
+    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) .avatar {
+        width: 34px;
+        height: 34px;
+    }
+    /* Collapse the compact tiers a bit further */
+    .rankings-list > *:nth-child(n+11):nth-child(-n+25):not(.rankings-empty) {
+        min-height: 42px;
+    }
+    .rankings-list > *:nth-child(n+26):not(.rankings-empty) {
+        min-height: 40px;
     }
 }
 
-/* ── REDUCED MOTION ────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   14. ACCESSIBILITY
+   ═══════════════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
-    .rankings-list > *:not(.rankings-empty):nth-child(1)::after {
-        animation: none;
+    .rankings-list > *:not(.rankings-empty) {
+        animation: none !important;
+        transition: none !important;
     }
+    .rankings-list > *:not(.rankings-empty):hover {
+        transform: none;
+    }
+    .rankings-empty::after {
+        animation: none;
+        display: none;
+    }
+}
+
+/* Focus visible for keyboard nav */
+.rankings-list > *:not(.rankings-empty):focus-visible,
+.rankings-close-btn:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 2px;
 }
