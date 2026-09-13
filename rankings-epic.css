@@ -1,41 +1,32 @@
 /* =========================================================
-   RANKINGS — PRO EDITION v3
-   Clean · Bold · High-contrast · Podium · Pulse
-   ---------------------------------------------------------
-   · Bigger typography, pro-grade hierarchy
-   · Explicit medal colors for consistent contrast
-   · X button rotates 90° on hover
-   · Drop-in: no JS or HTML changes
-========================================================= */
-
+   RANKINGS — PRO EDITION v4
+   Avatar · Level · Streak · Score — tidy & epic
+   ========================================================= */
 
 /* ═══════════════════════════════════════════════════════
-   1. CARD
+   CARD
    ═══════════════════════════════════════════════════════ */
 
 .rankings-card {
-    max-width: 1000px !important;
+    max-width: 1040px !important;
     width: 96% !important;
-    min-height: 74vh;
+    min-height: 76vh;
     max-height: 92vh;
-    padding: 36px 34px 30px !important;
+    padding: 34px 34px 26px !important;
     background: linear-gradient(165deg,
         var(--bg-elevated) 0%,
         var(--bg-panel) 55%,
         var(--bg-deep) 100%) !important;
     border: 1px solid var(--border-default) !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.05),
-        0 0 80px rgba(0, 0, 0, 0.5),
-        0 30px 80px rgba(0, 0, 0, 0.85) !important;
+        0 30px 90px rgba(0, 0, 0, 0.85) !important;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
-
-/* Top accent line — full width sweep */
 .rankings-card::before {
     content: '';
     position: absolute;
@@ -52,22 +43,20 @@
     z-index: 2;
 }
 
-
 /* ═══════════════════════════════════════════════════════
-   2. HEADER
+   HEADER
    ═══════════════════════════════════════════════════════ */
 
 .rankings-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4px 24px;
-    margin-bottom: 26px;
+    padding: 0 4px 22px;
+    margin-bottom: 24px;
     border-bottom: 1px solid var(--border-subtle);
     position: relative;
     flex-shrink: 0;
 }
-
 .rankings-header::after {
     content: '';
     position: absolute;
@@ -77,10 +66,9 @@
     box-shadow: 0 0 18px var(--accent-yellow);
     border-radius: 2px;
 }
-
 .rankings-header h3 {
     font-family: var(--font-mono) !important;
-    font-size: 1.6rem !important;
+    font-size: 1.55rem !important;
     font-weight: 900 !important;
     letter-spacing: 0.22em !important;
     text-transform: uppercase;
@@ -95,7 +83,7 @@
     gap: 14px;
 }
 
-/* ── X button — 90° rotate on hover, snappy ── */
+/* X button — rotate 90° with spring */
 .rankings-close-btn {
     width: 42px !important;
     height: 42px !important;
@@ -129,19 +117,16 @@
         inset 0 0 12px rgba(255, 32, 42, 0.15) !important;
     transform: rotate(90deg) scale(1.08);
 }
-.rankings-close-btn:active {
-    transform: rotate(90deg) scale(0.95);
-}
-
+.rankings-close-btn:active { transform: rotate(90deg) scale(0.95); }
 
 /* ═══════════════════════════════════════════════════════
-   3. GRID + COLUMNS
+   GRID
    ═══════════════════════════════════════════════════════ */
 
 .rankings-body {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    gap: 30px;
     flex: 1;
     min-height: 0;
 }
@@ -153,30 +138,28 @@
 
 .rankings-column-title {
     font-family: var(--font-mono) !important;
-    font-size: 0.85rem !important;
+    font-size: 0.82rem !important;
     font-weight: 900 !important;
-    letter-spacing: 0.32em !important;
+    letter-spacing: 0.3em !important;
     text-transform: uppercase;
-    padding: 0 0 16px !important;
-    margin-bottom: 16px !important;
+    padding: 0 0 14px !important;
+    margin-bottom: 14px !important;
     border-bottom: 1px solid var(--border-subtle) !important;
     position: relative;
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
-
 .rankings-column-title::after {
     content: '';
     position: absolute;
     bottom: -1px; left: 0;
-    width: 110px; height: 3px;
+    width: 100px; height: 3px;
     background: currentColor;
     box-shadow: 0 0 14px currentColor;
     border-radius: 2px;
 }
-
 .rankings-column:nth-child(1) .rankings-column-title {
     color: var(--accent-cyan) !important;
     text-shadow: 0 0 14px var(--accent-cyan) !important;
@@ -186,9 +169,8 @@
     text-shadow: 0 0 14px var(--accent-orange) !important;
 }
 
-
 /* ═══════════════════════════════════════════════════════
-   4. LIST CONTAINER
+   LIST
    ═══════════════════════════════════════════════════════ */
 
 .rankings-list {
@@ -204,10 +186,7 @@
     scroll-behavior: smooth;
 }
 .rankings-list::-webkit-scrollbar { width: 8px; }
-.rankings-list::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 4px;
-}
+.rankings-list::-webkit-scrollbar-track { background: transparent; border-radius: 4px; }
 .rankings-list::-webkit-scrollbar-thumb {
     background: var(--border-default);
     border-radius: 4px;
@@ -218,9 +197,8 @@
     box-shadow: 0 0 10px var(--accent-cyan);
 }
 
-
 /* ═══════════════════════════════════════════════════════
-   5. EMPTY / LOADING
+   EMPTY
    ═══════════════════════════════════════════════════════ */
 
 .rankings-empty {
@@ -228,18 +206,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 12px;
     padding: 70px 20px !important;
     color: var(--text-muted) !important;
     font-family: var(--font-mono);
-    font-size: 0.85rem !important;
-    font-style: normal !important;
+    font-size: 0.82rem !important;
     text-align: center;
     letter-spacing: 0.28em !important;
     text-transform: uppercase;
     background: rgba(0, 0, 0, 0.25);
     border: 1px dashed var(--border-subtle);
-    border-radius: 10px;
+    border-radius: 12px;
     animation: emptyPulse 2.4s ease-in-out infinite;
     font-weight: 700;
 }
@@ -248,25 +225,26 @@
     50%      { opacity: 1; }
 }
 
-
 /* ═══════════════════════════════════════════════════════
-   6. ROWS — base (bigger, cleaner)
+   ROW — base
    ═══════════════════════════════════════════════════════ */
 
 .rankings-list > *:not(.rankings-empty) {
     counter-increment: rank;
+
+    /* Default grid: rank · avatar · info · stats */
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto 1fr auto;
     align-items: center;
-    gap: 18px;
-    padding: 18px 22px !important;
-    min-height: 78px;
-    border-radius: 10px !important;
+    gap: 16px;
+
+    padding: 16px 20px !important;
+    min-height: 92px;
+    border-radius: 12px !important;
     background: rgba(0, 0, 0, 0.38);
     border: 1px solid var(--border-subtle) !important;
     font-family: var(--font-mono);
     font-size: 1rem;
-    font-weight: 600;
     color: var(--text-primary);
     position: relative;
     overflow: hidden;
@@ -276,19 +254,32 @@
         box-shadow 0.22s ease,
         background 0.22s ease;
     contain: layout style paint;
-    will-change: transform;
 }
 
-/* ── Rank badge — bigger, bolder ── */
+/* Right-edge accent bar */
+.rankings-list > *:not(.rankings-empty)::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; right: 0;
+    width: 4px;
+    background: transparent;
+    transition: background 0.22s ease, box-shadow 0.22s ease;
+    border-radius: 0 12px 12px 0;
+    pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────
+   RANK BADGE (auto via counter)
+   ───────────────────────────────────────────────────── */
 .rankings-list > *:not(.rankings-empty)::before {
     content: counter(rank, decimal-leading-zero);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 54px;
-    height: 54px;
+    width: 52px;
+    height: 52px;
     flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--bg-input);
     border: 1px solid var(--border-subtle);
     font-family: var(--font-mono);
@@ -297,46 +288,165 @@
     letter-spacing: 0.04em;
     color: var(--text-secondary);
     transition: all 0.22s ease;
+    order: 0;
 }
 
-/* ── Right-edge accent bar ── */
-.rankings-list > *:not(.rankings-empty)::after {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0; right: 0;
-    width: 4px;
-    background: transparent;
-    transition: background 0.22s ease, box-shadow 0.22s ease;
-    border-radius: 0 10px 10px 0;
+/* ─────────────────────────────────────────────────────
+   AVATAR — 52px base, round
+   ───────────────────────────────────────────────────── */
+.rankings-list > *:not(.rankings-empty) .rank-avatar,
+.rankings-list > *:not(.rankings-empty) .avatar,
+.rankings-list > *:not(.rankings-empty) .avatar-img,
+.rankings-list > *:not(.rankings-empty) img {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-default);
+    background: var(--bg-input);
+    order: 1;
+    transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-/* ── Value (right-aligned, big) ── */
-.rankings-list > *:not(.rankings-empty) span:last-child,
-.rankings-list > *:not(.rankings-empty) > div:last-child {
+/* ─────────────────────────────────────────────────────
+   INFO BLOCK — name + meta stacked
+   ───────────────────────────────────────────────────── */
+.rankings-list > *:not(.rankings-empty) .rank-info,
+.rankings-list > *:not(.rankings-empty) .user-info,
+.rankings-list > *:not(.rankings-empty) .rank-meta-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    order: 2;
+}
+
+/* Name */
+.rankings-list > *:not(.rankings-empty) .rank-name,
+.rankings-list > *:not(.rankings-empty) .user-name,
+.rankings-list > *:not(.rankings-empty) .username {
+    font-size: 1.05rem;
     font-weight: 900;
-    font-size: 1.1rem;
-    color: var(--accent-cyan);
-    text-shadow: 0 0 12px currentColor;
-    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.03em;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+/* Meta row: level + detail */
+.rankings-list > *:not(.rankings-empty) .rank-meta,
+.rankings-list > *:not(.rankings-empty) .rank-subline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
     letter-spacing: 0.05em;
-    text-align: right;
+    flex-wrap: wrap;
+}
+
+/* Level pill — colored tier */
+.rankings-list > *:not(.rankings-empty) .rank-level,
+.rankings-list > *:not(.rankings-empty) .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(1, 225, 234, 0.1);
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(1, 225, 234, 0.6);
+    box-shadow: 0 0 12px rgba(1, 225, 234, 0.25);
     white-space: nowrap;
 }
 
-/* ── Avatar ── */
-.rankings-list > *:not(.rankings-empty) img,
-.rankings-list > *:not(.rankings-empty) .avatar,
-.rankings-list > *:not(.rankings-empty) .rank-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 1px solid var(--border-default);
-    background: var(--bg-input);
-    transition: border-color 0.22s ease, box-shadow 0.22s ease;
+/* Detail text (points, member since, etc.) */
+.rankings-list > *:not(.rankings-empty) .rank-detail,
+.rankings-list > *:not(.rankings-empty) .user-status-text {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
 }
 
-/* ── Hover ── */
+/* ─────────────────────────────────────────────────────
+   STATS CLUSTER — streak + score on the right
+   ───────────────────────────────────────────────────── */
+.rankings-list > *:not(.rankings-empty) .rank-stats,
+.rankings-list > *:not(.rankings-empty) .rank-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    order: 3;
+    flex-shrink: 0;
+}
+
+/* Streak pill — fire + days */
+.rankings-list > *:not(.rankings-empty) .rank-streak,
+.rankings-list > *:not(.rankings-empty) .streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: rgba(246, 187, 22, 0.1);
+    border: 1px solid var(--accent-yellow);
+    color: var(--accent-yellow);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 10px rgba(246, 187, 22, 0.6);
+    box-shadow: 0 0 12px rgba(246, 187, 22, 0.25);
+    white-space: nowrap;
+}
+.rankings-list > *:not(.rankings-empty) .rank-streak .streak-fire,
+.rankings-list > *:not(.rankings-empty) .streak .streak-fire,
+.rankings-list > *:not(.rankings-empty) .streak-fire {
+    font-size: 0.9rem;
+    filter: drop-shadow(0 0 6px rgba(246, 187, 22, 0.9));
+    line-height: 1;
+}
+.rankings-list > *:not(.rankings-empty) .rank-streak .streak-num,
+.rankings-list > *:not(.rankings-empty) .streak .streak-num,
+.rankings-list > *:not(.rankings-empty) .streak-num {
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Score — big, right-aligned */
+.rankings-list > *:not(.rankings-empty) .rank-score,
+.rankings-list > *:not(.rankings-empty) .score,
+.rankings-list > *:not(.rankings-empty) span:last-child,
+.rankings-list > *:not(.rankings-empty) > div:last-child:not(.rank-info):not(.rank-stats):not(.rank-meta) {
+    font-weight: 900;
+    font-size: 1.15rem;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 12px currentColor;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    text-align: right;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+/* ─────────────────────────────────────────────────────
+   HOVER
+   ───────────────────────────────────────────────────── */
 .rankings-list > *:not(.rankings-empty):hover {
     border-color: var(--accent-cyan) !important;
     background: rgba(255, 255, 255, 0.06);
@@ -356,23 +466,23 @@
     background: var(--accent-cyan);
     box-shadow: 0 0 14px var(--accent-cyan);
 }
-.rankings-list > *:not(.rankings-empty):hover img,
+.rankings-list > *:not(.rankings-empty):hover .rank-avatar,
 .rankings-list > *:not(.rankings-empty):hover .avatar,
-.rankings-list > *:not(.rankings-empty):hover .rank-avatar {
+.rankings-list > *:not(.rankings-empty):hover img {
     border-color: var(--accent-cyan);
-    box-shadow: 0 0 12px rgba(1, 225, 234, 0.5);
+    box-shadow: 0 0 16px rgba(1, 225, 234, 0.5);
+    transform: scale(1.05);
 }
 
-
 /* ═══════════════════════════════════════════════════════
-   7. PODIUM — ranks 1, 2, 3
+   PODIUM — ranks 1, 2, 3
    ═══════════════════════════════════════════════════════ */
 
 .rankings-list > *:nth-child(-n+3):not(.rankings-empty) {
-    min-height: 104px;
-    padding: 24px 26px !important;
+    min-height: 118px;
+    padding: 20px 24px !important;
     border-width: 2px !important;
-    gap: 22px;
+    gap: 20px;
     animation: podiumSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 .rankings-list > *:nth-child(1):not(.rankings-empty) { animation-delay: 0s; }
@@ -385,28 +495,36 @@
 }
 
 .rankings-list > *:nth-child(-n+3):not(.rankings-empty)::before {
+    width: 64px;
+    height: 64px;
+    font-size: 1.6rem;
+    font-weight: 900;
+    border-radius: 12px;
+}
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .avatar,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) img {
     width: 68px;
     height: 68px;
-    font-size: 1.7rem;
-    font-weight: 900;
+    min-width: 68px;
+    min-height: 68px;
+    border-width: 2px;
 }
-.rankings-list > *:nth-child(-n+3):not(.rankings-empty) span:last-child,
-.rankings-list > *:nth-child(-n+3):not(.rankings-empty) > div:last-child {
-    font-size: 1.25rem;
-    letter-spacing: 0.06em;
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-name,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .user-name,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .username {
+    font-size: 1.2rem;
 }
-.rankings-list > *:nth-child(-n+3):not(.rankings-empty) img,
-.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .avatar,
-.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-avatar {
-    width: 58px;
-    height: 58px;
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-score,
+.rankings-list > *:nth-child(-n+3):not(.rankings-empty) .score {
+    font-size: 1.35rem;
 }
 
 
-/* ── 1st — GOLD CHAMPION ──────────────────────────── */
+/* ═══ 1st — GOLD CHAMPION ═══ */
 .rankings-list > *:nth-child(1):not(.rankings-empty) {
-    min-height: 132px;
-    padding: 28px 32px !important;
+    min-height: 154px;
+    padding: 26px 30px !important;
     background: linear-gradient(135deg,
         rgba(246, 187, 22, 0.28) 0%,
         rgba(246, 187, 22, 0.10) 45%,
@@ -420,14 +538,14 @@
     0%, 100% {
         box-shadow:
             0 0 0 1px rgba(255, 213, 74, 0.4),
-            0 0 50px rgba(246, 187, 22, 0.5),
-            inset 0 0 40px rgba(246, 187, 22, 0.12);
+            0 0 60px rgba(246, 187, 22, 0.55),
+            inset 0 0 45px rgba(246, 187, 22, 0.14);
     }
     50% {
         box-shadow:
-            0 0 0 1px rgba(255, 213, 74, 0.7),
-            0 0 80px rgba(246, 187, 22, 0.75),
-            inset 0 0 55px rgba(246, 187, 22, 0.22);
+            0 0 0 1px rgba(255, 213, 74, 0.75),
+            0 0 100px rgba(246, 187, 22, 0.8),
+            inset 0 0 65px rgba(246, 187, 22, 0.25);
     }
 }
 .rankings-list > *:nth-child(1):not(.rankings-empty)::before {
@@ -440,26 +558,32 @@
     width: 84px;
     height: 84px;
     font-size: 2.4rem;
-    font-weight: 900;
 }
-.rankings-list > *:nth-child(1):not(.rankings-empty) span:last-child,
-.rankings-list > *:nth-child(1):not(.rankings-empty) > div:last-child {
+.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(1):not(.rankings-empty) .avatar,
+.rankings-list > *:nth-child(1):not(.rankings-empty) img {
+    width: 88px;
+    height: 88px;
+    min-width: 88px;
+    min-height: 88px;
+    border: 3px solid #FFD54A;
+    box-shadow: 0 0 26px rgba(246, 187, 22, 0.75);
+}
+.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-name,
+.rankings-list > *:nth-child(1):not(.rankings-empty) .user-name {
+    font-size: 1.4rem;
+    color: #FFD54A;
+    text-shadow: 0 0 14px rgba(246, 187, 22, 0.6);
+}
+.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-score,
+.rankings-list > *:nth-child(1):not(.rankings-empty) .score {
     color: #FFD54A;
     text-shadow: 0 0 18px rgba(246, 187, 22, 0.95);
-    font-size: 1.5rem;
-    letter-spacing: 0.06em;
-}
-.rankings-list > *:nth-child(1):not(.rankings-empty) img,
-.rankings-list > *:nth-child(1):not(.rankings-empty) .avatar,
-.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar {
-    width: 74px;
-    height: 74px;
-    border: 2px solid #FFD54A;
-    box-shadow: 0 0 22px rgba(246, 187, 22, 0.7);
+    font-size: 1.6rem;
 }
 
 
-/* ── 2nd — SILVER ─────────────────────────────────── */
+/* ═══ 2nd — SILVER ═══ */
 .rankings-list > *:nth-child(2):not(.rankings-empty) {
     background: linear-gradient(135deg,
         rgba(200, 220, 240, 0.20) 0%,
@@ -468,7 +592,7 @@
     border-color: #C8DCF0 !important;
     box-shadow:
         0 0 0 1px rgba(200, 220, 240, 0.3),
-        0 0 36px rgba(200, 220, 240, 0.32),
+        0 0 40px rgba(200, 220, 240, 0.32),
         inset 0 0 30px rgba(200, 220, 240, 0.08) !important;
 }
 .rankings-list > *:nth-child(2):not(.rankings-empty)::before {
@@ -479,20 +603,24 @@
     box-shadow: 0 0 20px rgba(200, 220, 240, 0.6);
     text-shadow: 0 0 14px rgba(200, 220, 240, 0.85);
 }
-.rankings-list > *:nth-child(2):not(.rankings-empty) span:last-child,
-.rankings-list > *:nth-child(2):not(.rankings-empty) > div:last-child {
+.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(2):not(.rankings-empty) .avatar,
+.rankings-list > *:nth-child(2):not(.rankings-empty) img {
+    border: 2px solid #C8DCF0;
+    box-shadow: 0 0 18px rgba(200, 220, 240, 0.5);
+}
+.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-name,
+.rankings-list > *:nth-child(2):not(.rankings-empty) .user-name {
+    color: #E4EEFA;
+}
+.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-score,
+.rankings-list > *:nth-child(2):not(.rankings-empty) .score {
     color: #E4EEFA;
     text-shadow: 0 0 16px rgba(200, 220, 240, 0.85);
 }
-.rankings-list > *:nth-child(2):not(.rankings-empty) img,
-.rankings-list > *:nth-child(2):not(.rankings-empty) .avatar,
-.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar {
-    border: 2px solid #C8DCF0;
-    box-shadow: 0 0 16px rgba(200, 220, 240, 0.5);
-}
 
 
-/* ── 3rd — BRONZE ─────────────────────────────────── */
+/* ═══ 3rd — BRONZE ═══ */
 .rankings-list > *:nth-child(3):not(.rankings-empty) {
     background: linear-gradient(135deg,
         rgba(230, 140, 60, 0.20) 0%,
@@ -501,7 +629,7 @@
     border-color: #E68C3C !important;
     box-shadow:
         0 0 0 1px rgba(230, 140, 60, 0.3),
-        0 0 36px rgba(230, 140, 60, 0.32),
+        0 0 40px rgba(230, 140, 60, 0.32),
         inset 0 0 30px rgba(230, 140, 60, 0.08) !important;
 }
 .rankings-list > *:nth-child(3):not(.rankings-empty)::before {
@@ -512,20 +640,23 @@
     box-shadow: 0 0 20px rgba(230, 140, 60, 0.6);
     text-shadow: 0 0 14px rgba(230, 140, 60, 0.85);
 }
-.rankings-list > *:nth-child(3):not(.rankings-empty) span:last-child,
-.rankings-list > *:nth-child(3):not(.rankings-empty) > div:last-child {
+.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar,
+.rankings-list > *:nth-child(3):not(.rankings-empty) .avatar,
+.rankings-list > *:nth-child(3):not(.rankings-empty) img {
+    border: 2px solid #E68C3C;
+    box-shadow: 0 0 18px rgba(230, 140, 60, 0.5);
+}
+.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-name,
+.rankings-list > *:nth-child(3):not(.rankings-empty) .user-name {
+    color: #FFB073;
+}
+.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-score,
+.rankings-list > *:nth-child(3):not(.rankings-empty) .score {
     color: #FFB073;
     text-shadow: 0 0 16px rgba(230, 140, 60, 0.85);
 }
-.rankings-list > *:nth-child(3):not(.rankings-empty) img,
-.rankings-list > *:nth-child(3):not(.rankings-empty) .avatar,
-.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar {
-    border: 2px solid #E68C3C;
-    box-shadow: 0 0 16px rgba(230, 140, 60, 0.5);
-}
 
-
-/* ── Divider below podium ─────────────────────────── */
+/* Divider below podium */
 .rankings-list > *:nth-child(3):not(.rankings-empty) {
     margin-bottom: 22px;
     position: relative;
@@ -547,63 +678,41 @@
     border-radius: 0;
 }
 
-
-/* ── Podium hover keeps medal identity ────────────── */
+/* Podium hover — keep medal identity */
 .rankings-list > *:nth-child(-n+3):not(.rankings-empty):hover {
     transform: translateX(6px) scale(1.008);
 }
 .rankings-list > *:nth-child(1):not(.rankings-empty):hover {
-    border-color: #FFD54A !important;
     box-shadow:
-        0 0 0 1px rgba(255, 213, 74, 0.75),
-        0 0 80px rgba(246, 187, 22, 0.85),
-        inset 0 0 50px rgba(246, 187, 22, 0.28) !important;
-}
-.rankings-list > *:nth-child(1):not(.rankings-empty):hover::before {
-    color: #FFD54A;
-    border-color: #FFD54A;
-    box-shadow: 0 0 32px rgba(246, 187, 22, 0.95);
-}
-.rankings-list > *:nth-child(1):not(.rankings-empty):hover::after {
-    background: #FFD54A;
-    box-shadow: 0 0 18px #FFD54A;
+        0 0 0 1px rgba(255, 213, 74, 0.8),
+        0 0 100px rgba(246, 187, 22, 0.9),
+        inset 0 0 60px rgba(246, 187, 22, 0.3) !important;
 }
 .rankings-list > *:nth-child(2):not(.rankings-empty):hover {
-    border-color: #C8DCF0 !important;
     box-shadow:
-        0 0 0 1px rgba(200, 220, 240, 0.55),
-        0 0 60px rgba(200, 220, 240, 0.55),
-        inset 0 0 40px rgba(200, 220, 240, 0.15) !important;
-}
-.rankings-list > *:nth-child(2):not(.rankings-empty):hover::before {
-    color: #E4EEFA;
-    border-color: #C8DCF0;
-    box-shadow: 0 0 24px rgba(200, 220, 240, 0.75);
-}
-.rankings-list > *:nth-child(2):not(.rankings-empty):hover::after {
-    background: #C8DCF0;
-    box-shadow: 0 0 14px #C8DCF0;
+        0 0 0 1px rgba(200, 220, 240, 0.6),
+        0 0 70px rgba(200, 220, 240, 0.6),
+        inset 0 0 45px rgba(200, 220, 240, 0.15) !important;
 }
 .rankings-list > *:nth-child(3):not(.rankings-empty):hover {
-    border-color: #E68C3C !important;
     box-shadow:
-        0 0 0 1px rgba(230, 140, 60, 0.55),
-        0 0 60px rgba(230, 140, 60, 0.55),
-        inset 0 0 40px rgba(230, 140, 60, 0.15) !important;
+        0 0 0 1px rgba(230, 140, 60, 0.6),
+        0 0 70px rgba(230, 140, 60, 0.6),
+        inset 0 0 45px rgba(230, 140, 60, 0.15) !important;
 }
-.rankings-list > *:nth-child(3):not(.rankings-empty):hover::before {
-    color: #FFB073;
-    border-color: #E68C3C;
-    box-shadow: 0 0 24px rgba(230, 140, 60, 0.75);
-}
-.rankings-list > *:nth-child(3):not(.rankings-empty):hover::after {
-    background: #E68C3C;
-    box-shadow: 0 0 14px #E68C3C;
-}
-
 
 /* ═══════════════════════════════════════════════════════
-   8. RESPONSIVE
+   FALLBACK LAYOUT (if no dedicated .rank-info / .rank-stats)
+   Keeps rows readable for older JS output.
+   ═══════════════════════════════════════════════════════ */
+
+/* If the row has no .rank-info, treat middle content as flowing text */
+.rankings-list > *:not(.rankings-empty):not(:has(.rank-info)) {
+    grid-template-columns: auto auto 1fr auto;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
    ═══════════════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
@@ -612,7 +721,7 @@
         padding: 28px 22px 24px !important;
     }
     .rankings-body { gap: 22px; }
-    .rankings-header h3 { font-size: 1.35rem !important; }
+    .rankings-header h3 { font-size: 1.3rem !important; }
 }
 
 @media (max-width: 768px) {
@@ -622,98 +731,75 @@
         min-height: auto;
         max-height: 92vh;
         padding: 24px 18px 20px !important;
-        border-radius: 10px !important;
+        border-radius: 12px !important;
     }
-    .rankings-body {
-        grid-template-columns: 1fr;
-        gap: 22px;
-    }
-    .rankings-header {
-        padding-bottom: 18px;
-        margin-bottom: 20px;
-    }
-    .rankings-header h3 {
-        font-size: 1.1rem !important;
-        letter-spacing: 0.18em !important;
-    }
+    .rankings-body { grid-template-columns: 1fr; gap: 22px; }
+    .rankings-header { padding-bottom: 18px; margin-bottom: 20px; }
+    .rankings-header h3 { font-size: 1.05rem !important; letter-spacing: 0.18em !important; }
     .rankings-close-btn {
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        max-width: 38px !important;
+        width: 38px !important; height: 38px !important;
+        min-width: 38px !important; max-width: 38px !important;
         font-size: 1rem !important;
     }
-    .rankings-column-title {
-        font-size: 0.78rem !important;
-        letter-spacing: 0.26em !important;
-    }
+    .rankings-column-title { font-size: 0.76rem !important; letter-spacing: 0.24em !important; }
 
+    /* Base rows on mobile */
     .rankings-list > *:not(.rankings-empty) {
-        min-height: 66px;
+        grid-template-columns: auto auto 1fr;
+        grid-template-areas:
+            "badge avatar stats"
+            "info  info   info";
+        row-gap: 12px;
+        min-height: auto;
         padding: 14px 16px !important;
         gap: 14px;
         font-size: 0.92rem;
     }
-    .rankings-list > *:not(.rankings-empty)::before {
-        width: 44px;
-        height: 44px;
-        font-size: 0.82rem;
-    }
-    .rankings-list > *:not(.rankings-empty) span:last-child,
-    .rankings-list > *:not(.rankings-empty) > div:last-child {
-        font-size: 1rem;
-    }
-    .rankings-list > *:not(.rankings-empty) img,
+    .rankings-list > *:not(.rankings-empty)::before { grid-area: badge; width: 44px; height: 44px; font-size: 0.82rem; }
+    .rankings-list > *:not(.rankings-empty) .rank-avatar,
     .rankings-list > *:not(.rankings-empty) .avatar,
-    .rankings-list > *:not(.rankings-empty) .rank-avatar {
-        width: 40px;
-        height: 40px;
+    .rankings-list > *:not(.rankings-empty) img {
+        grid-area: avatar;
+        width: 44px; height: 44px; min-width: 44px; min-height: 44px;
     }
+    .rankings-list > *:not(.rankings-empty) .rank-info { grid-area: info; }
+    .rankings-list > *:not(.rankings-empty) .rank-stats {
+        grid-area: stats;
+        justify-self: end;
+        gap: 8px;
+    }
+    .rankings-list > *:not(.rankings-empty) .rank-name { font-size: 0.98rem; }
+    .rankings-list > *:not(.rankings-empty) .rank-score { font-size: 1.02rem; }
+    .rankings-list > *:not(.rankings-empty) .rank-streak { font-size: 0.74rem; padding: 4px 8px; }
 
     /* Podium on mobile */
     .rankings-list > *:nth-child(-n+3):not(.rankings-empty) {
-        min-height: 86px;
-        padding: 18px 18px !important;
+        min-height: auto;
+        padding: 16px 16px !important;
     }
     .rankings-list > *:nth-child(-n+3):not(.rankings-empty)::before {
-        width: 54px;
-        height: 54px;
-        font-size: 1.3rem;
+        width: 52px; height: 52px; font-size: 1.25rem;
     }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) {
-        min-height: 104px;
-        padding: 22px 22px !important;
-    }
-    .rankings-list > *:nth-child(1):not(.rankings-empty)::before {
-        width: 66px;
-        height: 66px;
-        font-size: 1.9rem;
-    }
-    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) img,
+    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-avatar,
     .rankings-list > *:nth-child(-n+3):not(.rankings-empty) .avatar,
-    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) .rank-avatar {
-        width: 46px;
-        height: 46px;
+    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) img {
+        width: 54px; height: 54px; min-width: 54px; min-height: 54px;
     }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) img,
+    .rankings-list > *:nth-child(1):not(.rankings-empty) { padding: 18px 18px !important; }
+    .rankings-list > *:nth-child(1):not(.rankings-empty)::before {
+        width: 64px; height: 64px; font-size: 1.8rem;
+    }
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar,
     .rankings-list > *:nth-child(1):not(.rankings-empty) .avatar,
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar {
-        width: 56px;
-        height: 56px;
+    .rankings-list > *:nth-child(1):not(.rankings-empty) img {
+        width: 68px; height: 68px; min-width: 68px; min-height: 68px;
     }
-    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) span:last-child,
-    .rankings-list > *:nth-child(-n+3):not(.rankings-empty) > div:last-child {
-        font-size: 1.05rem;
-    }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) span:last-child,
-    .rankings-list > *:nth-child(1):not(.rankings-empty) > div:last-child {
-        font-size: 1.2rem;
-    }
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-name { font-size: 1.15rem; }
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-score { font-size: 1.25rem; }
 }
 
-
 /* ═══════════════════════════════════════════════════════
-   9. ACCESSIBILITY
+   ACCESSIBILITY
    ═══════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
@@ -722,7 +808,7 @@
         animation: none !important;
         transition: none !important;
     }
-    .rankings-list > *:not(.rankings-empty):hover { transform: none; }
+    .rankings-list > *:not(.rankings-empty):hover,
     .rankings-list > *:nth-child(-n+3):not(.rankings-empty):hover { transform: none; }
     .rankings-empty { animation: none; }
     .rankings-close-btn:hover { transform: none; }
@@ -732,5 +818,5 @@
 .rankings-close-btn:focus-visible {
     outline: 2px solid var(--accent-cyan);
     outline-offset: 3px;
-    border-radius: 10px;
+    border-radius: 12px;
 }
