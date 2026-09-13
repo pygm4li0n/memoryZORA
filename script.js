@@ -1626,14 +1626,14 @@
             payload.username = username;
         }
         try {
-            const { error } = await supabase.from(table).insert([payload]);
+            const { data: inserted, error } = await supabase.from(table).insert([payload]).select().single();
             if (error) throw error;
             messageInput.value = '';
             setReplyingTo(null);
             clearAttachedImage();
             stopTyping();
             startCooldown(modCooldownSeconds);
-            if (window.addXP) window.addXP(5);
+            if (window.addXP && inserted?.id) window.addXP(inserted.id);
             // User just sent a message — pin to bottom to see it
             autoScroll = true;
         } catch (err) {
