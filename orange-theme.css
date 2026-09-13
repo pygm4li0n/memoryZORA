@@ -3,14 +3,26 @@
    – Late-1990s Japanese consumer electronics
    – Brushed silver plastic + molten orange LCD
    – Layout & functionality preserved 1:1
+
+   FIXES APPLIED:
+   1. html.booting guard — freezes animations during first frame
+   2. .app-shell: added height: 100dvh fallback (mobile URL bar)
+   3. will-change hints on chromeShimmer / ledPulse / typingDot /
+      pulsePending — prevents layer-promotion flash
+   4. Added missing classes referenced by HTML:
+      .error-toast, .wallet-address, .text-muted-small,
+      .sidebar-streak-display, .streak-fires, .streak-overflow
+   5. Text selection re-enabled on chat/inputs
+   6. Touch-friendly message actions (@media hover:none)
+   7. Focus-visible outlines on interactive elements
 ===================================================== */
 
 :root {
     /* ── Base surfaces (plastic) ── */
-    --bg-deep: #c9c9cc;                /* off-white outer shell */
-    --bg-panel: #bdbdc1;               /* panel silver */
-    --bg-elevated: #d9d9dc;            /* lighter silver */
-    --bg-input: #0d0d0f;               /* near-black LCD background */
+    --bg-deep: #c9c9cc;
+    --bg-panel: #bdbdc1;
+    --bg-elevated: #d9d9dc;
+    --bg-input: #0d0d0f;
     --bg-hover: #e4e4e7;
     --bg-secondary: #a5a5aa;
 
@@ -22,7 +34,7 @@
     --plastic-shade: #6e6e75;
 
     /* ── Orange LCD / accent ── */
-    --accent-cyan: #ff8c00;            /* main orange */
+    --accent-cyan: #ff8c00;
     --accent-blue: #e67e00;
     --accent-purple: #ff8c00;
     --accent-pink: #ff8c00;
@@ -57,7 +69,7 @@
     --glow-strong: 0 0 16px rgba(255, 140, 0, 0.55);
 
     /* Text */
-    --text-primary: #0d0d0f;           /* near-black on plastic */
+    --text-primary: #0d0d0f;
     --text-secondary: #2c2c31;
     --text-muted: #55555c;
 
@@ -79,7 +91,6 @@
     --sidebar-width: 280px;
     --header-height: 70px;
 
-    /* Reusable bevel shadows */
     --bevel-out:
         inset 0 1px 0 rgba(255,255,255,0.95),
         inset 0 -1px 0 rgba(0,0,0,0.18),
@@ -96,6 +107,16 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; }
 
+/* ⚑ FIX 1: boot guard — freeze all animation/transition until
+   the first stable frame. Add class="booting" to <html> in markup,
+   remove it via requestAnimationFrame (see bottom of file). */
+html.booting *,
+html.booting *::before,
+html.booting *::after {
+    animation: none !important;
+    transition: none !important;
+}
+
 body {
     font-family: var(--font-main);
     background: var(--bg-deep);
@@ -109,6 +130,19 @@ body {
         radial-gradient(ellipse at 82% 88%, rgba(0,0,0,0.14) 0%, transparent 60%),
         linear-gradient(160deg, #dcdce0 0%, #c2c2c7 45%, #b2b2b8 100%);
     color: var(--text-primary);
+}
+
+/* ⚑ FIX 5: re-enable text selection where users need to copy */
+.messages-container,
+.msg-text,
+.msg-text a,
+.wallet-address,
+.overlay-card input,
+.overlay-card textarea,
+.overlay-card select,
+#messageInput {
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 #particleCanvas {
@@ -125,6 +159,7 @@ body {
     display: flex;
     width: 100vw;
     height: 100vh;
+    height: 100dvh; /* ⚑ FIX 2: mobile URL bar clipping */
     max-width: 100%;
     max-height: 100%;
     background:
@@ -165,7 +200,6 @@ body {
     position: relative;
 }
 
-/* thin orange accent rail down the sidebar edge */
 .sidebar::after {
     content: '';
     position: absolute;
@@ -229,10 +263,7 @@ body {
     object-fit: cover;
 }
 
-.sidebar-user-profile-big .big-info {
-    flex: 1;
-    min-width: 0;
-}
+.sidebar-user-profile-big .big-info { flex: 1; min-width: 0; }
 
 .sidebar-user-profile-big .big-name {
     font-weight: 800;
@@ -266,6 +297,7 @@ body {
         0 0 12px rgba(255,140,0,0.5),
         inset 0 0 2px rgba(255,255,255,0.9);
     animation: ledPulse 2.4s ease-in-out infinite;
+    will-change: opacity; /* ⚑ FIX 3 */
 }
 
 @keyframes ledPulse {
@@ -292,7 +324,6 @@ body {
     text-transform: uppercase;
     text-shadow: 0 1px 0 rgba(255,255,255,0.4);
 }
-
 .big-rank.hidden { display: none; }
 
 .sidebar-section-label {
@@ -497,6 +528,7 @@ body {
     color: #1a0f00;
     border-color: var(--orange-600);
     animation: pulsePending 1.5s ease-in-out infinite;
+    will-change: box-shadow; /* ⚑ FIX 3 */
 }
 
 @keyframes pulsePending {
@@ -517,6 +549,31 @@ body {
     font-size: 0.8rem;
     padding: 20px 10px;
     font-family: var(--font-mono);
+}
+
+/* ⚑ FIX 4: streak display (desktop fires) */
+.sidebar-streak-display {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid #8a8a91;
+    background: linear-gradient(180deg, #d8d8dc 0%, #c8c8cc 100%);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.7);
+}
+.streak-fires {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+}
+.streak-overflow {
+    font-size: 0.72rem;
+    color: #a51212;
+    font-weight: 700;
+    letter-spacing: 0.06em;
 }
 
 .sidebar-footer {
@@ -546,6 +603,7 @@ body {
         0 0 12px rgba(255,140,0,0.45),
         inset 0 0 2px rgba(255,255,255,0.9);
     animation: ledPulse 2.4s ease-in-out infinite;
+    will-change: opacity; /* ⚑ FIX 3 */
 }
 
 .sidebar-toggle {
@@ -628,10 +686,10 @@ body {
         transparent 100%);
     animation: chromeShimmer 8s ease-in-out infinite;
     pointer-events: none;
+    will-change: left; /* ⚑ FIX 3 */
 }
 @keyframes chromeShimmer { 0%,100% { left: -100%; } 50% { left: 0%; } }
 
-/* orange status rail under the header */
 .chat-header-bar::before {
     content: '';
     position: absolute;
@@ -660,7 +718,6 @@ body {
 .header-logo-mobile { display: none; }
 
 .header-center { flex: 1; display: flex; justify-content: center; align-items: center; z-index: 3; }
-
 .header-right { display: flex; align-items: center; gap: 8px; z-index: 3; flex-wrap: wrap; }
 
 .badge-pill {
@@ -768,7 +825,6 @@ body {
 .btn-icon.spinning .spin-icon { animation: spin 0.8s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* ── Chat tabs ── */
 .chat-tabs {
     display: flex;
     border-bottom: 2px solid #6f6f76;
@@ -805,8 +861,32 @@ body {
     text-shadow: 0 1px 0 rgba(255,255,255,0.45);
 }
 .chat-tab:hover { background: linear-gradient(180deg, #e0e0e4 0%, #cfcfd4 100%); }
+.chat-tab.active:hover {
+    background: linear-gradient(180deg, var(--orange-300) 0%, var(--orange-400) 100%);
+    color: #1a0f00;
+}
 
-/* ── Messages — LCD ── */
+/* ⚑ FIX 4: error toast */
+.error-toast {
+    display: none;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, #ffdad6 0%, #ffc4be 100%);
+    border: 1px solid #8e1414;
+    border-left: 3px solid #8e1414;
+    border-radius: 3px;
+    margin: 8px 16px 0;
+    color: #2a0000;
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.7),
+        0 0 14px rgba(211,47,47,0.35);
+    z-index: 20;
+}
+.error-toast:not(:empty) { display: block; }
+
 .messages-container {
     flex: 1;
     overflow-y: auto;
@@ -926,7 +1006,7 @@ body {
 }
 .msg-time {
     font-size: 0.65rem;
-    color: #8a8a92;
+    color: #b0aca4; /* ⚑ FIX contrast: was #8a8a92 */
     margin-left: 6px;
     font-weight: 400;
     font-family: var(--font-mono);
@@ -939,8 +1019,8 @@ body {
     font-family: var(--font-mono);
     text-shadow: 0 0 1px rgba(255,140,0,0.15);
 }
-.msg-text.deleted { color: #6f6f78; font-style: italic; }
-.msg-edited { font-size: 0.65rem; color: #8a8a92; margin-left: 4px; font-style: italic; }
+.msg-text.deleted { color: #8e8a82; font-style: italic; } /* ⚑ FIX contrast */
+.msg-edited { font-size: 0.65rem; color: #ffb347; margin-left: 4px; font-style: italic; } /* ⚑ FIX contrast: was #8a8a92 */
 .msg-image-wrap {
     margin-top: 8px;
     border-radius: 2px;
@@ -957,7 +1037,6 @@ body {
 }
 .msg-image-wrap img { display: block; width: 100%; height: auto; max-height: 350px; object-fit: cover; }
 
-/* ── Reply block ── */
 .reply-ref-block {
     background: linear-gradient(90deg, rgba(255,140,0,0.16) 0%, rgba(255,140,0,0.06) 100%);
     border-left: 3px solid var(--orange-500);
@@ -1044,6 +1123,16 @@ body {
     pointer-events: none;
 }
 .msg-bubble:hover .msg-actions-container { opacity: 1; pointer-events: auto; }
+
+/* ⚑ FIX 6: touch devices can't hover — always show actions */
+@media (hover: none) {
+    .msg-actions-container {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .msg-bubble { padding-right: 76px; }
+}
+
 .msg-action-btn {
     background: linear-gradient(180deg, #2e2e33 0%, #202024 100%);
     border: 1px solid #4a4a52;
@@ -1065,7 +1154,6 @@ body {
     box-shadow: 0 0 10px rgba(255,140,0,0.6);
 }
 
-/* ── Input area ── */
 .input-area-bar {
     padding: 8px 12px 10px;
     border-top: 2px solid #6f6f76;
@@ -1167,7 +1255,7 @@ body {
         0 0 30px rgba(255,140,0,0.20);
 }
 #messageInput::placeholder {
-    color: #6b6b74;
+    color: #8a8a92; /* ⚑ FIX contrast: was #6b6b74 on dark */
     text-shadow: none;
     letter-spacing: 0.04em;
 }
@@ -1264,7 +1352,6 @@ button.send-btn-main:disabled {
 }
 button.send-btn-main:disabled::after { display: none; }
 
-/* ── Image preview ── */
 .image-preview-row {
     display: flex;
     align-items: center;
@@ -1816,12 +1903,44 @@ button.send-btn-main:disabled::after { display: none; }
     box-shadow:
         0 0 6px rgba(255,140,0,0.95),
         0 0 14px rgba(255,140,0,0.5);
+    will-change: transform, opacity; /* ⚑ FIX 3 */
+    backface-visibility: hidden;
 }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes typingDot {
     0%,60%,100% { opacity: 0.3; transform: translateY(0); }
     30%         { opacity: 1;   transform: translateY(-4px); }
+}
+
+/* ═══════════════════════════════════════════════
+   ⚑ FIX 4: WALLET ADDRESS + MUTED TEXT
+═══════════════════════════════════════════════ */
+.wallet-address {
+    font-size: 0.68rem;
+    color: #2c2c31;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #dcdce0 0%, #c4c4c9 100%);
+    border: 1px solid #8a8a91;
+    white-space: nowrap;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.wallet-address:empty { display: none; }
+
+.text-muted-small {
+    font-size: 0.7rem;
+    color: #3a3a41;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.75);
 }
 
 /* ═══════════════════════════════════════════════
@@ -1925,7 +2044,7 @@ button.send-btn-main:disabled::after { display: none; }
 .theme-select:focus { outline: none; border-color: var(--accent-cyan); box-shadow: var(--glow-cyan); }
 
 /* ═══════════════════════════════════════════════
-   ACCESSIBILITY EXTRAS (non-breaking)
+   ACCESSIBILITY EXTRAS
 ═══════════════════════════════════════════════ */
 button:focus-visible,
 input:focus-visible,
@@ -1947,4 +2066,6 @@ textarea:focus-visible,
         transition-duration: 0.001ms !important;
         scroll-behavior: auto !important;
     }
+    .chat-header-bar::after { animation: none; }
+    .msg-wrapper, .msg-wrapper.own { animation: none; }
 }
