@@ -659,17 +659,33 @@
         if (autoScroll) autoScroll = false;
     }
 
+        // Track last known scrollTop per container so we can spot upward movement
+    const lastScrollPos = { public: 0, private: 0 };
+
     function attachAutoScrollListeners() {
-        [publicContainer, privateContainer].forEach(container => {
-            // Instant disable on ANY user interaction gesture
-            container.addEventListener('touchstart', disableAutoScroll, { passive: true });
+        const pairs = [
+            [publicContainer, 'public'],
+            [privateContainer, 'private']
+        ];
+        pairs.forEach(([container, key]) => {
+            // Existing "any gesture → disable" handlers
+            container.addEventListener('touchstart',  disableAutoScroll, { passive: true });
             container.addEventListener('pointerdown', disableAutoScroll, { passive: true });
-            container.addEventListener('touchmove', disableAutoScroll, { passive: true });
-            container.addEventListener('wheel', disableAutoScroll, { passive: true });
-            container.addEventListener('keydown', disableAutoScroll, { passive: true });
-            // Note: NO scroll listener here — we do NOT re-enable autoScroll
-            // just because the user scrolled near the bottom. It only turns
-            // back on via the ↓ button or when sending a message.
+            container.addEventListener('touchmove',   disableAutoScroll, { passive: true });
+            container.addEventListener('touchcancel', disableAutoScroll, { passive: true });
+            container.addEventListener('wheel',       disableAutoScroll, { passive: true });
+            container.addEventListener('keydown',     disableAutoScroll, { passive: true });
+
+            // NEW: watch actual scroll position — the reliable signal on Phantom
+            container.addEventListener('scroll', () => {
+                const st = container.scrollTop;
+                const prev = lastScrollPos[key];
+                // Moving up more than 4px = user is reading history → kill auto-scroll
+                if (st < prev - 4) {
+                    disableAutoScroll();
+                }
+                lastScrollPos[key] = st;
+            }, { passive: true });
         });
     }
     attachAutoScrollListeners();
