@@ -195,10 +195,6 @@ html, body {
 
 /* =====================================================
    MOBILE – force-fit to the REAL visible viewport
-   --app-height is set by inline <script> in <head> of index.html
-   (do NOT use env(safe-area-inset-bottom) here — Phantom
-    already accounts for it, so adding it double-counts and
-    lifts the input bar above the visible bottom.)
 ===================================================== */
 @media (max-width: 768px) {
 
@@ -553,8 +549,7 @@ html, body {
     padding: 0 !important;
 }
 
-/* ── Desktop: tweet bubbles need a wider floor so embed fits,
-      but they stay inside the SAME 82% cap as every other message ── */
+/* ── Desktop: tweet bubbles need a wider floor so embed fits ── */
 @media (min-width: 769px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
@@ -580,24 +575,112 @@ html, body {
 }
 
 /* =====================================================
-   DAILY LOGIN TRACKING – STREAK BADGE + RESET BUTTON
+   XP LEVEL BADGE (sidebar profile card)
 ===================================================== */
-
-/* ── Login streak badge in sidebar profile card ── */
-.big-streak {
+.big-level {
     font-size: 0.72rem;
-    color: var(--accent-orange, #f97316);
-    font-weight: 600;
+    color: var(--accent-cyan, #00f0ff);
+    font-weight: 700;
     margin-top: 4px;
     letter-spacing: 0.03em;
     line-height: 1.2;
-    text-shadow: 0 0 8px rgba(249, 115, 22, 0.4);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
 }
-.big-streak.hidden {
+.big-level.hidden {
     display: none;
 }
 
-/* ── Reset login streaks button (inside Mod Settings panel) ── */
+/* =====================================================
+   DAILY STREAK – 7 FIRE DISPLAY (desktop only)
+===================================================== */
+.sidebar-streak-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: linear-gradient(
+        135deg,
+        rgba(249, 115, 22, 0.08) 0%,
+        rgba(249, 115, 22, 0.02) 100%
+    );
+    border-top: 1px solid var(--border-default, #233261);
+    border-bottom: 1px solid var(--border-default, #233261);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.sidebar-streak-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(249, 115, 22, 0.5),
+        transparent
+    );
+}
+
+.sidebar-streak-display.hidden {
+    display: none !important;
+}
+
+.streak-fires {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.fire-slot {
+    font-size: 1.15rem;
+    line-height: 1;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+/* Filled fire – full color + glow */
+.fire-slot.fire-filled {
+    filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.9))
+            drop-shadow(0 0 12px rgba(255, 165, 0, 0.4));
+    animation: fireFlicker 1.8s ease-in-out infinite;
+}
+
+/* Empty fire – dimmed grey, no glow */
+.fire-slot.fire-empty {
+    filter: grayscale(100%) brightness(0.4);
+    opacity: 0.25;
+}
+
+@keyframes fireFlicker {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.08); }
+}
+
+/* Overflow counter for >7 days */
+.streak-overflow {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--accent-orange, #f97316);
+    text-shadow: 0 0 10px rgba(249, 115, 22, 0.8);
+    letter-spacing: 0.02em;
+    margin-left: 2px;
+}
+.streak-overflow.hidden { display: none; }
+
+/* HIDE on mobile — desktop only */
+@media (max-width: 768px) {
+    .sidebar-streak-display {
+        display: none !important;
+    }
+}
+
+/* =====================================================
+   RESET LOGIN BUTTON (inside Mod Settings panel)
+===================================================== */
 .reset-login-btn {
     width: 100%;
     padding: 12px;
@@ -724,4 +807,191 @@ html, body {
 }
 .phantom-overlay-btn.connected:hover {
     background: rgba(255,92,124,0.25) !important;
+}
+
+/* =====================================================
+   RANKINGS OVERLAY – trophy button + dual boards
+===================================================== */
+
+/* Trophy button (inherits .btn-icon) */
+.rankings-btn {
+    /* nothing extra needed — uses base .btn-icon */
+}
+
+/* Overlay card */
+.rankings-card {
+    max-width: 720px !important;
+    width: 92% !important;
+    max-height: 85vh !important;
+    padding: 0 !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+.rankings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border-default, #233261);
+    flex-shrink: 0;
+}
+.rankings-header h3 {
+    margin: 0 !important;
+    font-size: 1.1rem !important;
+    color: var(--text-primary, #fff);
+    text-shadow: 0 0 12px rgba(0,240,255,0.4);
+}
+.rankings-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-default, #233261);
+    background: transparent;
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.rankings-close-btn:hover {
+    border-color: var(--accent-red, #ff5c7c);
+    color: var(--accent-red, #ff5c7c);
+    background: rgba(255,92,124,0.1);
+}
+
+/* Two-column body */
+.rankings-body {
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+.rankings-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.rankings-column:first-child {
+    border-right: 1px solid var(--border-default, #233261);
+}
+.rankings-column-title {
+    padding: 12px 18px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted, #64748b);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.rankings-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.rankings-list::-webkit-scrollbar {
+    width: 5px;
+}
+.rankings-list::-webkit-scrollbar-thumb {
+    background: var(--bg-secondary, #233261);
+    border-radius: 10px;
+}
+
+/* Ranking rows */
+.ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm, 6px);
+    background: rgba(255,255,255,0.03);
+    transition: background 0.2s;
+    font-size: 0.82rem;
+}
+.ranking-row:hover {
+    background: rgba(0, 240, 255, 0.08);
+}
+
+.rk-pos {
+    width: 26px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #94a3b8);
+    flex-shrink: 0;
+}
+.rk-tier {
+    font-size: 1rem;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
+}
+.rk-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+}
+.rk-streak {
+    color: var(--accent-orange, #f97316);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-shadow: 0 0 8px rgba(249,115,22,0.4);
+}
+.rk-stat {
+    color: var(--text-secondary, #94a3b8);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rankings-empty {
+    text-align: center;
+    color: var(--text-muted, #64748b);
+    font-style: italic;
+    font-size: 0.8rem;
+    padding: 24px 12px;
+}
+
+/* Mobile: stack the two columns vertically */
+@media (max-width: 768px) {
+    .rankings-card {
+        width: 95% !important;
+        max-height: 88vh !important;
+    }
+    .rankings-body {
+        flex-direction: column;
+    }
+    .rankings-column:first-child {
+        border-right: none;
+        border-bottom: 1px solid var(--border-default, #233261);
+        max-height: 45%;
+    }
+    .rankings-column {
+        max-height: 50%;
+    }
+    .rankings-header {
+        padding: 14px 16px 10px;
+    }
+    .rankings-header h3 {
+        font-size: 1rem !important;
+    }
 }
