@@ -24,7 +24,6 @@
             el.classList.add('hidden');
             return;
         }
-        // Fallback: if server didn't provide in_level/needed, compute locally
         if (inLevel == null || needed == null) {
             const thisLvl = xpForLevel(level);
             const nextLvl = xpForLevel(level + 1);
@@ -72,6 +71,19 @@
         }
     });
 
+    // ───── AVATAR HELPER ─────
+    // Tries multiple possible field names from the RPC payload.
+    // Falls back to a glowing initial-letter circle when no image exists.
+    function avatarHTML(row) {
+        const url = row.avatar_url || row.avatar || row.profile_pic ||
+                    row.profile_pic_url || row.pfp || null;
+        if (url) {
+            return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'rank-avatar rank-avatar-fallback\\'>${esc((row.username || '?').trim().charAt(0).toUpperCase() || '?')}</div>'">`;
+        }
+        const initial = (row.username || '?').trim().charAt(0).toUpperCase() || '?';
+        return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
+    }
+
     // ───── HOLDERS BOARD ─────
     async function loadHoldersBoard() {
         const el = document.getElementById('holdersLeaderboard');
@@ -83,15 +95,20 @@
                 return;
             }
             el.innerHTML = data.map(row => {
-                const pos = row.position ?? row.rank;
-                const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `#${pos}`;
                 const emoji = TIER_EMOJI[row.holder_tier] || '🦐';
-                const bal = Number(row.token_balance || 0).toLocaleString();
-                return `<div class="ranking-row">
-                    <span class="rk-pos">${medal}</span>
-                    <span class="rk-tier">${emoji}</span>
-                    <span class="rk-name">${esc(row.username)}</span>
-                    <span class="rk-stat">${bal}</span>
+                const tier  = (row.holder_tier || 'Holder').toUpperCase();
+                const bal   = Number(row.token_balance || 0).toLocaleString();
+                return `<div class="rank-row">
+                    ${avatarHTML(row)}
+                    <div class="rank-info">
+                        <div class="rank-name">${esc(row.username)}</div>
+                        <div class="rank-meta">
+                            <span class="rank-level">${emoji} ${tier}</span>
+                        </div>
+                    </div>
+                    <div class="rank-stats">
+                        <span class="rank-score">${bal}</span>
+                    </div>
                 </div>`;
             }).join('');
         } catch (err) { console.warn('Holders board failed:', err); }
@@ -108,14 +125,24 @@
                 return;
             }
             el.innerHTML = data.map(row => {
-                const pos = row.position ?? row.rank;
-                const medal = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `#${pos}`;
-                return `<div class="ranking-row">
-                    <span class="rk-pos">${medal}</span>
-                    <span class="rk-tier">🔥</span>
-                    <span class="rk-name">${esc(row.username)}</span>
-                    <span class="rk-streak">${row.login_streak}d</span>
-                    <span class="rk-stat">Lv.${row.level}</span>
+                const streak = Number(row.login_streak || 0);
+                const level  = Number(row.level || 1);
+                const xp     = Number(row.xp || row.total_xp || 0);
+                return `<div class="rank-row">
+                    ${avatarHTML(row)}
+                    <div class="rank-info">
+                        <div class="rank-name">${esc(row.username)}</div>
+                        <div class="rank-meta">
+                            <span class="rank-level">LVL ${level}</span>
+                            <span class="rank-detail">${xp.toLocaleString()} XP</span>
+                        </div>
+                    </div>
+                    <div class="rank-stats">
+                        <div class="rank-streak">
+                            <span class="streak-fire">🔥</span>
+                            <span class="streak-num">${streak}</span>
+                        </div>
+                    </div>
                 </div>`;
             }).join('');
         } catch (err) { console.warn('Activity board failed:', err); }
@@ -135,8 +162,6 @@
             if (error) { console.warn('add_xp failed:', error); return null; }
             if (!data || data.error) return null;
 
-            // Only update the badge if the server actually granted something.
-            // Silent no-ops on: too_short, cooldown, duplicate, hourly_cap, daily_cap.
             if (data.granted > 0) {
                 updateLevelBadge(data.level, data.xp, data.in_level, data.needed);
             }
