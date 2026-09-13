@@ -1,20 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="booting">
+<!-- ⚑ FIX: class="booting" on <html> holds all animations/transitions
+     until the first stable frame. Removed by the inline script in <head>. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Meme Social Network // MSN</title>
+
+    <!-- ⚑ FIX: Google Fonts preconnect + stylesheet link.
+         Moving the font load out of the CSS @import lets the browser
+         discover it before first paint → no fallback→webfont reflow.
+         The @import stays in the CSS as a harmless cache-hit fallback. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+
     <!-- Preconnect hints for faster X/Twitter embed loading -->
     <link rel="preconnect" href="https://platform.twitter.com" crossorigin>
     <link rel="preconnect" href="https://cdn.syndication.twimg.com" crossorigin>
     <link rel="dns-prefetch" href="https://platform.twitter.com">
     <link rel="dns-prefetch" href="https://cdn.syndication.twimg.com">
-    <!-- Theme stylesheet (swappable) -->
-    <link id="themeStylesheet" rel="stylesheet" href="style.css?v=69">
+
+    <!-- ⚑ FIX: Theme bootstrap MUST run before the stylesheet link.
+         Previously the page always loaded style.css first, then the
+         inline script at the bottom swapped to the saved theme —
+         causing a visible flash of the wrong theme on every load.
+         Now we insert the correct <link> synchronously during parse.
+         document.write is intentional here: it's the only way to
+         inject a blocking stylesheet from inline head JS. -->
+    <script>
+        (function () {
+            var THEME_KEY = 'msn_theme';
+            var themes = {
+                original: 'style.css?v=73',
+                orange:   'orange-theme.css?v=69',
+                cherry:   'cherry-theme.css?v=69',
+                gold:     'gold-theme.css?v=69',
+                indu:     'indu-theme.css?v=69',
+                arcade:   'arcade-theme.css?v=69',
+                science:  'science-theme.css?v=70' /* ⚑ FIX: bumped — CSS updated */
+            };
+            var saved = localStorage.getItem(THEME_KEY) || 'original';
+            var href = themes[saved] || themes.original;
+            document.write('<link id="themeStylesheet" rel="stylesheet" href="' + href + '">');
+        })();
+    </script>
+
     <!-- Separate fixes: Phantom toast + token contrast -->
     <link rel="stylesheet" href="theme-fixes.css?v=69">
+
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+    <!-- ⚑ FIX: remove the .booting guard after the first stable frame.
+         Double rAF ensures we've painted at least once before releasing
+         the freeze. This is what stops the initial chromeShimmer /
+         statusPulse / typingDot flash on Phantom and desktop. -->
+    <script>
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                document.documentElement.classList.remove('booting');
+            });
+        });
+    </script>
+
     <!-- Inline style: theme buttons and overlay -->
     <style>
         /* Circular theme buttons (header & sidebar) */
@@ -179,7 +228,6 @@
                 <textarea id="modAnnouncementInput" rows="3" maxlength="300" placeholder="Type your announcement..."></textarea>
                 <button id="modPostAnnouncementBtn">POST ANNOUNCEMENT</button>
             </div>
-            <!-- Reset login streaks button -->
             <button id="modResetLoginBtn" class="reset-login-btn">🔄 Reset All Login Streaks</button>
             <button id="modSaveSettingsBtn">SAVE SETTINGS</button>
             <button id="modCloseSettingsBtn">Close</button>
@@ -193,7 +241,6 @@
                 <div class="big-info">
                     <div class="big-name" id="sidebarBigName">You</div>
                     <div class="big-rank hidden" id="sidebarBigRank"></div>
-                    <!-- XP Level badge -->
                     <div class="big-level hidden" id="sidebarBigLevel"></div>
                     <div class="big-status"><span class="status-dot"></span> Online</div>
                 </div>
@@ -202,7 +249,6 @@
             <div class="sidebar-section-label">
                 🔵 ACTIVE USERS <span class="active-users-count" id="sidebarActiveUsersCount">0</span>
             </div>
-            <!-- Sidebar theme button (mobile only) -->
             <button class="btn-icon sidebar-theme-btn" id="sidebarThemeBtn" title="Change theme">🎨</button>
             <div class="sidebar-users" id="sidebarUsers">
                 <div class="no-users-sidebar">No one else online</div>
@@ -213,7 +259,6 @@
                 <span class="token-price" id="mobileTokenPrice">--</span>
                 <span class="token-change" id="mobileTokenChange">--</span>
             </div>
-            <!-- Daily streak fires (desktop only) -->
             <div class="sidebar-streak-display hidden" id="sidebarStreakDisplay">
                 <div class="streak-fires" id="streakFires"></div>
                 <span class="streak-overflow hidden" id="streakOverflow"></span>
@@ -255,9 +300,7 @@
                     <button class="btn-icon mobile-edit-btn" id="mobileEditBtn" title="Edit profile">✎</button>
                     <span class="wallet-address" id="walletAddress"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
-                    <!-- Header theme button (desktop only) -->
                     <button class="btn-icon header-theme-btn" id="headerThemeBtn" title="Change theme">🎨</button>
-                    <!-- Rankings trophy button -->
                     <button class="btn-icon rankings-btn" id="rankingsBtn" title="Rankings">🏆</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                 </div>
@@ -355,25 +398,27 @@
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js?v=69"></script>
-    <!-- daily login tracking (must be after script.js) -->
     <script src="login-tracking.js?v=69"></script>
-    <!-- XP + rankings (must be after script.js) -->
     <script src="xp-system.js?v=69"></script>
 
-    <!-- Theme switching script (updated for overlay) -->
+    <!-- ⚑ FIX: Theme switching script.
+         Removed the initial setTheme(saved) call — that's now handled
+         synchronously in <head> before the stylesheet loads, so the
+         correct theme is present from the very first paint.
+         This script now only wires up the overlay + buttons. -->
     <script>
-        (function() {
+        (function () {
             const themeLink = document.getElementById('themeStylesheet');
             const THEME_KEY = 'msn_theme';
 
             const themes = {
                 original: 'style.css?v=73',
-                orange: 'orange-theme.css?v=69',
-                cherry: 'cherry-theme.css?v=69',
-                gold: 'gold-theme.css?v=69',
-                indu: 'indu-theme.css?v=69',
-                arcade: 'arcade-theme.css?v=69',
-                science: 'science-theme.css?v=69'
+                orange:   'orange-theme.css?v=69',
+                cherry:   'cherry-theme.css?v=69',
+                gold:     'gold-theme.css?v=69',
+                indu:     'indu-theme.css?v=69',
+                arcade:   'arcade-theme.css?v=69',
+                science:  'science-theme.css?v=70' /* ⚑ FIX: bumped to match head */
             };
 
             function setTheme(themeId) {
@@ -382,11 +427,9 @@
                 localStorage.setItem(THEME_KEY, themeId);
             }
 
-            // Load saved theme
-            const saved = localStorage.getItem(THEME_KEY) || 'original';
-            setTheme(saved);
+            // NOTE: initial theme is already applied by the <head> bootstrap.
+            // Do NOT call setTheme() here — it would force a redundant swap.
 
-            // Overlay elements
             const headerThemeBtn = document.getElementById('headerThemeBtn');
             const sidebarThemeBtn = document.getElementById('sidebarThemeBtn');
             const themeOverlay = document.getElementById('themeOverlay');
@@ -413,7 +456,6 @@
                 });
             });
 
-            // Expose globally
             window.setTheme = setTheme;
             window.getCurrentTheme = () => localStorage.getItem(THEME_KEY) || 'original';
         })();
