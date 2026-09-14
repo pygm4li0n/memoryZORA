@@ -27,6 +27,13 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // ⚑ Helper — current wallet string (or null)
+    function getWalletAddress() {
+        try {
+            return phantomWalletPublicKey ? phantomWalletPublicKey.toBase58() : null;
+        } catch (e) { return null; }
+    }
+
     // ── Real visible viewport height ──
     function updateAppHeight() {
         const vv = window.visualViewport;
@@ -161,7 +168,6 @@
                 console.warn('Twitter widget failed:', err);
             }
             await new Promise(r => setTimeout(r, 400));
-            // If user hasn't touched the chat and auto-scroll is on, re-snap
             if (autoScroll) {
                 const c = currentTab === 'private' ? privateContainer : publicContainer;
                 c.scrollTop = c.scrollHeight;
@@ -319,6 +325,41 @@
     }
     function updateUserRank(balance) { return; }
 
+    // ⚑ Wallet-keyed upsert. Falls back to username if no wallet connected.
+    async function upsertProfile({ username: uname, avatar_url, token_balance }) {
+        const wallet = getWalletAddress();
+        try {
+            if (wallet) {
+                const payload = { wallet_address: wallet };
+                if (uname !== undefined) payload.username = uname;
+                if (avatar_url !== undefined) payload.avatar_url = avatar_url;
+                if (token_balance !== undefined) payload.token_balance = token_balance;
+                return await supabase.from('profiles').upsert(payload, { onConflict: 'wallet_address' });
+            }
+            // No wallet → best-effort by username
+            if (uname) {
+                const { data: existing } = await supabase.from('profiles')
+                    .select('id').eq('username', uname).is('wallet_address', null).maybeSingle();
+                if (existing) {
+                    const upd = {};
+                    if (avatar_url !== undefined) upd.avatar_url = avatar_url;
+                    if (token_balance !== undefined) upd.token_balance = token_balance;
+                    if (Object.keys(upd).length) {
+                        return await supabase.from('profiles').update(upd).eq('id', existing.id);
+                    }
+                    return { data: null, error: null };
+                }
+                const ins = { username: uname };
+                if (avatar_url !== undefined) ins.avatar_url = avatar_url;
+                if (token_balance !== undefined) ins.token_balance = token_balance;
+                return await supabase.from('profiles').insert(ins);
+            }
+        } catch (err) {
+            console.warn('upsertProfile failed:', err);
+            return { data: null, error: err };
+        }
+    }
+
     async function fetchAndDisplayAllTokens() {
         if (!phantomWalletPublicKey) return;
         try {
@@ -335,16 +376,14 @@
                 }
             }
             updateUserRank(targetBalance);
-            try {
-                await supabase.from('profiles').upsert({
-                    username: username,
-                    token_balance: targetBalance,
-                    wallet_address: phantomWalletPublicKey.toBase58()
-                }, { onConflict: 'username' });
-                userBalances[username] = targetBalance;
-            } catch (err) {
-                console.warn('Failed to update profile balance:', err);
-            }
+
+            // ⚑ Save by wallet_address (source of truth)
+            await upsertProfile({
+                username: username,
+                token_balance: targetBalance
+            });
+            userBalances[username] = targetBalance;
+
             if (modTokenRequirement <= 0) {
                 hasTokenAccess = true;
             } else if (targetBalance > modTokenRequirement) {
@@ -641,25 +680,12 @@
     // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
-    // ══════════════════════════════════════════════════════════════
-    // AUTO-SCROLL LOGIC
-    // ─────────────────────────────────────────────────────────────
-    // autoScroll = true  → keep pinned to bottom while content loads
-    // autoScroll = false → user has taken control; do NOT touch scrollTop
-    //
-    // Rules:
-    //  - Starts TRUE (fresh page load pins to bottom)
-    //  - Any user touch / wheel / key → turns FALSE immediately
-    //  - Stays FALSE until explicitly re-enabled (↓ button or send message)
-    //  - Never re-enables itself just from scrolling near the bottom
-    // ══════════════════════════════════════════════════════════════
     let autoScroll = true;
 
     function disableAutoScroll() {
         if (autoScroll) autoScroll = false;
     }
 
-        // Track last known scrollTop per container so we can spot upward movement
     const lastScrollPos = { public: 0, private: 0 };
 
     function attachAutoScrollListeners() {
@@ -668,7 +694,6 @@
             [privateContainer, 'private']
         ];
         pairs.forEach(([container, key]) => {
-            // Existing "any gesture → disable" handlers
             container.addEventListener('touchstart',  disableAutoScroll, { passive: true });
             container.addEventListener('pointerdown', disableAutoScroll, { passive: true });
             container.addEventListener('touchmove',   disableAutoScroll, { passive: true });
@@ -676,11 +701,9 @@
             container.addEventListener('wheel',       disableAutoScroll, { passive: true });
             container.addEventListener('keydown',     disableAutoScroll, { passive: true });
 
-            // NEW: watch actual scroll position — the reliable signal on Phantom
             container.addEventListener('scroll', () => {
                 const st = container.scrollTop;
                 const prev = lastScrollPos[key];
-                // Moving up more than 4px = user is reading history → kill auto-scroll
                 if (st < prev - 4) {
                     disableAutoScroll();
                 }
@@ -690,7 +713,6 @@
     }
     attachAutoScrollListeners();
 
-    // Loop runs every frame but only touches scrollTop while autoScroll is true.
     function startAutoScrollLoop() {
         const tick = () => {
             if (autoScroll) {
@@ -704,7 +726,6 @@
     }
     startAutoScrollLoop();
 
-    // Kept for compatibility with loadMessages / loadPrivateMessages calls
     function pinToBottom(container, durationMs = 4000) {
         if (container && autoScroll) {
             container.scrollTop = container.scrollHeight;
@@ -726,7 +747,7 @@
 
     scrollBottomBtn.addEventListener('click', () => {
         const container = currentTab === 'public' ? publicContainer : privateContainer;
-        autoScroll = true;   // user explicitly wants bottom → re-enable
+        autoScroll = true;
         container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
         setTimeout(() => updateScrollButtonVisibility(container), 300);
     });
@@ -843,6 +864,7 @@
         else return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
     }
 
+    // ⚑ Prefer wallet-having rows so dupes don't overwrite the current avatar
     async function fetchAvatars(usernames) {
         const unique = [...new Set(usernames.filter(u => u && (!avatarCache[u] || !(u in userBalances))))];
         if (unique.length === 0) return;
@@ -851,8 +873,13 @@
             .in('username', unique);
         if (error) { console.warn('Error fetching profiles:', error); return; }
         (data || []).forEach(p => {
-            avatarCache[p.username] = p.avatar_url;
-            userBalances[p.username] = p.wallet_address ? (p.token_balance || 0) : null;
+            const hasWallet = p.wallet_address && String(p.wallet_address).length > 0;
+            const exists    = p.username in avatarCache;
+            // Wallet-bearing rows always win; wallet-less rows only fill empty slots
+            if (hasWallet || !exists) {
+                avatarCache[p.username] = p.avatar_url;
+                userBalances[p.username] = hasWallet ? (p.token_balance || 0) : null;
+            }
         });
     }
     function getAvatarURL(user) { return avatarCache[user] || null; }
@@ -1301,7 +1328,7 @@
             privateContainer.classList.add('hidden');
             privateIndicatorBar.classList.add('hidden');
             messageInput.placeholder = 'Type a message...';
-            autoScroll = true;   // re-enable on tab switch
+            autoScroll = true;
             setTimeout(() => { scrollContainerToBottom(publicContainer); updateScrollButtonVisibility(publicContainer); }, 150);
         } else {
             publicContainer.classList.add('hidden');
@@ -1314,7 +1341,7 @@
                 privateIndicatorBar.classList.add('hidden');
                 messageInput.placeholder = 'Select a partner from the sidebar first.';
             }
-            autoScroll = true;   // re-enable on tab switch
+            autoScroll = true;
             setTimeout(() => { scrollContainerToBottom(privateContainer); updateScrollButtonVisibility(privateContainer); }, 150);
         }
         updateTypingIndicator();
@@ -1568,7 +1595,7 @@
                     if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
                 });
                 for (const msg of data) await renderMessage(msg, false, false);
-                autoScroll = true;   // fresh load → pin to bottom
+                autoScroll = true;
                 scrollContainerToBottom(publicContainer);
                 pinToBottom(publicContainer, 4000);
                 updateScrollButtonVisibility(publicContainer);
@@ -1634,7 +1661,6 @@
             stopTyping();
             startCooldown(modCooldownSeconds);
             if (window.addXP && inserted?.id) window.addXP(inserted.id);
-            // User just sent a message — pin to bottom to see it
             autoScroll = true;
         } catch (err) {
             showError('Send failed: ' + err.message);
@@ -1679,6 +1705,7 @@
         setTimeout(() => refreshBtn.classList.remove('spinning'), 700);
     }
 
+    // ⚑ Rewritten to always tie writes to the wallet when one is connected
     async function applyUsername(name) {
         username = name;
         localStorage.setItem(STORAGE_KEY_NAME, name);
@@ -1692,7 +1719,9 @@
             } catch(err) { showError('Avatar upload failed: ' + err.message); }
         }
 
-        await supabase.from('profiles').upsert({ username: name, avatar_url: avatarUrlToUse });
+        // ⚑ Wallet-keyed save — falls back to username-only when no wallet
+        await upsertProfile({ username: name, avatar_url: avatarUrlToUse });
+
         avatarCache[name] = avatarUrlToUse;
         if (sidebarBigAvatar) {
             if (avatarUrlToUse) sidebarBigAvatar.innerHTML = `<img src="${avatarUrlToUse}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -1708,6 +1737,9 @@
         await updateSidebarUI();
         setupTypingChannel();
         updateChatAccessibility();
+
+        // ⚑ Notify XP system to refresh the wallet-keyed badge
+        try { window.dispatchEvent(new Event('msn:wallet-connected')); } catch (e) {}
     }
 
     // Event listeners
@@ -1833,7 +1865,28 @@
         inputAreaBar.classList.add('hidden');
 
         if(username) {
-            const { data: profile } = await supabase.from('profiles').select('avatar_url, token_balance, wallet_address').eq('username', username).single();
+            // ⚑ Read by wallet when one is connected — falls back to username
+            let profile = null;
+            const walletForRead = getWalletAddress();
+            if (walletForRead) {
+                const { data } = await supabase.from('profiles')
+                    .select('avatar_url, token_balance, wallet_address, username')
+                    .eq('wallet_address', walletForRead)
+                    .maybeSingle();
+                profile = data;
+                // Sync local username to what the wallet row says (source of truth)
+                if (profile?.username && profile.username !== username) {
+                    username = profile.username;
+                    localStorage.setItem(STORAGE_KEY_NAME, username);
+                }
+            } else {
+                const { data } = await supabase.from('profiles')
+                    .select('avatar_url, token_balance, wallet_address')
+                    .eq('username', username)
+                    .maybeSingle();
+                profile = data;
+            }
+
             if(profile && profile.avatar_url) {
                 avatarCache[username] = profile.avatar_url;
                 currentAvatarUrl = profile.avatar_url;
@@ -1873,18 +1926,35 @@
             }
         } else {
             const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
-            if (lastUsername) {
-                nameInput.value = lastUsername;
-                const { data: lastProfile } = await supabase.from('profiles').select('avatar_url').eq('username', lastUsername).single();
-                if (lastProfile && lastProfile.avatar_url) {
-                    currentAvatarUrl = lastProfile.avatar_url;
-                    profilePicPreview.innerHTML = `<img src="${lastProfile.avatar_url}" alt="Profile">`;
-                } else {
-                    currentAvatarUrl = null;
-                    profilePicPreview.innerHTML = '<span>📷</span>';
+            // ⚑ Prefer wallet lookup for the "welcome back" overlay
+            const walletForLast = getWalletAddress();
+            let lastProfile = null;
+
+            if (walletForLast) {
+                const { data } = await supabase.from('profiles')
+                    .select('avatar_url, username')
+                    .eq('wallet_address', walletForLast)
+                    .maybeSingle();
+                lastProfile = data;
+                if (lastProfile?.username) {
+                    nameInput.value = lastProfile.username;
+                } else if (lastUsername) {
+                    nameInput.value = lastUsername;
                 }
+            } else if (lastUsername) {
+                nameInput.value = lastUsername;
+                const { data } = await supabase.from('profiles')
+                    .select('avatar_url')
+                    .eq('username', lastUsername)
+                    .maybeSingle();
+                lastProfile = data;
+            }
+
+            if (lastProfile && lastProfile.avatar_url) {
+                currentAvatarUrl = lastProfile.avatar_url;
+                profilePicPreview.innerHTML = `<img src="${lastProfile.avatar_url}" alt="Profile">`;
             } else {
-                nameInput.value = '';
+                currentAvatarUrl = null;
                 profilePicPreview.innerHTML = '<span>📷</span>';
             }
             nameOverlay.classList.remove('hidden');
