@@ -407,7 +407,10 @@
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon,
                 .msn-right-sidebar .msn-rs-actions .header-theme-btn,
-                .msn-right-sidebar .msn-rs-actions .rankings-btn {
+                .msn-right-sidebar .msn-rs-actions .rankings-btn,
+                .msn-right-sidebar .msn-rs-actions #rankingsBtn,
+                .msn-right-sidebar .msn-rs-actions #headerThemeBtn,
+                .msn-right-sidebar .msn-rs-actions #modSettingsBtn {
                     width: 100% !important;
                     height: 100% !important;
                     min-height: 90px !important;
