@@ -14,6 +14,7 @@
     const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
     const KNOWN_WALLET_KEYS = [
+        'msn_cached_wallet',
         'msn_wallet', 'msn_wallet_address', 'wallet_address', 'walletAddress',
         'phantom_wallet', 'phantomWallet', 'sol_wallet', 'solana_wallet',
         'user_wallet', 'connected_wallet', 'wallet', 'publicKey', 'public_key',
@@ -39,7 +40,7 @@
         return null;
     }
 
-    // ⚑ NEW: Read directly from window.solana / window.phantom (mobile priority)
+    // ⚑ Read directly from window.solana / window.phantom (mobile priority)
     function findWalletFromProvider() {
         try {
             const provider = window.phantom?.solana || window.solana;
@@ -227,7 +228,6 @@
     //  AVATAR HELPERS — cache-busted
     // ═══════════════════════════════════════════════════════
 
-    // ⚑ NEW: append a version tag so the browser re-fetches when data changes
     function cacheBust(url, row) {
         if (!url) return url;
         const tag = row.xp ?? row.token_balance ?? row.updated_at ?? Date.now();
