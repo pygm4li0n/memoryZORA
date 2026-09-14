@@ -57,9 +57,6 @@
 
             /* ═══════════════════════════════════════════════════════════
                ⚑ HEADER LAYOUT — desktop + mobile
-               · Hide LIVE badge + online count from header (they live in sidebar)
-               · Wallet → LEFT of Phantom (fixed slot so nothing shifts)
-               · Refresh → RIGHT of Phantom
             ═══════════════════════════════════════════════════════════ */
             #connectionPill,
             #onlineCountBadge {
@@ -99,12 +96,11 @@
             .header-right #headerThemeBtn {
                 order: 7;
             }
-            /* When wallet empty, do not leave a gap */
             .header-right #walletAddress:empty {
                 display: none !important;
             }
 
-                        /* ── Rankings trophy button ── */
+            /* ── Rankings trophy button ── */
             /* ⚑ Exclude the right-sidebar card so it can stretch like the others */
             .rankings-btn:not(.msn-rs-card),
             #rankingsBtn:not(.msn-rs-card) {
@@ -193,12 +189,10 @@
                 }
             }
 
-            /* ⚑ ── Clean message loading state (container is EMPTY while loading) ── */
+            /* ── Message loading state ── */
             .messages-container {
                 position: relative;
             }
-
-            /* Centered loader — inside the messages container */
             .msn-msg-loader {
                 position: absolute;
                 top: 0; left: 0; right: 0; bottom: 0;
@@ -242,7 +236,7 @@
                 50%      { opacity: 1;    transform: translateY(-4px) scale(1); }
             }
 
-            /* ── Pinned announcement as centered chat bubble (theme-aware) ── */
+            /* ── Pinned announcement (theme-aware) ── */
             .mod-message-box {
                 display: flex !important;
                 flex-direction: row !important;
@@ -338,7 +332,6 @@
                     z-index: 10 !important;
                 }
 
-                /* Wider scrollbar, separated at the boundary */
                 .messages-container::-webkit-scrollbar { width: 10px; }
                 .messages-container::-webkit-scrollbar-track { background: transparent; }
                 .messages-container::-webkit-scrollbar-thumb {
@@ -420,10 +413,10 @@
                     background: var(--bg-elevated, rgba(255,255,255,0.03)) !important;
                     border: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
                     color: var(--text-primary, #fff) !important;
-                    display: flex !important;
-                    flex-direction: column !important;
-                    align-items: center !important;
-                    justify-content: center !important;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
                     gap: 8px !important;
                     cursor: pointer !important;
                     transition: background 0.18s ease,
@@ -463,6 +456,11 @@
                     object-fit: contain !important;
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon.hidden {
+                    display: none !important;
+                }
+                /* ⚑ MOD card is mod-wallet only — hard-hide on .hidden */
+                .msn-right-sidebar .msn-rs-actions #modSettingsBtn.hidden,
+                .msn-right-sidebar .msn-rs-actions #modSettingsBtn[style*="display: none"] {
                     display: none !important;
                 }
 
@@ -767,7 +765,7 @@
         return null;
     }
 
-        function checkIfModWallet() {
+    function checkIfModWallet() {
         // Mod only when: connected AND wallet matches MOD_WALLET
         if (phantomConnected && phantomWalletPublicKey) {
             try {
@@ -779,14 +777,14 @@
             isModWallet = false;
         }
 
-        // ⚑ Show ONLY for the mod wallet — force-hide everywhere else,
-        //    including inside the right sidebar.
+        // ⚑ Show ONLY for the mod wallet — force-hide everywhere else.
         if (isModWallet) {
             modSettingsBtn.classList.remove('hidden');
             modSettingsBtn.style.removeProperty('display');
         } else {
             modSettingsBtn.classList.add('hidden');
-            modSettingsBtn.style.display = 'none';
+            // Inline !important beats ANY stylesheet rule, !important or not.
+            modSettingsBtn.style.setProperty('display', 'none', 'important');
         }
 
         if (modAnnouncementSection) {
@@ -2286,7 +2284,6 @@
 
     async function loadMessages() {
         setConnection('connecting');
-        // Clear container first so the loader is the only child, centered
         publicContainer.innerHTML = '';
         showMsgLoader(publicContainer, 'Loading messages');
 
@@ -2316,7 +2313,6 @@
                 }
             }
 
-            // Remove loader + swap in content atomically
             publicContainer.innerHTML = '';
             while (holder.firstChild) publicContainer.appendChild(holder.firstChild);
 
@@ -2500,7 +2496,6 @@
         right.id = 'msnRightSidebar';
         right.className = 'msn-right-sidebar';
 
-        // Single full-height section
         const s2 = document.createElement('div');
         s2.className = 'msn-rs-section';
         s2.innerHTML = '<div class="msn-rs-label">Options</div>';
@@ -2527,7 +2522,6 @@
                 next: el.nextSibling
             });
 
-            // Inject the text label if it isn't already there
             if (label && !el.querySelector('.msn-rs-card-label')) {
                 const lbl = document.createElement('span');
                 lbl.className = 'msn-rs-card-label';
@@ -2535,7 +2529,6 @@
                 el.appendChild(lbl);
             }
 
-            // Tag the button so we can style/cleanup consistently
             el.classList.add('msn-rs-card');
 
             into.appendChild(el);
@@ -2549,7 +2542,6 @@
         _rsMoved.forEach(({ el, parent, next }) => {
             if (!parent) return;
 
-            // Strip the sidebar-only label + card class before returning to header
             const lbl = el.querySelector('.msn-rs-card-label');
             if (lbl) lbl.remove();
             el.classList.remove('msn-rs-card');
@@ -2691,7 +2683,7 @@
         }
     });
 
-        async function init() {
+    async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
         // ⚑ Build right sidebar on desktop
@@ -2702,6 +2694,13 @@
 
         const provider = getPhantomProvider();
         if (provider) {
+            // ⚑ Re-evaluate mod status whenever the wallet changes
+            try {
+                provider.on?.('disconnect',     () => { checkIfModWallet(); });
+                provider.on?.('accountChanged', () => { checkIfModWallet(); });
+                provider.on?.('connect',        () => { checkIfModWallet(); });
+            } catch (e) { /* ignore */ }
+
             if (provider.isConnected && provider.publicKey) {
                 phantomWalletPublicKey = provider.publicKey;
                 phantomConnected = true;
