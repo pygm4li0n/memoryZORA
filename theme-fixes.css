@@ -869,3 +869,54 @@ html body .streak-toast.visible {
         left: calc(50% - 140px) !important;
     }
 }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ THEME ICON CONTAINER — soft alpha blend (DESKTOP ONLY)
+   Applied to the SKINS card in the right sidebar only.
+   Mobile theme button is untouched.
+═════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+    .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card {
+        position: relative !important;
+        isolation: isolate !important;
+        overflow: hidden !important;
+    }
+
+    .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card::after {
+        content: '' !important;
+        position: absolute !important;
+        inset: 0 !important;
+
+        /* The image, edge-to-edge over the card */
+        background-image: url('https://i.postimg.cc/85PqTLJq/Chat-GPT-Image-14-sept-2026-03-21-20-a-m-(1).png') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+
+        /* ⚑ Soft blend into the card surface */
+        opacity: 0.18 !important;
+        mix-blend-mode: soft-light !important;
+
+        /* Fade toward the edges so it doesn't cut off hard */
+        -webkit-mask-image: radial-gradient(ellipse at center,
+            rgba(0,0,0,1) 0%,
+            rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%,
+            rgba(0,0,0,0) 100%) !important;
+        mask-image: radial-gradient(ellipse at center,
+            rgba(0,0,0,1) 0%,
+            rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%,
+            rgba(0,0,0,0) 100%) !important;
+
+        pointer-events: none !important;
+        z-index: 0 !important;
+        border-radius: inherit !important;
+    }
+
+    /* Icon + label sit above the texture */
+    .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card > * {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+}
