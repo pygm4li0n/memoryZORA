@@ -2691,11 +2691,14 @@
         }
     });
 
-    async function init() {
+        async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
 
         // ⚑ Build right sidebar on desktop
         syncRightSidebar();
+
+        // ⚑ Ensure MOD card is hidden by default (only mod wallet will reveal it)
+        checkIfModWallet();
 
         const provider = getPhantomProvider();
         if (provider) {
