@@ -209,7 +209,7 @@
                 50%      { opacity: 1;    transform: translateY(-4px) scale(1); }
             }
 
-            /* ⚑ ADDED ── Pinned announcement as centered chat bubble ── */
+            /* ⚑ ── Pinned announcement as centered chat bubble ── */
             .mod-message-box {
                 display: flex !important;
                 flex-direction: row !important;
@@ -290,6 +290,54 @@
                 .mod-message-box .mod-message-text {
                     font-size: 0.78rem;
                     line-height: 1.4;
+                }
+            }
+
+            /* ═══════════════════════════════════════════════════════════
+               ⚑ CHAT AREA — DESKTOP ONLY
+               · Chat panel narrower, hugs left edge
+               · Right side of app-shell left empty for future widgets
+               · Space under the header reserved for future tweaks
+               · Mobile (< 769px) is completely untouched
+            ═══════════════════════════════════════════════════════════ */
+            @media (min-width: 769px) {
+
+                /* Sidebar stays fixed; chat anchors to the left */
+                .app-shell {
+                    justify-content: flex-start !important;
+                }
+
+                /* Chat panel — narrower, left-anchored, room on the right */
+                .chat-panel {
+                    flex: 0 1 auto !important;
+                    width: min(100%, 640px) !important;
+                    max-width: 640px !important;
+                    min-width: 320px !important;
+                    margin-right: auto !important;
+                    border-right: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+                    border-radius: 0 !important;
+                }
+
+                /* ── Reserved space UNDER the header (future widget slot) ── */
+                .chat-tabs {
+                    margin-top: 10px !important;
+                }
+
+                /* ── Tighter rhythm so the chat feels compact ── */
+                .messages-container {
+                    padding: 12px 14px !important;
+                    gap: 10px !important;
+                }
+                .input-area-bar {
+                    padding: 8px 12px 10px !important;
+                }
+                .chat-tab {
+                    padding: 8px 10px !important;
+                }
+
+                /* Pinned bubble hugs the narrower panel */
+                .mod-message-box {
+                    max-width: min(90%, 500px) !important;
                 }
             }
         `;
@@ -1428,7 +1476,7 @@
         return html;
     }
 
-    // ⚑ Builds a message element into ANY target container (used for off-screen builds)
+    // ⚑ Builds a message element (returns it, doesn't append)
     async function buildMessageNode(msg, isPrivate) {
         const user = isPrivate ? msg.from_user : msg.username;
         if (!getAvatarURL(user)) await fetchAvatars([user]);
@@ -1487,7 +1535,6 @@
         bubble.innerHTML = innerHTML;
         wrapper.appendChild(bubble);
 
-        // Wire up
         observeTweetsInWrapper(wrapper);
 
         const replyBtn = bubble.querySelector('.reply-btn');
@@ -1853,7 +1900,7 @@
     }
     cancelPrivateBtn.addEventListener('click', () => setActivePrivateChat(null));
 
-    // ⚑ Rewritten — off-screen build, atomic swap, fade reveal, pinned to bottom
+    // ⚑ Off-screen build + atomic swap + fade reveal
     async function loadPrivateMessages(partner) {
         if (!username || !partner) return;
         privateContainer.classList.add('msn-loading');
@@ -1892,7 +1939,6 @@
 
             lastLoadedPrivatePartner = partner;
 
-            // Build into a detached holder so nothing flashes
             const holder = document.createElement('div');
             holder.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
 
@@ -2099,7 +2145,7 @@
             }).subscribe();
     }
 
-    // ⚑ Rewritten — off-screen build, atomic swap, fade reveal, pinned to bottom
+    // ⚑ Off-screen build + atomic swap + fade reveal
     async function loadMessages() {
         setConnection('connecting');
         publicContainer.classList.add('msn-loading');
@@ -2115,13 +2161,11 @@
             data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
             knownMessageIds.clear();
 
-            // Seed caches
             data.forEach(msg => {
                 if (msg.avatar_url) avatarCache[msg.username] = msg.avatar_url;
                 if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
             });
 
-            // Build everything off-screen first
             const holder = document.createElement('div');
             holder.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
 
@@ -2132,13 +2176,11 @@
                     const node = await buildMessageNode(msg, false);
                     holder.appendChild(node);
                 }
-                // Atomic swap — single paint
                 publicContainer.innerHTML = '';
                 while (holder.firstChild) publicContainer.appendChild(holder.firstChild);
             }
 
             autoScroll = true;
-            // Pin to bottom, then re-pin on next frame to catch late layout shifts
             publicContainer.scrollTop = publicContainer.scrollHeight;
             requestAnimationFrame(() => {
                 publicContainer.scrollTop = publicContainer.scrollHeight;
