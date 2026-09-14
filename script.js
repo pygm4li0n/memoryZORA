@@ -2495,7 +2495,6 @@
 
         const s2 = document.createElement('div');
         s2.className = 'msn-rs-section';
-        s2.innerHTML = '<div class="msn-rs-label">Options</div>';
         const actionsWrap = document.createElement('div');
         actionsWrap.className = 'msn-rs-actions';
         s2.appendChild(actionsWrap);
