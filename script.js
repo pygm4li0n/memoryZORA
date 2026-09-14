@@ -104,16 +104,17 @@
                 display: none !important;
             }
 
-            /* ── Rankings trophy button ── */
-            .rankings-btn,
-            #rankingsBtn {
+                        /* ── Rankings trophy button ── */
+            /* ⚑ Exclude the right-sidebar card so it can stretch like the others */
+            .rankings-btn:not(.msn-rs-card),
+            #rankingsBtn:not(.msn-rs-card) {
                 width: 44px !important;
                 height: 44px !important;
                 font-size: 1.3rem !important;
             }
             @media (max-width: 768px) {
-                .rankings-btn,
-                #rankingsBtn {
+                .rankings-btn:not(.msn-rs-card),
+                #rankingsBtn:not(.msn-rs-card) {
                     width: 46px !important;
                     height: 46px !important;
                     font-size: 1.45rem !important;
