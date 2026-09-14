@@ -1,15 +1,15 @@
 /* =========================================================
-   RANKINGS — CELL EDITION v3
-   Desktop: single card, two thin columns
-   Mobile/Phantom: TWO separate cards, stacked, 2-line rows
+   RANKINGS — CELL EDITION v3 (HARDENED)
+   Every selector is prefixed with #rankingsOverlay so it
+   beats any theme, any load order, any conflicting rule.
    ========================================================= */
 
 /* ── CARD ─────────────────────────────────────────── */
-.rankings-card {
+#rankingsOverlay .rankings-card {
     max-width: 900px !important;
     width: 94% !important;
-    min-height: 62vh;
-    max-height: 90vh;
+    min-height: 62vh !important;
+    max-height: 90vh !important;
     padding: 22px 22px 18px !important;
     background: var(--bg-panel) !important;
     border: 1px solid var(--border-default) !important;
@@ -17,48 +17,49 @@
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.04),
         0 20px 60px rgba(0, 0, 0, 0.75) !important;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    text-align: left !important;
 }
-.rankings-card::before {
-    content: '';
-    position: absolute;
+#rankingsOverlay .rankings-card::before {
+    content: '' !important;
+    position: absolute !important;
     top: 0; left: 0; right: 0;
-    height: 2px;
+    height: 2px !important;
     background: linear-gradient(90deg,
         transparent 0%,
         var(--accent-cyan) 30%,
         var(--accent-magenta) 70%,
-        transparent 100%);
-    opacity: 0.85;
-    pointer-events: none;
-    z-index: 2;
+        transparent 100%) !important;
+    opacity: 0.85 !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
 }
 
 /* ── HEADER ───────────────────────────────────────── */
-.rankings-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2px 12px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--border-subtle);
-    flex-shrink: 0;
+#rankingsOverlay .rankings-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 2px 12px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    flex-shrink: 0 !important;
 }
-.rankings-header h3 {
+#rankingsOverlay .rankings-header h3 {
     font-family: var(--font-mono) !important;
     font-size: 1.05rem !important;
     font-weight: 900 !important;
     letter-spacing: 0.18em !important;
-    text-transform: uppercase;
+    text-transform: uppercase !important;
     color: var(--accent-yellow) !important;
     text-shadow: 0 0 10px rgba(246, 187, 22, 0.5) !important;
     margin: 0 !important;
-    line-height: 1;
+    line-height: 1 !important;
 }
-.rankings-close-btn {
+#rankingsOverlay .rankings-close-btn {
     width: 30px !important;
     height: 30px !important;
     min-width: 30px !important;
@@ -69,97 +70,101 @@
     color: var(--text-secondary) !important;
     font-size: 0.85rem !important;
     padding: 0 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                border-color 0.2s, color 0.2s, box-shadow 0.2s;
-    will-change: transform;
+                border-color 0.2s, color 0.2s, box-shadow 0.2s !important;
+    will-change: transform !important;
 }
-.rankings-close-btn:hover {
+#rankingsOverlay .rankings-close-btn:hover {
     border-color: var(--accent-red) !important;
     color: var(--accent-red) !important;
     box-shadow: 0 0 12px rgba(255, 32, 42, 0.5) !important;
-    transform: rotate(90deg);
+    transform: rotate(90deg) !important;
 }
 
 /* ── GRID ─────────────────────────────────────────── */
-.rankings-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    flex: 1;
-    min-height: 0;
+#rankingsOverlay .rankings-body {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
-.rankings-column {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+#rankingsOverlay .rankings-column {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
-.rankings-column-title {
+#rankingsOverlay .rankings-column-title {
     font-family: var(--font-mono) !important;
     font-size: 0.68rem !important;
     font-weight: 900 !important;
     letter-spacing: 0.24em !important;
-    text-transform: uppercase;
+    text-transform: uppercase !important;
     padding: 0 0 8px !important;
     margin-bottom: 6px !important;
     border-bottom: 1px solid var(--border-subtle) !important;
-    position: relative;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
 }
-.rankings-column-title::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0;
-    width: 60px; height: 2px;
-    background: currentColor;
-    box-shadow: 0 0 8px currentColor;
+#rankingsOverlay .rankings-column-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -1px !important;
+    left: 0 !important;
+    width: 60px !important;
+    height: 2px !important;
+    background: currentColor !important;
+    box-shadow: 0 0 8px currentColor !important;
 }
-.rankings-column:nth-child(1) .rankings-column-title { color: var(--accent-cyan) !important; }
-.rankings-column:nth-child(2) .rankings-column-title { color: var(--accent-orange) !important; }
+#rankingsOverlay .rankings-column:nth-child(1) .rankings-column-title { color: var(--accent-cyan) !important; }
+#rankingsOverlay .rankings-column:nth-child(2) .rankings-column-title { color: var(--accent-orange) !important; }
 
 /* ── LIST ─────────────────────────────────────────── */
-.rankings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 2px 4px 2px 0;
-    counter-reset: rank;
+#rankingsOverlay .rankings-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 2px 4px 2px 0 !important;
+    counter-reset: rank !important;
 }
-.rankings-list::-webkit-scrollbar { width: 6px; }
-.rankings-list::-webkit-scrollbar-track { background: transparent; }
-.rankings-list::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: 3px;
+#rankingsOverlay .rankings-list::-webkit-scrollbar { width: 6px !important; }
+#rankingsOverlay .rankings-list::-webkit-scrollbar-track { background: transparent !important; }
+#rankingsOverlay .rankings-list::-webkit-scrollbar-thumb {
+    background: var(--border-default) !important;
+    border-radius: 3px !important;
 }
-.rankings-list::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+#rankingsOverlay .rankings-list::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan) !important; }
 
 /* ── EMPTY ────────────────────────────────────────── */
-.rankings-empty {
+#rankingsOverlay .rankings-empty {
     display: flex !important;
-    align-items: center;
-    justify-content: center;
+    align-items: center !important;
+    justify-content: center !important;
     padding: 40px 12px !important;
     color: var(--text-muted) !important;
-    font-family: var(--font-mono);
+    font-family: var(--font-mono) !important;
     font-size: 0.72rem !important;
-    text-align: center;
+    text-align: center !important;
     letter-spacing: 0.18em !important;
-    text-transform: uppercase;
-    border: 1px dashed var(--border-subtle);
-    border-radius: 6px;
-    font-weight: 700;
-    animation: emptyPulse 2.4s ease-in-out infinite;
+    text-transform: uppercase !important;
+    border: 1px dashed var(--border-subtle) !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    animation: emptyPulse 2.4s ease-in-out infinite !important;
 }
 @keyframes emptyPulse {
     0%, 100% { opacity: 0.5; }
@@ -170,516 +175,375 @@
    ROW — thin cell (desktop)
    ═══════════════════════════════════════════════════ */
 
-.rankings-list > *:not(.rankings-empty) {
-    counter-increment: rank;
-    display: grid;
-    grid-template-columns: 26px 32px 1fr auto;
-    align-items: center;
-    gap: 10px;
+#rankingsOverlay .rankings-list > .rank-row {
+    counter-increment: rank !important;
+    display: grid !important;
+    grid-template-columns: 26px 32px 1fr auto !important;
+    align-items: center !important;
+    gap: 10px !important;
     padding: 8px 12px !important;
-    min-height: 46px;
+    min-height: 46px !important;
     border-radius: 6px !important;
-    background: rgba(0, 0, 0, 0.32);
+    background: rgba(0, 0, 0, 0.32) !important;
     border: 1px solid var(--border-subtle) !important;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-primary);
-    position: relative;
-    overflow: hidden;
-    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-    contain: layout style paint;
+    font-family: var(--font-mono) !important;
+    font-size: 0.8rem !important;
+    color: var(--text-primary) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
+    contain: layout style paint !important;
 }
-.rankings-list > *:not(.rankings-empty)::before {
-    content: counter(rank);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    color: var(--text-muted);
-    transition: color 0.15s;
-    line-height: 1;
+#rankingsOverlay .rankings-list > .rank-row::before {
+    content: counter(rank) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.02em !important;
+    color: var(--text-muted) !important;
+    transition: color 0.15s !important;
+    line-height: 1 !important;
 }
-.rankings-list > *:not(.rankings-empty)::after {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0; right: 0;
-    width: 3px;
-    background: transparent;
-    transition: background 0.15s ease, box-shadow 0.15s ease;
-    border-radius: 0 6px 6px 0;
-    pointer-events: none;
+#rankingsOverlay .rankings-list > .rank-row::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0; bottom: 0; right: 0 !important;
+    width: 3px !important;
+    background: transparent !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease !important;
+    border-radius: 0 6px 6px 0 !important;
+    pointer-events: none !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-avatar,
-.rankings-list > *:not(.rankings-empty) .avatar,
-.rankings-list > *:not(.rankings-empty) img {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid var(--border-default);
-    background: var(--bg-input);
-    flex-shrink: 0;
-    transition: border-color 0.15s;
+
+/* Avatars */
+#rankingsOverlay .rank-avatar,
+#rankingsOverlay .rank-avatar-fallback {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1px solid var(--border-default) !important;
+    background: var(--bg-input) !important;
+    flex-shrink: 0 !important;
+    transition: border-color 0.15s !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 900 !important;
+    font-size: 0.78rem !important;
+    color: var(--accent-cyan) !important;
+    line-height: 1 !important;
+    user-select: none !important;
 }
-.rankings-list .rank-avatar-fallback {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono);
-    font-weight: 900;
-    font-size: 0.78rem;
-    color: var(--accent-cyan);
-    background: var(--bg-input);
-    border: 1px solid var(--border-default);
-    border-radius: 50%;
-    flex-shrink: 0;
-    line-height: 1;
-    user-select: none;
+
+/* Info block */
+#rankingsOverlay .rank-info,
+#rankingsOverlay .rank-meta-block {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-info,
-.rankings-list > *:not(.rankings-empty) .user-info,
-.rankings-list > *:not(.rankings-empty) .rank-meta-block {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    overflow: hidden;
+#rankingsOverlay .rank-name {
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.02em !important;
+    color: var(--text-primary) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    line-height: 1.1 !important;
+    min-width: 0 !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-name,
-.rankings-list > *:not(.rankings-empty) .user-name,
-.rankings-list > *:not(.rankings-empty) .username {
-    font-size: 0.82rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    line-height: 1.1;
-    min-width: 0;
-    flex-shrink: 1;
+#rankingsOverlay .rank-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-meta,
-.rankings-list > *:not(.rankings-empty) .rank-subline {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+#rankingsOverlay .rank-level {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    padding: 1px 6px !important;
+    border-radius: 3px !important;
+    background: rgba(1, 225, 234, 0.08) !important;
+    border: 1px solid rgba(1, 225, 234, 0.5) !important;
+    color: var(--accent-cyan) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.6rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    line-height: 1.4 !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-level,
-.rankings-list > *:not(.rankings-empty) .level-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    background: rgba(1, 225, 234, 0.08);
-    border: 1px solid rgba(1, 225, 234, 0.5);
-    color: var(--accent-cyan);
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    line-height: 1.4;
+#rankingsOverlay .rank-detail {
+    color: var(--text-muted) !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-detail,
-.rankings-list > *:not(.rankings-empty) .user-status-text {
-    color: var(--text-muted);
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
+
+/* Stats */
+#rankingsOverlay .rank-stats {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-stats,
-.rankings-list > *:not(.rankings-empty) .rank-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-    margin-left: auto;
+#rankingsOverlay .rank-score {
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    color: var(--accent-cyan) !important;
+    font-variant-numeric: tabular-nums !important;
+    letter-spacing: 0.02em !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
 }
-.rankings-list > *:not(.rankings-empty) .rank-streak,
-.rankings-list > *:not(.rankings-empty) .streak {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    background: rgba(246, 187, 22, 0.08);
-    border: 1px solid rgba(246, 187, 22, 0.5);
-    color: var(--accent-yellow);
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    white-space: nowrap;
-    line-height: 1.4;
-}
-.rankings-list > *:not(.rankings-empty) .streak-fire { font-size: 0.68rem; line-height: 1; }
-.rankings-list > *:not(.rankings-empty) .streak-num {
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-    color: var(--accent-yellow);
-}
-.rankings-list > *:not(.rankings-empty) .rank-score,
-.rankings-list > *:not(.rankings-empty) .score,
-.rankings-list > *:not(.rankings-empty) span:last-child,
-.rankings-list > *:not(.rankings-empty) > div:last-child:not(.rank-info):not(.rank-stats):not(.rank-meta) {
-    font-weight: 900;
-    font-size: 0.82rem;
-    color: var(--accent-cyan);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
-    text-align: right;
-    white-space: nowrap;
-    line-height: 1;
-}
-.rankings-list > *:not(.rankings-empty):hover {
-    background: rgba(255, 255, 255, 0.05);
+
+/* Hover */
+#rankingsOverlay .rankings-list > .rank-row:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
     border-color: var(--accent-cyan) !important;
 }
-.rankings-list > *:not(.rankings-empty):hover::before { color: var(--accent-cyan); }
-.rankings-list > *:not(.rankings-empty):hover::after {
-    background: var(--accent-cyan);
-    box-shadow: 0 0 8px var(--accent-cyan);
+#rankingsOverlay .rankings-list > .rank-row:hover::before { color: var(--accent-cyan) !important; }
+#rankingsOverlay .rankings-list > .rank-row:hover::after {
+    background: var(--accent-cyan) !important;
+    box-shadow: 0 0 8px var(--accent-cyan) !important;
 }
-.rankings-list > *:not(.rankings-empty):hover .rank-avatar { border-color: var(--accent-cyan); }
+#rankingsOverlay .rankings-list > .rank-row:hover .rank-avatar { border-color: var(--accent-cyan) !important; }
 
 /* ── PODIUM — top 3 (desktop) ── */
-.rankings-list > *:nth-child(1):not(.rankings-empty) {
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) {
     background: linear-gradient(90deg, rgba(246, 187, 22, 0.14) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(255, 213, 74, 0.65) !important;
-    box-shadow: inset 0 0 20px rgba(246, 187, 22, 0.06);
+    box-shadow: inset 0 0 20px rgba(246, 187, 22, 0.06) !important;
 }
-.rankings-list > *:nth-child(1):not(.rankings-empty)::before { color: #FFD54A; text-shadow: 0 0 8px rgba(246, 187, 22, 0.7); }
-.rankings-list > *:nth-child(1):not(.rankings-empty)::after { background: #FFD54A; box-shadow: 0 0 8px rgba(246, 187, 22, 0.7); }
-.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar { border-color: #FFD54A; }
-.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-name { color: #FFD54A; }
-.rankings-list > *:nth-child(1):not(.rankings-empty) .rank-score { color: #FFD54A; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1)::before { color: #FFD54A !important; text-shadow: 0 0 8px rgba(246, 187, 22, 0.7) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1)::after { background: #FFD54A !important; box-shadow: 0 0 8px rgba(246, 187, 22, 0.7) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-avatar,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-avatar-fallback { border-color: #FFD54A !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-name { color: #FFD54A !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-score { color: #FFD54A !important; }
 
-.rankings-list > *:nth-child(2):not(.rankings-empty) {
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) {
     background: linear-gradient(90deg, rgba(200, 220, 240, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(200, 220, 240, 0.5) !important;
 }
-.rankings-list > *:nth-child(2):not(.rankings-empty)::before { color: #E4EEFA; text-shadow: 0 0 6px rgba(200, 220, 240, 0.6); }
-.rankings-list > *:nth-child(2):not(.rankings-empty)::after { background: #C8DCF0; box-shadow: 0 0 6px rgba(200, 220, 240, 0.6); }
-.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar { border-color: #C8DCF0; }
-.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-name { color: #E4EEFA; }
-.rankings-list > *:nth-child(2):not(.rankings-empty) .rank-score { color: #E4EEFA; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2)::before { color: #E4EEFA !important; text-shadow: 0 0 6px rgba(200, 220, 240, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2)::after { background: #C8DCF0 !important; box-shadow: 0 0 6px rgba(200, 220, 240, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-avatar,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-avatar-fallback { border-color: #C8DCF0 !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-name { color: #E4EEFA !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-score { color: #E4EEFA !important; }
 
-.rankings-list > *:nth-child(3):not(.rankings-empty) {
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) {
     background: linear-gradient(90deg, rgba(230, 140, 60, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(230, 140, 60, 0.5) !important;
 }
-.rankings-list > *:nth-child(3):not(.rankings-empty)::before { color: #FFB073; text-shadow: 0 0 6px rgba(230, 140, 60, 0.6); }
-.rankings-list > *:nth-child(3):not(.rankings-empty)::after { background: #E68C3C; box-shadow: 0 0 6px rgba(230, 140, 60, 0.6); }
-.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar { border-color: #E68C3C; }
-.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-name { color: #FFB073; }
-.rankings-list > *:nth-child(3):not(.rankings-empty) .rank-score { color: #FFB073; }
-
-.rankings-list > *:nth-child(3):not(.rankings-empty) {
-    margin-bottom: 6px;
-    position: relative;
-}
-.rankings-list > *:nth-child(3):not(.rankings-empty)::after {
-    content: '';
-    position: absolute;
-    top: auto; bottom: -4px;
-    left: 0; right: 0;
-    width: auto; height: 1px;
-    background: linear-gradient(90deg,
-        transparent 0%,
-        var(--border-default) 30%,
-        var(--border-default) 70%,
-        transparent 100%);
-    box-shadow: none;
-    border-radius: 0;
-}
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3)::before { color: #FFB073 !important; text-shadow: 0 0 6px rgba(230, 140, 60, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3)::after { background: #E68C3C !important; box-shadow: 0 0 6px rgba(230, 140, 60, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-avatar,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-avatar-fallback { border-color: #E68C3C !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-name { color: #FFB073 !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-score { color: #FFB073 !important; }
 
 /* ═══════════════════════════════════════════════════════════════
    MOBILE / PHANTOM — TWO separate stacked cards
    ═══════════════════════════════════════════════════════════════ */
-
 @media (max-width: 900px) {
-    .rankings-card { max-width: 96% !important; }
+    #rankingsOverlay .rankings-card { max-width: 96% !important; }
 }
 
 @media (max-width: 768px) {
-    /* ── OUTER CARD — keep as wrapper but let columns break out ── */
-    .rankings-card {
+    #rankingsOverlay .rankings-card {
         max-width: 96% !important;
         width: 96% !important;
-        min-height: auto;
-        max-height: 92vh;
+        min-height: auto !important;
+        max-height: 92vh !important;
         padding: 14px 12px 14px !important;
         border-radius: 10px !important;
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
     }
-    .rankings-card::before { opacity: 0.7; }
-
-    /* ── HEADER ── */
-    .rankings-header {
-        padding: 0 2px 10px;
-        margin-bottom: 10px;
+    #rankingsOverlay .rankings-header {
+        padding: 0 2px 10px !important;
+        margin-bottom: 10px !important;
     }
-    .rankings-header h3 { font-size: 0.9rem !important; letter-spacing: 0.12em !important; }
-    .rankings-close-btn {
+    #rankingsOverlay .rankings-header h3 { font-size: 0.9rem !important; letter-spacing: 0.12em !important; }
+    #rankingsOverlay .rankings-close-btn {
         width: 28px !important; height: 28px !important;
         min-width: 28px !important; max-width: 28px !important;
         font-size: 0.78rem !important;
     }
 
-    /* ── BODY — stack columns as separate cards ── */
-    .rankings-body {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        min-height: 0;
+    /* Stack columns as separate cards */
+    #rankingsOverlay .rankings-body {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        min-height: 0 !important;
+        overflow: visible !important;
     }
-
-    /* Each column becomes its own visible card */
-    .rankings-column {
-        background: rgba(0, 0, 0, 0.28);
-        border: 1px solid var(--border-subtle);
-        border-radius: 8px;
-        padding: 10px 10px 8px;
-        min-height: 0;
-        position: relative;
-        overflow: hidden;
+    #rankingsOverlay .rankings-column {
+        background: rgba(0, 0, 0, 0.28) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px !important;
+        padding: 10px 10px 8px !important;
+        position: relative !important;
+        overflow: hidden !important;
     }
-    /* Left accent stripe per card */
-    .rankings-column::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; bottom: 0;
-        width: 3px;
-        pointer-events: none;
+    #rankingsOverlay .rankings-column::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; bottom: 0 !important;
+        width: 3px !important;
+        pointer-events: none !important;
     }
-    .rankings-column:nth-child(1)::before {
-        background: var(--accent-cyan);
-        box-shadow: 0 0 10px var(--accent-cyan);
+    #rankingsOverlay .rankings-column:nth-child(1)::before {
+        background: var(--accent-cyan) !important;
+        box-shadow: 0 0 10px var(--accent-cyan) !important;
     }
-    .rankings-column:nth-child(2)::before {
-        background: var(--accent-orange);
-        box-shadow: 0 0 10px var(--accent-orange);
+    #rankingsOverlay .rankings-column:nth-child(2)::before {
+        background: var(--accent-orange) !important;
+        box-shadow: 0 0 10px var(--accent-orange) !important;
     }
-
-    /* Column titles */
-    .rankings-column-title {
+    #rankingsOverlay .rankings-column-title {
         font-size: 0.66rem !important;
         letter-spacing: 0.2em !important;
-        padding: 0 0 8px !important;
+        padding: 0 0 8px 8px !important;
         margin-bottom: 8px !important;
-        padding-left: 8px !important;
     }
-    .rankings-column-title::after { display: none; }
-
-    /* ── LIST — no fixed height, grows naturally ── */
-    .rankings-list {
-        gap: 4px;
-        padding: 0;
-        overflow: visible;
-        max-height: none;
+    #rankingsOverlay .rankings-column-title::after { display: none !important; }
+    #rankingsOverlay .rankings-list {
+        gap: 4px !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
     }
 
-    /* ── ROW — 2-line layout, full width ── */
-    .rankings-list > *:not(.rankings-empty) {
-        display: grid;
-        grid-template-columns: 20px 34px 1fr auto;
+    /* 2-line row layout */
+    #rankingsOverlay .rankings-list > .rank-row {
+        display: grid !important;
+        grid-template-columns: 20px 34px 1fr auto !important;
         grid-template-areas:
             "rank avatar name  score"
-            "rank avatar meta  meta ";
-        column-gap: 10px;
-        row-gap: 2px;
+            "rank avatar meta  meta " !important;
+        column-gap: 10px !important;
+        row-gap: 2px !important;
         padding: 8px 10px !important;
-        min-height: 48px;
+        min-height: 48px !important;
         border-radius: 6px !important;
-        font-size: 0.82rem;
+        font-size: 0.82rem !important;
+    }
+    #rankingsOverlay .rankings-list > .rank-row::before {
+        grid-area: rank !important;
+        align-self: center !important;
+        font-size: 0.64rem !important;
+    }
+    #rankingsOverlay .rank-avatar,
+    #rankingsOverlay .rank-avatar-fallback {
+        grid-area: avatar !important;
+        align-self: center !important;
+        width: 34px !important; height: 34px !important;
+        min-width: 34px !important; min-height: 34px !important;
+    }
+    #rankingsOverlay .rank-info { display: contents !important; }
+    #rankingsOverlay .rank-name {
+        grid-area: name !important;
+        align-self: end !important;
+        font-size: 0.82rem !important;
+        line-height: 1.15 !important;
+    }
+    #rankingsOverlay .rank-meta {
+        grid-area: meta !important;
+        align-self: start !important;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+    }
+    #rankingsOverlay .rank-level {
+        font-size: 0.58rem !important;
+        padding: 1px 6px !important;
+    }
+    #rankingsOverlay .rank-detail {
+        font-size: 0.58rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    #rankingsOverlay .rank-stats { display: contents !important; }
+    #rankingsOverlay .rank-score {
+        grid-area: score !important;
+        align-self: end !important;
+        font-size: 0.82rem !important;
+        text-align: right !important;
+        line-height: 1.15 !important;
     }
 
-    /* Rank index spans both rows */
-    .rankings-list > *:not(.rankings-empty)::before {
-        grid-area: rank;
-        align-self: center;
-        font-size: 0.64rem;
-    }
-
-    /* Avatar spans both rows */
-    .rankings-list > *:not(.rankings-empty) .rank-avatar,
-    .rankings-list > *:not(.rankings-empty) .avatar,
-    .rankings-list > *:not(.rankings-empty) img {
-        grid-area: avatar;
-        align-self: center;
-        width: 34px; height: 34px;
-        min-width: 34px; min-height: 34px;
-    }
-    .rankings-list .rank-avatar-fallback {
-        grid-area: avatar;
-        align-self: center;
-        width: 34px; height: 34px;
-        min-width: 34px; min-height: 34px;
-        font-size: 0.78rem;
-    }
-
-    /* Info block flattens so name/meta split onto the 2 grid rows */
-    .rankings-list > *:not(.rankings-empty) .rank-info,
-    .rankings-list > *:not(.rankings-empty) .user-info,
-    .rankings-list > *:not(.rankings-empty) .rank-meta-block {
-        display: contents;
-    }
-    .rankings-list > *:not(.rankings-empty) .rank-name,
-    .rankings-list > *:not(.rankings-empty) .user-name,
-    .rankings-list > *:not(.rankings-empty) .username {
-        grid-area: name;
-        align-self: end;
-        font-size: 0.82rem;
-        line-height: 1.15;
-        letter-spacing: 0.02em;
-    }
-    .rankings-list > *:not(.rankings-empty) .rank-meta,
-    .rankings-list > *:not(.rankings-empty) .rank-subline {
-        grid-area: meta;
-        align-self: start;
-        gap: 6px;
-        flex-wrap: nowrap;
-        overflow: hidden;
-    }
-    .rankings-list > *:not(.rankings-empty) .rank-level,
-    .rankings-list > *:not(.rankings-empty) .level-badge {
-        font-size: 0.58rem;
-        padding: 1px 6px;
-        letter-spacing: 0.05em;
-    }
-    .rankings-list > *:not(.rankings-empty) .rank-detail {
-        font-size: 0.58rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Stats flatten — score top-right, streak appended in meta */
-    .rankings-list > *:not(.rankings-empty) .rank-stats,
-    .rankings-list > *:not(.rankings-empty) .rank-right {
-        display: contents;
-    }
-    .rankings-list > *:not(.rankings-empty) .rank-score,
-    .rankings-list > *:not(.rankings-empty) .score {
-        grid-area: score;
-        align-self: end;
-        font-size: 0.82rem;
-        text-align: right;
-        line-height: 1.15;
-    }
-    .rankings-list > *:not(.rankings-empty) .rank-streak,
-    .rankings-list > *:not(.rankings-empty) .streak {
-        grid-area: meta;
-        justify-self: end;
-        font-size: 0.58rem;
-        padding: 1px 6px;
-        margin-left: auto;
-    }
-    .rankings-list > *:not(.rankings-empty) .streak-fire { font-size: 0.64rem; }
-
-    /* ── PODIUM — bigger visual punch per card ── */
-    .rankings-list > *:nth-child(1):not(.rankings-empty) {
+    /* Podium on mobile */
+    #rankingsOverlay .rankings-list > .rank-row:nth-child(1) {
         border-width: 2px !important;
         box-shadow:
             inset 0 0 24px rgba(246, 187, 22, 0.08),
             0 0 14px rgba(246, 187, 22, 0.25) !important;
     }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar,
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar-fallback {
-        border-color: #FFD54A !important;
-        box-shadow: 0 0 10px rgba(246, 187, 22, 0.4);
-    }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-name,
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-score {
-        color: #FFD54A !important;
-    }
-
-    .rankings-list > *:nth-child(2):not(.rankings-empty) {
+    #rankingsOverlay .rankings-list > .rank-row:nth-child(2) {
         border-color: rgba(200, 220, 240, 0.55) !important;
     }
-    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar,
-    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar-fallback {
-        border-color: #C8DCF0;
-    }
-    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-name,
-    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-score {
-        color: #E4EEFA;
-    }
-
-    .rankings-list > *:nth-child(3):not(.rankings-empty) {
+    #rankingsOverlay .rankings-list > .rank-row:nth-child(3) {
         border-color: rgba(230, 140, 60, 0.55) !important;
-        margin-bottom: 2px;
-    }
-    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar,
-    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar-fallback {
-        border-color: #E68C3C;
-    }
-    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-name,
-    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-score {
-        color: #FFB073;
-    }
-    /* Hide the desktop podium divider on mobile */
-    .rankings-list > *:nth-child(3):not(.rankings-empty)::after {
-        display: none;
     }
 
-    /* Empty state */
-    .rankings-empty {
+    #rankingsOverlay .rankings-empty {
         padding: 22px 10px !important;
         font-size: 0.66rem !important;
-        border-radius: 6px;
-    }
-
-    /* Hover effects don't apply on touch — remove jitter */
-    .rankings-list > *:not(.rankings-empty):hover {
-        background: rgba(0, 0, 0, 0.32);
     }
 }
 
 /* Very small phones */
 @media (max-width: 420px) {
-    .rankings-card { padding: 12px 10px !important; }
-    .rankings-column { padding: 8px 8px 6px; }
-    .rankings-list > *:not(.rankings-empty) {
-        grid-template-columns: 18px 30px 1fr auto;
-        column-gap: 8px;
+    #rankingsOverlay .rankings-card { padding: 12px 10px !important; }
+    #rankingsOverlay .rankings-column { padding: 8px 8px 6px !important; }
+    #rankingsOverlay .rankings-list > .rank-row {
+        grid-template-columns: 18px 30px 1fr auto !important;
+        column-gap: 8px !important;
         padding: 7px 8px !important;
     }
-    .rankings-list > *:not(.rankings-empty) .rank-avatar,
-    .rankings-list > *:not(.rankings-empty) .rank-avatar-fallback {
-        width: 30px; height: 30px;
-        min-width: 30px; min-height: 30px;
+    #rankingsOverlay .rank-avatar,
+    #rankingsOverlay .rank-avatar-fallback {
+        width: 30px !important; height: 30px !important;
+        min-width: 30px !important; min-height: 30px !important;
     }
-    .rankings-list > *:not(.rankings-empty) .rank-name { font-size: 0.76rem; }
-    .rankings-list > *:not(.rankings-empty) .rank-score { font-size: 0.78rem; }
-    .rankings-list > *:not(.rankings-empty) .rank-level { font-size: 0.54rem; }
+    #rankingsOverlay .rank-name { font-size: 0.76rem !important; }
+    #rankingsOverlay .rank-score { font-size: 0.78rem !important; }
+    #rankingsOverlay .rank-level { font-size: 0.54rem !important; }
 }
 
 /* ═══════════════════════════════════════════════════
    ACCESSIBILITY
    ═══════════════════════════════════════════════════ */
-
 @media (prefers-reduced-motion: reduce) {
-    .rankings-list > *:not(.rankings-empty) { transition: none !important; }
-    .rankings-empty { animation: none; }
-    .rankings-close-btn:hover { transform: none; }
+    #rankingsOverlay .rank-row { transition: none !important; }
+    #rankingsOverlay .rankings-empty { animation: none !important; }
+    #rankingsOverlay .rankings-close-btn:hover { transform: none !important; }
 }
 
-.rankings-list > *:not(.rankings-empty):focus-visible,
-.rankings-close-btn:focus-visible {
-    outline: 2px solid var(--accent-cyan);
-    outline-offset: 2px;
-    border-radius: 6px;
+#rankingsOverlay .rank-row:focus-visible,
+#rankingsOverlay .rankings-close-btn:focus-visible {
+    outline: 2px solid var(--accent-cyan) !important;
+    outline-offset: 2px !important;
+    border-radius: 6px !important;
 }
