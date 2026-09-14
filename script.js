@@ -400,10 +400,7 @@
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon,
                 .msn-right-sidebar .msn-rs-actions .header-theme-btn,
-                .msn-right-sidebar .msn-rs-actions .rankings-btn,
-                .msn-right-sidebar .msn-rs-actions #rankingsBtn,
-                .msn-right-sidebar .msn-rs-actions #headerThemeBtn,
-                .msn-right-sidebar .msn-rs-actions #modSettingsBtn {
+                .msn-right-sidebar .msn-rs-actions .rankings-btn {
                     width: 100% !important;
                     height: 100% !important;
                     min-height: 90px !important;
@@ -413,10 +410,10 @@
                     background: var(--bg-elevated, rgba(255,255,255,0.03)) !important;
                     border: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
                     color: var(--text-primary, #fff) !important;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    justify-content: center !important;
                     gap: 8px !important;
                     cursor: pointer !important;
                     transition: background 0.18s ease,
