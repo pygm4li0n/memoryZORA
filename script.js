@@ -208,6 +208,90 @@
                 0%, 100% { opacity: 0.28; transform: translateY(0) scale(0.85); }
                 50%      { opacity: 1;    transform: translateY(-4px) scale(1); }
             }
+
+            /* ⚑ ADDED ── Pinned announcement as centered chat bubble ── */
+            .mod-message-box {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 8px !important;
+                align-self: center !important;
+                width: auto !important;
+                max-width: min(85%, 560px);
+                margin: 10px 16px !important;
+                padding: 8px 14px !important;
+                border-radius: 16px 16px 16px 4px;
+                background: linear-gradient(145deg,
+                    rgba(201, 168, 78, 0.16) 0%,
+                    rgba(201, 168, 78, 0.06) 100%);
+                border: 1px solid rgba(201, 168, 78, 0.5);
+                box-shadow:
+                    0 2px 12px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+                flex-shrink: 0 !important;
+                z-index: 5;
+                position: relative;
+                font-family: var(--font-mono, monospace);
+                pointer-events: auto;
+            }
+            .mod-message-box.hidden { display: none !important; }
+
+            .mod-message-box .mod-badge {
+                background: linear-gradient(180deg, #C9A84E 0%, #A88A3A 100%);
+                color: #1a0f00;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 0.55rem;
+                font-weight: 900;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                flex-shrink: 0;
+                border: none;
+                box-shadow: 0 0 8px rgba(201, 168, 78, 0.55);
+                line-height: 1.2;
+                white-space: nowrap;
+            }
+
+            .mod-message-box .mod-message-text {
+                color: var(--cream, #F3E7B8);
+                font-size: 0.82rem;
+                line-height: 1.45;
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                flex: 1;
+                min-width: 0;
+                text-align: left;
+                letter-spacing: 0.01em;
+            }
+
+            .mod-message-box .mod-message-text a {
+                color: var(--accent-cyan, #01E1EA);
+                text-decoration: underline;
+                text-underline-offset: 2px;
+            }
+
+            /* Mobile — full width minus tiny margins, softer radius */
+            @media (max-width: 768px) {
+                .mod-message-box {
+                    max-width: calc(100% - 24px) !important;
+                    margin: 8px 12px !important;
+                    padding: 7px 12px !important;
+                    border-radius: 14px 14px 14px 4px;
+                    gap: 7px !important;
+                }
+                .mod-message-box .mod-badge {
+                    font-size: 0.5rem;
+                    padding: 2px 6px;
+                    letter-spacing: 0.08em;
+                }
+                .mod-message-box .mod-message-text {
+                    font-size: 0.78rem;
+                    line-height: 1.4;
+                }
+            }
         `;
         const tag = document.createElement('style');
         tag.setAttribute('data-msn-phantom-fixes', '1');
