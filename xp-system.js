@@ -1,4 +1,4 @@
-// xp-system.js – XP badge + dual rankings overlay (FINAL v5)
+// xp-system.js – XP badge + dual rankings overlay (FINAL v6)
 (function () {
     const SUPABASE_URL = 'https://uxrpjfsouwxnlcbhjilz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
@@ -8,7 +8,7 @@
     let lastWallet = null;
 
     // ═══════════════════════════════════════════════════════
-    //  WALLET DETECTION
+    //  WALLET DETECTION — desktop + mobile Phantom
     // ═══════════════════════════════════════════════════════
 
     const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
@@ -39,7 +39,39 @@
         return null;
     }
 
+    // ⚑ NEW: Read directly from window.solana / window.phantom (mobile priority)
+    function findWalletFromProvider() {
+        try {
+            const provider = window.phantom?.solana || window.solana;
+            if (!provider) return null;
+
+            // Method 1: connected + publicKey object
+            if (provider.isConnected && provider.publicKey) {
+                const pk = provider.publicKey;
+                const s = typeof pk === 'string' ? pk : pk.toBase58?.() || pk.toString?.();
+                if (looksLikeWallet(s)) return s.trim();
+            }
+
+            // Method 2: provider.publicKey exists but not marked connected
+            if (provider.publicKey) {
+                const pk = provider.publicKey;
+                const s = typeof pk === 'string' ? pk : pk.toBase58?.() || pk.toString?.();
+                if (looksLikeWallet(s)) return s.trim();
+            }
+
+            // Method 3: deep scan provider object for a base58 string
+            const found = findWalletInObject(provider, 0);
+            if (found) return found;
+        } catch (e) {}
+        return null;
+    }
+
     function findWallet() {
+        // 0) Provider first — this is what mobile needs
+        const fromProvider = findWalletFromProvider();
+        if (fromProvider) return fromProvider;
+
+        // 1) Known storage keys
         try {
             for (const k of KNOWN_WALLET_KEYS) {
                 const v = localStorage.getItem(k);
@@ -47,6 +79,7 @@
             }
         } catch (e) {}
 
+        // 2) Scan every localStorage value
         try {
             for (let i = 0; i < localStorage.length; i++) {
                 const val = localStorage.getItem(localStorage.key(i));
@@ -54,6 +87,7 @@
             }
         } catch (e) {}
 
+        // 3) SessionStorage
         try {
             for (let i = 0; i < sessionStorage.length; i++) {
                 const val = sessionStorage.getItem(sessionStorage.key(i));
@@ -61,6 +95,7 @@
             }
         } catch (e) {}
 
+        // 4) Deep JSON scan on localStorage
         try {
             for (let i = 0; i < localStorage.length; i++) {
                 const raw = localStorage.getItem(localStorage.key(i));
@@ -144,7 +179,6 @@
             }
         } catch (e) {}
 
-        // Fallback: direct read
         try {
             const { data, error } = await sb
                 .from('profiles')
@@ -190,18 +224,27 @@
     });
 
     // ═══════════════════════════════════════════════════════
-    //  AVATAR HELPERS
+    //  AVATAR HELPERS — cache-busted
     // ═══════════════════════════════════════════════════════
+
+    // ⚑ NEW: append a version tag so the browser re-fetches when data changes
+    function cacheBust(url, row) {
+        if (!url) return url;
+        const tag = row.xp ?? row.token_balance ?? row.updated_at ?? Date.now();
+        const sep = url.indexOf('?') === -1 ? '?' : '&';
+        return url + sep + 'v=' + encodeURIComponent(String(tag));
+    }
 
     function avatarHTML(row) {
         let url = row.avatar_url || row.avatar || row.profile_pic ||
                   row.profile_pic_url || row.pfp || null;
 
-        // Normalize relative paths to Supabase Storage URLs
         if (url && !/^https?:\/\//i.test(url) && url.indexOf('/') !== -1) {
             url = 'https://uxrpjfsouwxnlcbhjilz.supabase.co/storage/v1/object/public/' +
                   url.replace(/^\/+/, '');
         }
+
+        if (url) url = cacheBust(url, row);
 
         const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
         if (url) {
@@ -272,7 +315,7 @@
         const el = document.getElementById('activityLeaderboard');
         if (!el) return;
         try {
-            const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 10 });
+            const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 50 });
             if (error) {
                 console.warn('activity rpc:', error);
                 el.innerHTML = '<div class="rankings-empty">Error loading</div>';
@@ -311,12 +354,27 @@
     function refreshBoth() { loadHoldersBoard(); loadActivityBoard(); }
 
     // ═══════════════════════════════════════════════════════
-    //  ADD XP — wallet-keyed, holder-gated by SQL
+    //  ADD XP — wallet-keyed, works on mobile + desktop
     // ═══════════════════════════════════════════════════════
 
     window.addXP = async function (messageId) {
-        const wallet = getWallet();
-        if (!wallet || !messageId) return null;
+        // Force a fresh wallet read — mobile may have just connected
+        refreshWallet();
+        let wallet = getWallet();
+
+        // Retry once after a tiny delay — catches mobile Phantom
+        // that writes to storage a moment after the connect callback
+        if (!wallet) {
+            await new Promise(r => setTimeout(r, 400));
+            refreshWallet();
+            wallet = getWallet();
+        }
+
+        if (!wallet) {
+            console.log('[xp] addXP: no wallet detected, skipping');
+            return null;
+        }
+        if (!messageId) return null;
 
         try {
             const { data, error } = await sb.rpc('add_xp', {
@@ -356,16 +414,23 @@
         if (!provider || provider.__msnHooked) return false;
         try {
             provider.__msnHooked = true;
-            provider.on?.('connect', () => {
-                refreshWallet();
-                const w = getWallet();
-                if (w) loadXpForWallet(w);
+
+            // Mobile Phantom emits more event types
+            ['connect', 'accountChanged', 'disconnect'].forEach(evt => {
+                provider.on?.(evt, () => {
+                    console.log('[xp] Phantom event:', evt);
+                    refreshWallet();
+                    const w = getWallet();
+                    if (w && evt !== 'disconnect') {
+                        lastWallet = w;
+                        loadXpForWallet(w);
+                    } else if (evt === 'disconnect') {
+                        lastWallet = null;
+                        updateLevelBadge(null, 0);
+                    }
+                });
             });
-            provider.on?.('accountChanged', () => {
-                refreshWallet();
-                const w = getWallet();
-                if (w) loadXpForWallet(w);
-            });
+
             return true;
         } catch (e) {
             return false;
@@ -376,8 +441,8 @@
     let phantomTries = 0;
     const phantomTimer = setInterval(() => {
         phantomTries++;
-        if (tryHookPhantom() || phantomTries > 30) clearInterval(phantomTimer);
-    }, 1000);
+        if (tryHookPhantom() || phantomTries > 60) clearInterval(phantomTimer);
+    }, 500);
 
     window.addEventListener('storage', (e) => {
         if (!e.key || /wallet|phantom|sol|pubkey|address/i.test(e.key)) {
@@ -398,7 +463,8 @@
 
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
-            const w = findWallet();
+            refreshWallet();
+            const w = getWallet();
             if (w && w !== lastWallet) {
                 lastWallet = w;
                 loadXpForWallet(w);
@@ -433,7 +499,7 @@
             cachedWalletTime = Date.now();
             loadXpForWallet(w);
         }
-        if (startupTicks >= 40) clearInterval(startupPoll);
+        if (startupTicks >= 60) clearInterval(startupPoll);
     }, 500);
 
     setInterval(() => {
@@ -458,6 +524,17 @@
 
     window.msnXpDebug = () => ({
         wallet: getWallet(),
+        provider: (() => {
+            try {
+                const p = window.phantom?.solana || window.solana;
+                if (!p) return 'none';
+                return {
+                    isConnected: p.isConnected,
+                    hasPublicKey: !!p.publicKey,
+                    publicKey: p.publicKey?.toString?.() || null
+                };
+            } catch (e) { return 'error'; }
+        })(),
         lastWallet,
         cacheAge: cachedWallet ? (Date.now() - cachedWalletTime) + 'ms' : 'none'
     });
