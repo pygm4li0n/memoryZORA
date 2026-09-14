@@ -5,7 +5,7 @@
     const AVATAR_BUCKET = 'chat-avatars';
 
     // ═══════════════════════════════════════════════════════════
-    //  ⚑ PHANTOM / MOBILE VISUAL FIXES — injected once
+    //  ⚑ PHANTOM / MOBILE VISUAL FIXES + RIGHT SIDEBAR — injected once
     // ═══════════════════════════════════════════════════════════
     (function injectPhantomFixes() {
         if (document.querySelector('style[data-msn-phantom-fixes]')) return;
@@ -294,33 +294,176 @@
             }
 
             /* ═══════════════════════════════════════════════════════════
-               ⚑ CHAT AREA — DESKTOP ONLY
+               ⚑ CHAT AREA + RIGHT SIDEBAR — DESKTOP ONLY
                · Full-width header across the whole remaining screen
-               · Chat content below the header is left-anchored
-               · Right empty space = sidebar width (280px)
+               · Chat content below header, left-anchored
+               · Right 280px = utility sidebar (tabs + actions)
                · Mobile (< 769px) untouched
             ═══════════════════════════════════════════════════════════ */
             @media (min-width: 769px) {
-                /* Chat panel fills remaining width but reserves 280px on the right */
+
+                /* Chat panel reserves 280px on the right for the sidebar */
                 .chat-panel {
+                    padding-right: 280px !important;
+                    position: relative !important;
                     flex: 1 1 auto !important;
                     max-width: none !important;
-                    padding-right: 280px !important;
-                    position: relative;
                     border-radius: 0 !important;
                 }
 
                 /* Header extends into the reserved space — spans full width */
                 .chat-header-bar {
                     width: calc(100% + 280px) !important;
+                    position: relative !important;
+                    z-index: 10 !important;
                 }
 
-                /* Reserved space under the header (future widget slot) */
-                .chat-tabs {
-                    margin-top: 10px !important;
+                /* Messages scrollbar — wider, separated at the boundary */
+                .messages-container::-webkit-scrollbar {
+                    width: 10px;
+                }
+                .messages-container::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .messages-container::-webkit-scrollbar-thumb {
+                    background: var(--border-default, #1a3a5c);
+                    border-radius: 5px;
+                    border: 2px solid transparent;
+                    background-clip: padding-box;
+                }
+                .messages-container::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent-cyan, #01E1EA);
+                    background-clip: padding-box;
                 }
 
-                /* Tighter rhythm so the chat feels compact */
+                /* ── RIGHT SIDEBAR CONTAINER ── */
+                .msn-right-sidebar {
+                    position: absolute !important;
+                    top: var(--header-height, 70px) !important;
+                    right: 0 !important;
+                    bottom: 0 !important;
+                    width: 280px !important;
+                    background: linear-gradient(180deg,
+                        var(--bg-panel, #01091A) 0%,
+                        var(--bg-deep, #050914) 100%) !important;
+                    border-left: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 18px !important;
+                    padding: 16px 14px !important;
+                    overflow-y: auto !important;
+                    z-index: 5 !important;
+                    font-family: var(--font-mono, monospace) !important;
+                }
+
+                /* Sections */
+                .msn-right-sidebar .msn-rs-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .msn-right-sidebar .msn-rs-label {
+                    font-size: 0.62rem;
+                    font-weight: 800;
+                    letter-spacing: 0.18em;
+                    text-transform: uppercase;
+                    color: var(--text-muted, #426080);
+                    padding-bottom: 6px;
+                    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+                    text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+                }
+
+                /* Vertical chat tabs */
+                .msn-right-sidebar .msn-rs-tabs .chat-tabs {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 6px !important;
+                    border-bottom: none !important;
+                    background: transparent !important;
+                    padding: 0 !important;
+                    box-shadow: none !important;
+                }
+                .msn-right-sidebar .msn-rs-tabs .chat-tab {
+                    flex: none !important;
+                    text-align: left !important;
+                    padding: 11px 14px !important;
+                    border: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+                    border-left: 3px solid transparent !important;
+                    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+                    border-radius: 6px !important;
+                    background: rgba(0, 0, 0, 0.2) !important;
+                    font-size: 0.75rem !important;
+                    color: var(--text-secondary, #8DA7C7) !important;
+                    transition: all 0.18s ease;
+                    text-shadow: none !important;
+                    cursor: pointer;
+                }
+                .msn-right-sidebar .msn-rs-tabs .chat-tab:hover {
+                    background: rgba(1, 225, 234, 0.04) !important;
+                    border-left-color: rgba(1, 225, 234, 0.4) !important;
+                }
+                .msn-right-sidebar .msn-rs-tabs .chat-tab.active {
+                    border-left-color: var(--accent-cyan, #01E1EA) !important;
+                    background: rgba(1, 225, 234, 0.08) !important;
+                    color: var(--accent-cyan, #01E1EA) !important;
+                    border-bottom-color: var(--border-subtle, rgba(255,255,255,0.06)) !important;
+                    text-shadow: 0 0 6px rgba(1, 225, 234, 0.4) !important;
+                }
+
+                /* Actions grid — 2-column */
+                .msn-right-sidebar .msn-rs-actions {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 8px;
+                }
+                .msn-right-sidebar .msn-rs-actions .btn-icon,
+                .msn-right-sidebar .msn-rs-actions .header-theme-btn,
+                .msn-right-sidebar .msn-rs-actions .rankings-btn {
+                    width: 100% !important;
+                    height: 50px !important;
+                    font-size: 1.35rem !important;
+                    border-radius: 8px !important;
+                    background: linear-gradient(180deg,
+                        rgba(122, 78, 44, 0.5) 0%,
+                        rgba(107, 63, 36, 0.5) 100%) !important;
+                    border: 1px solid rgba(138, 117, 72, 0.5) !important;
+                    color: var(--cream, #E5D39A) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                .msn-right-sidebar .msn-rs-actions .btn-icon:hover,
+                .msn-right-sidebar .msn-rs-actions .header-theme-btn:hover,
+                .msn-right-sidebar .msn-rs-actions .rankings-btn:hover {
+                    border-color: var(--accent-cyan, #01E1EA) !important;
+                    color: var(--accent-cyan, #01E1EA) !important;
+                    box-shadow: 0 0 12px rgba(1, 225, 234, 0.35) !important;
+                    background: linear-gradient(180deg,
+                        rgba(138, 90, 50, 0.6) 0%,
+                        rgba(122, 78, 44, 0.6) 100%) !important;
+                }
+                .msn-right-sidebar .msn-rs-actions .btn-icon img {
+                    width: 22px !important;
+                    height: 22px !important;
+                }
+                /* Mod settings button — hide if not mod */
+                .msn-right-sidebar .msn-rs-actions .btn-icon.hidden {
+                    display: none !important;
+                }
+
+                /* Right sidebar's own scrollbar */
+                .msn-right-sidebar::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .msn-right-sidebar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .msn-right-sidebar::-webkit-scrollbar-thumb {
+                    background: var(--border-default, #1a3a5c);
+                    border-radius: 3px;
+                }
+
+                /* Tighter rhythm for the chat content */
                 .messages-container {
                     padding: 12px 14px !important;
                     gap: 10px !important;
@@ -328,11 +471,8 @@
                 .input-area-bar {
                     padding: 8px 12px 10px !important;
                 }
-                .chat-tab {
-                    padding: 8px 10px !important;
-                }
 
-                /* Pinned bubble fits content width */
+                /* Pinned announcement — fits narrower chat width */
                 .mod-message-box {
                     max-width: min(90%, 500px) !important;
                 }
@@ -1473,7 +1613,6 @@
         return html;
     }
 
-    // ⚑ Builds a message element (returns it, doesn't append)
     async function buildMessageNode(msg, isPrivate) {
         const user = isPrivate ? msg.from_user : msg.username;
         if (!getAvatarURL(user)) await fetchAvatars([user]);
@@ -1570,7 +1709,6 @@
         return wrapper;
     }
 
-    // ⚑ Loader helpers
     function showMsgLoader(container, label) {
         const host = container.parentNode;
         if (!host) return;
@@ -1897,7 +2035,6 @@
     }
     cancelPrivateBtn.addEventListener('click', () => setActivePrivateChat(null));
 
-    // ⚑ Off-screen build + atomic swap + fade reveal
     async function loadPrivateMessages(partner) {
         if (!username || !partner) return;
         privateContainer.classList.add('msn-loading');
@@ -2142,7 +2279,6 @@
             }).subscribe();
     }
 
-    // ⚑ Off-screen build + atomic swap + fade reveal
     async function loadMessages() {
         setConnection('connecting');
         publicContainer.classList.add('msn-loading');
@@ -2347,6 +2483,95 @@
         return true;
     }
 
+    // ═══════════════════════════════════════════════════════════
+    //  ⚑ RIGHT SIDEBAR — desktop-only utility column
+    //  Moves tabs + action buttons into a dedicated right panel
+    // ═══════════════════════════════════════════════════════════
+    const _rsMoved = [];
+
+    function buildRightSidebar() {
+        if (document.getElementById('msnRightSidebar')) return;
+        const chatPanel = document.getElementById('chatPanel');
+        if (!chatPanel) return;
+
+        const right = document.createElement('aside');
+        right.id = 'msnRightSidebar';
+        right.className = 'msn-right-sidebar';
+
+        // Section 1: Chats (tabs)
+        const s1 = document.createElement('div');
+        s1.className = 'msn-rs-section';
+        s1.innerHTML = '<div class="msn-rs-label">Chats</div>';
+        const tabsWrap = document.createElement('div');
+        tabsWrap.className = 'msn-rs-tabs';
+        s1.appendChild(tabsWrap);
+        right.appendChild(s1);
+
+        // Section 2: Actions
+        const s2 = document.createElement('div');
+        s2.className = 'msn-rs-section';
+        s2.innerHTML = '<div class="msn-rs-label">Actions</div>';
+        const actionsWrap = document.createElement('div');
+        actionsWrap.className = 'msn-rs-actions';
+        s2.appendChild(actionsWrap);
+        right.appendChild(s2);
+
+        chatPanel.appendChild(right);
+
+        const moves = [
+            { el: chatTabs,                                       into: tabsWrap },
+            { el: document.getElementById('headerThemeBtn'),      into: actionsWrap },
+            { el: document.getElementById('rankingsBtn'),         into: actionsWrap },
+            { el: document.getElementById('modSettingsBtn'),      into: actionsWrap },
+            { el: document.getElementById('refreshBtn'),          into: actionsWrap },
+        ];
+
+        moves.forEach(({ el, into }) => {
+            if (!el || !into) return;
+            _rsMoved.push({
+                el,
+                parent: el.parentNode,
+                next: el.nextSibling
+            });
+            into.appendChild(el);
+        });
+    }
+
+    function destroyRightSidebar() {
+        const right = document.getElementById('msnRightSidebar');
+        if (!right) return;
+        _rsMoved.forEach(({ el, parent, next }) => {
+            if (!parent) return;
+            try {
+                if (next && next.parentNode === parent) {
+                    parent.insertBefore(el, next);
+                } else {
+                    parent.appendChild(el);
+                }
+            } catch (e) {
+                parent.appendChild(el);
+            }
+        });
+        _rsMoved.length = 0;
+        right.remove();
+    }
+
+    function syncRightSidebar() {
+        const isDesktop = window.innerWidth >= 769;
+        const exists = !!document.getElementById('msnRightSidebar');
+        if (isDesktop && !exists) buildRightSidebar();
+        else if (!isDesktop && exists) destroyRightSidebar();
+    }
+
+    let _lastDesktop = window.innerWidth >= 769;
+    window.addEventListener('resize', () => {
+        const nowDesktop = window.innerWidth >= 769;
+        if (nowDesktop !== _lastDesktop) {
+            _lastDesktop = nowDesktop;
+            syncRightSidebar();
+        }
+    });
+
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
     cancelReplyBtn.addEventListener('click', () => setReplyingTo(null));
@@ -2455,6 +2680,9 @@
 
     async function init() {
         if (window.innerWidth <= 768) sidebarToggle.classList.remove('hidden');
+
+        // ⚑ Build right sidebar on desktop
+        syncRightSidebar();
 
         const provider = getPhantomProvider();
         if (provider) {
