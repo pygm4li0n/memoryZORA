@@ -925,6 +925,59 @@ html body .streak-toast.visible {
 }
 
 /* ═════════════════════════════════════════════════════
+   ⚑ SIDEBAR OPTION LABELS — 2× bigger
+   SKINS / RANK / MOD text under each right-sidebar card.
+   Desktop only (the right sidebar only exists on desktop).
+═════════════════════════════════════════════════════ */
+.msn-right-sidebar .msn-rs-actions .msn-rs-card-label {
+    font-size: 1.44rem !important;
+    letter-spacing: 0.24em !important;
+    line-height: 1 !important;
+}
+
+/* ═════════════════════════════════════════════════════
+   ⚑ PINNED ANNOUNCEMENT — full width of chat container,
+   text centered. Applies on desktop + phantom (mobile).
+   `html body` prefix beats the injected script.js rules.
+═════════════════════════════════════════════════════ */
+html body .mod-message-box {
+    align-self: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 8px 0 !important;
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+}
+
+html body .mod-message-box .mod-message-text {
+    flex: 0 1 auto !important;
+    text-align: center !important;
+}
+
+html body .mod-message-box .mod-badge {
+    flex-shrink: 0 !important;
+}
+
+/* Phantom — keep full width + centered */
+@media (max-width: 768px) {
+    html body .mod-message-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 6px 0 !important;
+        padding: 8px 14px !important;
+        border-radius: 6px !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+    html body .mod-message-box .mod-message-text {
+        text-align: center !important;
+    }
+}
+
+/* ═════════════════════════════════════════════════════
    ⚑ RANKINGS OVERLAY — BULLETPROOF
    Now lives here (theme-fixes.css) so it always loads.
    #rankingsOverlay prefix → (1,0,0) specificity, cannot
