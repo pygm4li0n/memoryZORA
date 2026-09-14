@@ -27,14 +27,12 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ⚑ Helper — current wallet string (or null)
     function getWalletAddress() {
         try {
             return phantomWalletPublicKey ? phantomWalletPublicKey.toBase58() : null;
         } catch (e) { return null; }
     }
 
-    // ── Real visible viewport height ──
     function updateAppHeight() {
         const vv = window.visualViewport;
         const h = vv ? vv.height : window.innerHeight;
@@ -49,7 +47,6 @@
     window.addEventListener('orientationchange', () => setTimeout(updateAppHeight, 100));
     [50, 200, 500, 1200, 2500].forEach(ms => setTimeout(updateAppHeight, ms));
 
-    // DOM elements
     const sidebarWalletAddress = document.getElementById('sidebarWalletAddress');
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
@@ -325,8 +322,6 @@
     }
     function updateUserRank(balance) { return; }
 
-    // ⚑ FIXED — wallet-only upsert. No more ghost rows.
-    // If no wallet is connected, refuses to write and returns an error.
     async function upsertProfile({ username: uname, avatar_url, token_balance }) {
         const wallet = getWalletAddress();
         if (!wallet) {
@@ -586,7 +581,6 @@
         showCooldown(seconds);
     }
 
-    // ============== REST OF ORIGINAL CODE ==============
     let replyingTo = null;
     let activePrivateChat = null;
     let currentTab = 'public';
@@ -660,7 +654,6 @@
     updateTokenInfo();
     setInterval(updateTokenInfo, 60000);
 
-    // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
     let autoScroll = true;
@@ -736,13 +729,29 @@
     });
 
     function saveAcceptedChats() { localStorage.setItem('msn_accepted_chats', JSON.stringify([...acceptedPrivateChats])); }
+
+    // ⚑ REWRITTEN — pulls from both accepted requests AND message history.
+    // Anyone you've privately messaged with counts as an accepted partner,
+    // even if the request row was cleaned up.
     async function loadAcceptedChatsFromDB() {
         if (!username) return;
         try {
-            const { data: sent } = await supabase.from('private_chat_requests').select('to_user').eq('from_user', username).eq('status', 'accepted');
-            const { data: received } = await supabase.from('private_chat_requests').select('from_user').eq('to_user', username).eq('status', 'accepted');
-            (sent||[]).forEach(r => acceptedPrivateChats.add(r.to_user));
-            (received||[]).forEach(r => acceptedPrivateChats.add(r.from_user));
+            // Source 1: accepted request rows
+            const { data: sent } = await supabase.from('private_chat_requests')
+                .select('to_user').eq('from_user', username).eq('status', 'accepted');
+            const { data: received } = await supabase.from('private_chat_requests')
+                .select('from_user').eq('to_user', username).eq('status', 'accepted');
+            (sent || []).forEach(r => r.to_user && acceptedPrivateChats.add(r.to_user));
+            (received || []).forEach(r => r.from_user && acceptedPrivateChats.add(r.from_user));
+
+            // Source 2: message history — anyone you've exchanged messages with
+            const { data: msgSent } = await supabase.from('private_messages')
+                .select('to_user').eq('from_user', username).limit(500);
+            const { data: msgReceived } = await supabase.from('private_messages')
+                .select('from_user').eq('to_user', username).limit(500);
+            (msgSent || []).forEach(r => r.to_user && acceptedPrivateChats.add(r.to_user));
+            (msgReceived || []).forEach(r => r.from_user && acceptedPrivateChats.add(r.from_user));
+
             saveAcceptedChats();
         } catch (err) { console.error('Error loading accepted chats:', err); }
     }
@@ -847,7 +856,6 @@
         else return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${timeStr}`;
     }
 
-    // ⚑ Prefer wallet-having rows so dupes don't overwrite the current avatar
     async function fetchAvatars(usernames) {
         const unique = [...new Set(usernames.filter(u => u && (!avatarCache[u] || !(u in userBalances))))];
         if (unique.length === 0) return;
@@ -1344,6 +1352,9 @@
         activePrivateChat = partnerUsername;
         localStorage.setItem(ACTIVE_CHAT_KEY, partnerUsername || '');
         if(partnerUsername) {
+            // ⚑ Auto-trust: opening a chat implies acceptance
+            acceptedPrivateChats.add(partnerUsername);
+            saveAcceptedChats();
             privateIndicatorBar.classList.remove('hidden');
             privateChatUserDisp.textContent = partnerUsername;
             setReplyingTo(null);
@@ -1363,28 +1374,54 @@
     }
     cancelPrivateBtn.addEventListener('click', () => setActivePrivateChat(null));
 
+    // ⚑ REWRITTEN — two .eq() queries instead of .or() so usernames with special
+    // characters don't break the PostgREST filter. Dedupes and sorts by created_at.
     async function loadPrivateMessages(partner) {
+        if (!username || !partner) return;
         privateContainer.innerHTML = '<div class="empty-chat-hint">Loading…</div>';
-        const { data, error } = await supabase
-            .from('private_messages')
-            .select('*')
-            .or(`and(from_user.eq.${username},to_user.eq.${partner}),and(from_user.eq.${partner},to_user.eq.${username})`)
-            .order('sort_order', { ascending: true });
-        if (error) { showError('Failed to load private messages'); return; }
-        data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-        privateContainer.innerHTML = '';
-        if (data.length === 0) {
-            privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
-        } else {
-            const users = [...new Set(data.flatMap(m => [m.from_user, m.to_user]))];
-            await fetchAvatars(users);
-            for (const msg of data) await renderMessage(msg, true, false);
-            autoScroll = true;
-            scrollContainerToBottom(privateContainer);
-            pinToBottom(privateContainer, 4000);
-            updateScrollButtonVisibility(privateContainer);
+        try {
+            const [{ data: a, error: e1 }, { data: b, error: e2 }] = await Promise.all([
+                supabase.from('private_messages').select('*')
+                    .eq('from_user', username).eq('to_user', partner),
+                supabase.from('private_messages').select('*')
+                    .eq('from_user', partner).eq('to_user', username)
+            ]);
+            if (e1 || e2) {
+                console.warn('loadPrivateMessages error:', e1 || e2);
+                privateContainer.innerHTML = '<div class="empty-chat-hint">Failed to load messages</div>';
+                return;
+            }
+            const data = [...(a || []), ...(b || [])];
+            const seen = new Set();
+            const unique = data.filter(m => {
+                if (seen.has(m.id)) return false;
+                seen.add(m.id);
+                return true;
+            });
+            // Sort by created_at (fallback to sort_order if present)
+            unique.sort((x, y) => {
+                const tx = x.sort_order != null ? x.sort_order : new Date(x.created_at || 0).getTime();
+                const ty = y.sort_order != null ? y.sort_order : new Date(y.created_at || 0).getTime();
+                return tx - ty;
+            });
+
+            privateContainer.innerHTML = '';
+            if (unique.length === 0) {
+                privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
+            } else {
+                const users = [...new Set(unique.flatMap(m => [m.from_user, m.to_user]).filter(Boolean))];
+                await fetchAvatars(users);
+                for (const msg of unique) await renderMessage(msg, true, false);
+                autoScroll = true;
+                scrollContainerToBottom(privateContainer);
+                pinToBottom(privateContainer, 4000);
+                updateScrollButtonVisibility(privateContainer);
+            }
+            loadReactions('private_message_reactions', true);
+        } catch (err) {
+            console.error('loadPrivateMessages failed:', err);
+            privateContainer.innerHTML = '<div class="empty-chat-hint">Error loading private messages</div>';
         }
-        loadReactions('private_message_reactions', true);
     }
 
     async function updateSidebarUI() {
@@ -1687,8 +1724,6 @@
         setTimeout(() => refreshBtn.classList.remove('spinning'), 700);
     }
 
-    // ⚑ REQUIRES WALLET — refuses to save if Phantom disconnected.
-    // The write always targets the wallet row (no ghost rows possible).
     async function applyUsername(name) {
         const wallet = getWalletAddress();
         if (!wallet) {
@@ -1708,7 +1743,6 @@
             } catch (err) { showError('Avatar upload failed: ' + err.message); }
         }
 
-        // ⚑ Wallet-keyed write — only path that exists now
         const { error: upsertErr } = await upsertProfile({
             username: name,
             avatar_url: avatarUrlToUse
@@ -1736,12 +1770,10 @@
         setupTypingChannel();
         updateChatAccessibility();
 
-        // Notify XP system to refresh the wallet-keyed badge
         try { window.dispatchEvent(new Event('msn:wallet-connected')); } catch (e) {}
         return true;
     }
 
-    // Event listeners
     sendBtn.addEventListener('click', sendMessage);
     messageInput.addEventListener('keypress', (e) => { if(e.key==='Enter') sendMessage(); });
     cancelReplyBtn.addEventListener('click', () => setReplyingTo(null));
@@ -1785,7 +1817,6 @@
         reader.readAsDataURL(file);
     });
 
-    // ⚑ Require wallet at submit time
     nameSubmitBtn.addEventListener('click', async () => {
         const newName = nameInput.value.trim();
         if (!newName) return;
@@ -1809,7 +1840,6 @@
     });
     nameInput.addEventListener('keypress', (e) => { if(e.key==='Enter') nameSubmitBtn.click(); });
 
-    // ⚑ Require wallet before opening the edit overlay
     sidebarChangeNameBtn.addEventListener('click', () => {
         if (!phantomConnected || !phantomWalletPublicKey) {
             showError('Connect Phantom first to edit your profile.');
@@ -1875,12 +1905,11 @@
 
         await loadSettings();
         subscribeToSettings();
-        await loadAcceptedChatsFromDB();
 
         inputAreaBar.classList.add('hidden');
 
         if(username) {
-            // ⚑ Read by wallet when one is connected — wallet is source of truth
+            // ⚑ STEP 1 — sync username from wallet row BEFORE loading accepted chats
             let profile = null;
             const walletForRead = getWalletAddress();
             if (walletForRead) {
@@ -1899,6 +1928,16 @@
                     .eq('username', username)
                     .maybeSingle();
                 profile = data;
+            }
+
+            // ⚑ STEP 2 — load accepted chats with the correct username
+            await loadAcceptedChatsFromDB();
+
+            // ⚑ STEP 3 — trust the saved active chat even if requests were cleaned
+            const savedActiveChat = localStorage.getItem(ACTIVE_CHAT_KEY);
+            if (savedActiveChat) {
+                acceptedPrivateChats.add(savedActiveChat);
+                saveAcceptedChats();
             }
 
             if(profile && profile.avatar_url) {
@@ -1934,8 +1973,8 @@
             setupTypingChannel();
             updateChatAccessibility();
 
-            const savedActiveChat = localStorage.getItem(ACTIVE_CHAT_KEY);
-            if (savedActiveChat && acceptedPrivateChats.has(savedActiveChat)) {
+            // ⚑ STEP 4 — reopen the last private chat at the very end
+            if (savedActiveChat) {
                 setActivePrivateChat(savedActiveChat);
             }
         } else {
