@@ -1,4 +1,4 @@
-// xp-system.js – XP badge + dual rankings overlay (WALLET-KEYED v3)
+// xp-system.js – XP badge + dual rankings overlay (WALLET-KEYED v4)
 (function () {
     const SUPABASE_URL = 'https://uxrpjfsouwxnlcbhjilz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
@@ -9,9 +9,6 @@
 
     // ═══════════════════════════════════════════════════════
     //  WALLET DETECTION
-    //  · Known keys fast path
-    //  · Direct-value scan (localStorage + sessionStorage)
-    //  · Deep JSON scan (up to 4 levels) — catches {publicKey:"..."}
     // ═══════════════════════════════════════════════════════
 
     const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
@@ -29,7 +26,6 @@
         return BASE58_RE.test(s);
     }
 
-    // Walk a JSON value up to N levels deep, looking for a base58 string
     function findWalletInObject(obj, depth) {
         depth = depth || 0;
         if (depth > 4 || !obj || typeof obj !== 'object') return null;
@@ -45,56 +41,36 @@
     }
 
     function findWallet() {
-        // 1) Known keys (fast path)
         try {
             for (const k of KNOWN_WALLET_KEYS) {
                 const v = localStorage.getItem(k);
-                if (looksLikeWallet(v)) {
-                    console.log('[xp] wallet found in known key:', k, '→', v);
-                    return String(v).trim();
-                }
+                if (looksLikeWallet(v)) return String(v).trim();
             }
         } catch (e) {}
 
-        // 2) Scan every localStorage value directly
         try {
             for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                const val = localStorage.getItem(key);
-                if (looksLikeWallet(val)) {
-                    console.log('[xp] wallet auto-detected in localStorage key:', key, '→', val);
-                    return String(val).trim();
-                }
+                const val = localStorage.getItem(localStorage.key(i));
+                if (looksLikeWallet(val)) return String(val).trim();
             }
         } catch (e) {}
 
-        // 3) Scan every sessionStorage value directly
         try {
             for (let i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i);
-                const val = sessionStorage.getItem(key);
-                if (looksLikeWallet(val)) {
-                    console.log('[xp] wallet auto-detected in sessionStorage key:', key, '→', val);
-                    return String(val).trim();
-                }
+                const val = sessionStorage.getItem(sessionStorage.key(i));
+                if (looksLikeWallet(val)) return String(val).trim();
             }
         } catch (e) {}
 
-        // 4) Deep JSON scan on localStorage
         try {
             for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                const raw = localStorage.getItem(key);
+                const raw = localStorage.getItem(localStorage.key(i));
                 if (!raw) continue;
                 const first = raw[0];
                 if (first !== '{' && first !== '[') continue;
                 try {
-                    const obj = JSON.parse(raw);
-                    const found = findWalletInObject(obj);
-                    if (found) {
-                        console.log('[xp] wallet found inside JSON at key:', key, '→', found);
-                        return found;
-                    }
+                    const found = findWalletInObject(JSON.parse(raw));
+                    if (found) return found;
                 } catch (e) {}
             }
         } catch (e) {}
@@ -102,7 +78,6 @@
         return null;
     }
 
-    // 500ms cache — snappy but avoids hammering localStorage
     let cachedWallet = null;
     let cachedWalletTime = 0;
     function getWallet() {
@@ -156,17 +131,25 @@
         el.classList.remove('hidden');
     }
 
+    // ⚑ HARDENED — handles RPC returning a table (array of rows)
     async function loadXpForWallet(wallet) {
         if (!wallet) { updateLevelBadge(null, 0); return; }
 
         // RPC first
         try {
             const { data, error } = await sb.rpc('get_xp_by_wallet', { p_wallet: wallet });
-            if (!error && data && data.length) {
-                const row = Array.isArray(data) ? data[0] : data;
-                const lvl = row.level || levelFromXp(row.xp || 0);
-                updateLevelBadge(lvl, row.xp, row.in_level, row.needed);
-                return;
+            if (!error && data) {
+                // RPC returns TABLE → array; pick highest-XP row if dupes remain
+                const rows = Array.isArray(data) ? data : [data];
+                if (rows.length) {
+                    const row = rows.reduce((best, r) =>
+                        (Number(r?.xp || 0) > Number(best?.xp || 0) ? r : best), rows[0]);
+                    if (row) {
+                        const lvl = row.level || levelFromXp(row.xp || 0);
+                        updateLevelBadge(lvl, row.xp, row.in_level, row.needed);
+                        return;
+                    }
+                }
             }
         } catch (e) {}
 
@@ -262,9 +245,8 @@
             }
 
             const cleaned = data.filter(row => {
-                const bal = Number(row.token_balance || 0);
                 const wal = String(row.wallet_address || '').trim();
-                return bal > 0.000001 && wal.length > 0;
+                return wal.length > 0;
             });
 
             if (!cleaned.length) {
@@ -315,10 +297,10 @@
                 return;
             }
 
+            // ⚑ RELAXED — RPC already filters and sorts; only skip wallet-less rows
             const cleaned = data.filter(row => {
-                const xp = Number(row.xp || 0);
                 const wal = String(row.wallet_address || '').trim();
-                return xp > 0 && wal.length > 0;
+                return wal.length > 0;
             });
 
             if (!cleaned.length) {
@@ -412,7 +394,7 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    //  WALLET EVENT HOOKS — instant detection
+    //  WALLET EVENT HOOKS
     // ═══════════════════════════════════════════════════════
 
     function tryHookPhantom() {
@@ -422,23 +404,19 @@
             provider.__msnHooked = true;
 
             provider.on?.('connect', () => {
-                console.log('[xp] Phantom connect event');
                 refreshWallet();
                 const w = getWallet();
                 if (w) loadXpForWallet(w);
             });
 
             provider.on?.('accountChanged', () => {
-                console.log('[xp] Phantom account changed');
                 refreshWallet();
                 const w = getWallet();
                 if (w) loadXpForWallet(w);
             });
 
-            console.log('[xp] Phantom provider hooked');
             return true;
         } catch (e) {
-            console.warn('[xp] Phantom hook failed:', e);
             return false;
         }
     }
@@ -450,7 +428,6 @@
         if (tryHookPhantom() || phantomTries > 30) clearInterval(phantomTimer);
     }, 1000);
 
-    // Cross-tab wallet changes
     window.addEventListener('storage', (e) => {
         if (!e.key || /wallet|phantom|sol|pubkey|address/i.test(e.key)) {
             refreshWallet();
@@ -462,15 +439,12 @@
         }
     });
 
-    // Custom app event
     window.addEventListener('msn:wallet-connected', () => {
-        console.log('[xp] msn:wallet-connected fired');
         refreshWallet();
         const w = getWallet();
         if (w) { lastWallet = w; loadXpForWallet(w); }
     });
 
-    // Tab refocus
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             const w = findWallet();
@@ -481,7 +455,6 @@
         }
     });
 
-    // First user interaction — catches wallet written after page load
     const firstTouch = () => {
         refreshWallet();
         const w = getWallet();
@@ -496,16 +469,14 @@
         document.addEventListener(ev, firstTouch, true));
 
     // ═══════════════════════════════════════════════════════
-    //  WALLET POLL — aggressive startup, then steady
+    //  WALLET POLL
     // ═══════════════════════════════════════════════════════
 
-    // Phase 1: 500ms poll for the first 20 seconds
     let startupTicks = 0;
     const startupPoll = setInterval(() => {
         startupTicks++;
         const w = findWallet();
         if (w && w !== lastWallet) {
-            console.log('[xp] wallet appeared during startup:', w);
             lastWallet = w;
             cachedWallet = w;
             cachedWalletTime = Date.now();
@@ -514,7 +485,6 @@
         if (startupTicks >= 40) clearInterval(startupPoll);
     }, 500);
 
-    // Phase 2: 1.5s steady-state forever
     setInterval(() => {
         const current = getWallet();
         if (current && current !== lastWallet) {
@@ -526,7 +496,6 @@
         }
     }, 1500);
 
-    // Initial fire
     setTimeout(() => {
         const w = getWallet();
         if (w) { lastWallet = w; loadXpForWallet(w); }
