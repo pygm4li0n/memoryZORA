@@ -767,15 +767,28 @@
         return null;
     }
 
-    function checkIfModWallet() {
+        function checkIfModWallet() {
+        // Mod only when: connected AND wallet matches MOD_WALLET
         if (phantomConnected && phantomWalletPublicKey) {
-            isModWallet = phantomWalletPublicKey.toBase58() === MOD_WALLET;
-            if (isModWallet) modSettingsBtn.classList.remove('hidden');
-            else modSettingsBtn.classList.add('hidden');
+            try {
+                isModWallet = phantomWalletPublicKey.toBase58() === MOD_WALLET;
+            } catch (e) {
+                isModWallet = false;
+            }
         } else {
             isModWallet = false;
-            modSettingsBtn.classList.add('hidden');
         }
+
+        // ⚑ Show ONLY for the mod wallet — force-hide everywhere else,
+        //    including inside the right sidebar.
+        if (isModWallet) {
+            modSettingsBtn.classList.remove('hidden');
+            modSettingsBtn.style.removeProperty('display');
+        } else {
+            modSettingsBtn.classList.add('hidden');
+            modSettingsBtn.style.display = 'none';
+        }
+
         if (modAnnouncementSection) {
             modAnnouncementSection.classList.toggle('hidden', !isModWallet);
         }
