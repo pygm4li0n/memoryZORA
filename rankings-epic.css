@@ -1,7 +1,7 @@
 /* =========================================================
-   RANKINGS — CELL EDITION v2
-   Desktop: thin cell rows
-   Mobile / Phantom: 2-line compact rows, stacked boards
+   RANKINGS — CELL EDITION v3
+   Desktop: single card, two thin columns
+   Mobile/Phantom: TWO separate cards, stacked, 2-line rows
    ========================================================= */
 
 /* ── CARD ─────────────────────────────────────────── */
@@ -189,7 +189,6 @@
     transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     contain: layout style paint;
 }
-
 .rankings-list > *:not(.rankings-empty)::before {
     content: counter(rank);
     display: flex;
@@ -213,7 +212,6 @@
     border-radius: 0 6px 6px 0;
     pointer-events: none;
 }
-
 .rankings-list > *:not(.rankings-empty) .rank-avatar,
 .rankings-list > *:not(.rankings-empty) .avatar,
 .rankings-list > *:not(.rankings-empty) img {
@@ -243,7 +241,6 @@
     line-height: 1;
     user-select: none;
 }
-
 .rankings-list > *:not(.rankings-empty) .rank-info,
 .rankings-list > *:not(.rankings-empty) .user-info,
 .rankings-list > *:not(.rankings-empty) .rank-meta-block {
@@ -345,7 +342,6 @@
     white-space: nowrap;
     line-height: 1;
 }
-
 .rankings-list > *:not(.rankings-empty):hover {
     background: rgba(255, 255, 255, 0.05);
     border-color: var(--accent-cyan) !important;
@@ -357,10 +353,7 @@
 }
 .rankings-list > *:not(.rankings-empty):hover .rank-avatar { border-color: var(--accent-cyan); }
 
-/* ═══════════════════════════════════════════════════
-   PODIUM — top 3 (desktop)
-   ═══════════════════════════════════════════════════ */
-
+/* ── PODIUM — top 3 (desktop) ── */
 .rankings-list > *:nth-child(1):not(.rankings-empty) {
     background: linear-gradient(90deg, rgba(246, 187, 22, 0.14) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(255, 213, 74, 0.65) !important;
@@ -411,88 +404,133 @@
     border-radius: 0;
 }
 
-/* ═══════════════════════════════════════════════════
-   MOBILE / PHANTOM — stacked boards + 2-line rows
-   ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE / PHANTOM — TWO separate stacked cards
+   ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
     .rankings-card { max-width: 96% !important; }
-    .rankings-body { gap: 14px; }
 }
 
 @media (max-width: 768px) {
-    /* ── CARD ── */
+    /* ── OUTER CARD — keep as wrapper but let columns break out ── */
     .rankings-card {
         max-width: 96% !important;
         width: 96% !important;
         min-height: auto;
         max-height: 92vh;
-        padding: 16px 12px 14px !important;
-        border-radius: 8px !important;
+        padding: 14px 12px 14px !important;
+        border-radius: 10px !important;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
-
-    /* ── STACK THE TWO BOARDS VERTICALLY ── */
-    .rankings-body {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    .rankings-column { min-height: 0; }
-    .rankings-column-title {
-        font-size: 0.62rem !important;
-        letter-spacing: 0.2em !important;
-        padding: 0 0 6px !important;
-        margin-bottom: 5px !important;
-    }
+    .rankings-card::before { opacity: 0.7; }
 
     /* ── HEADER ── */
-    .rankings-header h3 { font-size: 0.92rem !important; letter-spacing: 0.12em !important; }
+    .rankings-header {
+        padding: 0 2px 10px;
+        margin-bottom: 10px;
+    }
+    .rankings-header h3 { font-size: 0.9rem !important; letter-spacing: 0.12em !important; }
     .rankings-close-btn {
-        width: 26px !important; height: 26px !important;
-        min-width: 26px !important; max-width: 26px !important;
-        font-size: 0.75rem !important;
+        width: 28px !important; height: 28px !important;
+        min-width: 28px !important; max-width: 28px !important;
+        font-size: 0.78rem !important;
     }
 
-    /* ── ROW — 2 thin lines per entry ── */
-    .rankings-list {
-        gap: 3px;
+    /* ── BODY — stack columns as separate cards ── */
+    .rankings-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 0;
     }
+
+    /* Each column becomes its own visible card */
+    .rankings-column {
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+        padding: 10px 10px 8px;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    /* Left accent stripe per card */
+    .rankings-column::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        width: 3px;
+        pointer-events: none;
+    }
+    .rankings-column:nth-child(1)::before {
+        background: var(--accent-cyan);
+        box-shadow: 0 0 10px var(--accent-cyan);
+    }
+    .rankings-column:nth-child(2)::before {
+        background: var(--accent-orange);
+        box-shadow: 0 0 10px var(--accent-orange);
+    }
+
+    /* Column titles */
+    .rankings-column-title {
+        font-size: 0.66rem !important;
+        letter-spacing: 0.2em !important;
+        padding: 0 0 8px !important;
+        margin-bottom: 8px !important;
+        padding-left: 8px !important;
+    }
+    .rankings-column-title::after { display: none; }
+
+    /* ── LIST — no fixed height, grows naturally ── */
+    .rankings-list {
+        gap: 4px;
+        padding: 0;
+        overflow: visible;
+        max-height: none;
+    }
+
+    /* ── ROW — 2-line layout, full width ── */
     .rankings-list > *:not(.rankings-empty) {
-        grid-template-columns: 18px 28px 1fr auto;
+        display: grid;
+        grid-template-columns: 20px 34px 1fr auto;
         grid-template-areas:
             "rank avatar name  score"
             "rank avatar meta  meta ";
-        column-gap: 8px;
-        row-gap: 1px;
-        padding: 6px 9px !important;
-        min-height: 42px;
-        font-size: 0.78rem;
+        column-gap: 10px;
+        row-gap: 2px;
+        padding: 8px 10px !important;
+        min-height: 48px;
+        border-radius: 6px !important;
+        font-size: 0.82rem;
     }
 
-    /* Rank number — spans both rows, vertically centered */
+    /* Rank index spans both rows */
     .rankings-list > *:not(.rankings-empty)::before {
         grid-area: rank;
         align-self: center;
-        font-size: 0.62rem;
+        font-size: 0.64rem;
     }
 
-    /* Avatar — spans both rows, vertically centered */
+    /* Avatar spans both rows */
     .rankings-list > *:not(.rankings-empty) .rank-avatar,
     .rankings-list > *:not(.rankings-empty) .avatar,
     .rankings-list > *:not(.rankings-empty) img {
         grid-area: avatar;
         align-self: center;
-        width: 28px; height: 28px;
-        min-width: 28px; min-height: 28px;
+        width: 34px; height: 34px;
+        min-width: 34px; min-height: 34px;
     }
     .rankings-list .rank-avatar-fallback {
-        font-size: 0.68rem;
         grid-area: avatar;
         align-self: center;
-        width: 28px; height: 28px;
-        min-width: 28px; min-height: 28px;
+        width: 34px; height: 34px;
+        min-width: 34px; min-height: 34px;
+        font-size: 0.78rem;
     }
 
-    /* Info block flattens to parent grid so name/meta split onto 2 rows */
+    /* Info block flattens so name/meta split onto the 2 grid rows */
     .rankings-list > *:not(.rankings-empty) .rank-info,
     .rankings-list > *:not(.rankings-empty) .user-info,
     .rankings-list > *:not(.rankings-empty) .rank-meta-block {
@@ -503,25 +541,32 @@
     .rankings-list > *:not(.rankings-empty) .username {
         grid-area: name;
         align-self: end;
-        font-size: 0.78rem;
+        font-size: 0.82rem;
         line-height: 1.15;
-        text-transform: uppercase;
+        letter-spacing: 0.02em;
     }
     .rankings-list > *:not(.rankings-empty) .rank-meta,
     .rankings-list > *:not(.rankings-empty) .rank-subline {
         grid-area: meta;
         align-self: start;
-        gap: 5px;
+        gap: 6px;
+        flex-wrap: nowrap;
+        overflow: hidden;
     }
     .rankings-list > *:not(.rankings-empty) .rank-level,
     .rankings-list > *:not(.rankings-empty) .level-badge {
-        font-size: 0.54rem;
-        padding: 0 5px;
+        font-size: 0.58rem;
+        padding: 1px 6px;
         letter-spacing: 0.05em;
     }
-    .rankings-list > *:not(.rankings-empty) .rank-detail { font-size: 0.55rem; }
+    .rankings-list > *:not(.rankings-empty) .rank-detail {
+        font-size: 0.58rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-    /* Stats flattens too — score lands in top-right, streak (if present) in meta row */
+    /* Stats flatten — score top-right, streak appended in meta */
     .rankings-list > *:not(.rankings-empty) .rank-stats,
     .rankings-list > *:not(.rankings-empty) .rank-right {
         display: contents;
@@ -530,30 +575,96 @@
     .rankings-list > *:not(.rankings-empty) .score {
         grid-area: score;
         align-self: end;
-        font-size: 0.76rem;
+        font-size: 0.82rem;
         text-align: right;
         line-height: 1.15;
     }
-    /* If streak exists, place it in the meta line */
     .rankings-list > *:not(.rankings-empty) .rank-streak,
     .rankings-list > *:not(.rankings-empty) .streak {
         grid-area: meta;
         justify-self: end;
-        font-size: 0.54rem;
-        padding: 0 5px;
+        font-size: 0.58rem;
+        padding: 1px 6px;
+        margin-left: auto;
     }
-    .rankings-list > *:not(.rankings-empty) .streak-fire { font-size: 0.6rem; }
+    .rankings-list > *:not(.rankings-empty) .streak-fire { font-size: 0.64rem; }
 
-    /* ── PODIUM tweaks — smaller in mobile ── */
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar { border-color: #FFD54A; }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-name { color: #FFD54A; }
-    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-score { color: #FFD54A; }
+    /* ── PODIUM — bigger visual punch per card ── */
+    .rankings-list > *:nth-child(1):not(.rankings-empty) {
+        border-width: 2px !important;
+        box-shadow:
+            inset 0 0 24px rgba(246, 187, 22, 0.08),
+            0 0 14px rgba(246, 187, 22, 0.25) !important;
+    }
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar,
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-avatar-fallback {
+        border-color: #FFD54A !important;
+        box-shadow: 0 0 10px rgba(246, 187, 22, 0.4);
+    }
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-name,
+    .rankings-list > *:nth-child(1):not(.rankings-empty) .rank-score {
+        color: #FFD54A !important;
+    }
 
-    /* Tighter divider below 3rd */
-    .rankings-list > *:nth-child(3):not(.rankings-empty) { margin-bottom: 4px; }
+    .rankings-list > *:nth-child(2):not(.rankings-empty) {
+        border-color: rgba(200, 220, 240, 0.55) !important;
+    }
+    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar,
+    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-avatar-fallback {
+        border-color: #C8DCF0;
+    }
+    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-name,
+    .rankings-list > *:nth-child(2):not(.rankings-empty) .rank-score {
+        color: #E4EEFA;
+    }
 
-    /* Empty state compact */
-    .rankings-empty { padding: 24px 10px !important; font-size: 0.66rem !important; }
+    .rankings-list > *:nth-child(3):not(.rankings-empty) {
+        border-color: rgba(230, 140, 60, 0.55) !important;
+        margin-bottom: 2px;
+    }
+    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar,
+    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-avatar-fallback {
+        border-color: #E68C3C;
+    }
+    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-name,
+    .rankings-list > *:nth-child(3):not(.rankings-empty) .rank-score {
+        color: #FFB073;
+    }
+    /* Hide the desktop podium divider on mobile */
+    .rankings-list > *:nth-child(3):not(.rankings-empty)::after {
+        display: none;
+    }
+
+    /* Empty state */
+    .rankings-empty {
+        padding: 22px 10px !important;
+        font-size: 0.66rem !important;
+        border-radius: 6px;
+    }
+
+    /* Hover effects don't apply on touch — remove jitter */
+    .rankings-list > *:not(.rankings-empty):hover {
+        background: rgba(0, 0, 0, 0.32);
+    }
+}
+
+/* Very small phones */
+@media (max-width: 420px) {
+    .rankings-card { padding: 12px 10px !important; }
+    .rankings-column { padding: 8px 8px 6px; }
+    .rankings-list > *:not(.rankings-empty) {
+        grid-template-columns: 18px 30px 1fr auto;
+        column-gap: 8px;
+        padding: 7px 8px !important;
+    }
+    .rankings-list > *:not(.rankings-empty) .rank-avatar,
+    .rankings-list > *:not(.rankings-empty) .rank-avatar-fallback {
+        width: 30px; height: 30px;
+        min-width: 30px; min-height: 30px;
+    }
+    .rankings-list > *:not(.rankings-empty) .rank-name { font-size: 0.76rem; }
+    .rankings-list > *:not(.rankings-empty) .rank-score { font-size: 0.78rem; }
+    .rankings-list > *:not(.rankings-empty) .rank-level { font-size: 0.54rem; }
 }
 
 /* ═══════════════════════════════════════════════════
