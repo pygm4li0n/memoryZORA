@@ -295,35 +295,32 @@
 
             /* ═══════════════════════════════════════════════════════════
                ⚑ CHAT AREA — DESKTOP ONLY
-               · Chat panel narrower, hugs left edge
-               · Right side of app-shell left empty for future widgets
-               · Space under the header reserved for future tweaks
-               · Mobile (< 769px) is completely untouched
+               · Full-width header across the whole remaining screen
+               · Chat content below the header is left-anchored
+               · Right empty space = sidebar width (280px)
+               · Mobile (< 769px) untouched
             ═══════════════════════════════════════════════════════════ */
             @media (min-width: 769px) {
-
-                /* Sidebar stays fixed; chat anchors to the left */
-                .app-shell {
-                    justify-content: flex-start !important;
-                }
-
-                /* Chat panel — narrower, left-anchored, room on the right */
+                /* Chat panel fills remaining width but reserves 280px on the right */
                 .chat-panel {
-                    flex: 0 1 auto !important;
-                    width: min(100%, 640px) !important;
-                    max-width: 640px !important;
-                    min-width: 320px !important;
-                    margin-right: auto !important;
-                    border-right: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+                    flex: 1 1 auto !important;
+                    max-width: none !important;
+                    padding-right: 280px !important;
+                    position: relative;
                     border-radius: 0 !important;
                 }
 
-                /* ── Reserved space UNDER the header (future widget slot) ── */
+                /* Header extends into the reserved space — spans full width */
+                .chat-header-bar {
+                    width: calc(100% + 280px) !important;
+                }
+
+                /* Reserved space under the header (future widget slot) */
                 .chat-tabs {
                     margin-top: 10px !important;
                 }
 
-                /* ── Tighter rhythm so the chat feels compact ── */
+                /* Tighter rhythm so the chat feels compact */
                 .messages-container {
                     padding: 12px 14px !important;
                     gap: 10px !important;
@@ -335,7 +332,7 @@
                     padding: 8px 10px !important;
                 }
 
-                /* Pinned bubble hugs the narrower panel */
+                /* Pinned bubble fits content width */
                 .mod-message-box {
                     max-width: min(90%, 500px) !important;
                 }
