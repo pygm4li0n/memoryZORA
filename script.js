@@ -325,35 +325,19 @@
     }
     function updateUserRank(balance) { return; }
 
-    // ⚑ Wallet-keyed upsert. Falls back to username if no wallet connected.
+    // ⚑ FIXED — wallet-only upsert. No more ghost rows.
+    // If no wallet is connected, refuses to write and returns an error.
     async function upsertProfile({ username: uname, avatar_url, token_balance }) {
         const wallet = getWalletAddress();
+        if (!wallet) {
+            return { data: null, error: { message: 'no_wallet' } };
+        }
         try {
-            if (wallet) {
-                const payload = { wallet_address: wallet };
-                if (uname !== undefined) payload.username = uname;
-                if (avatar_url !== undefined) payload.avatar_url = avatar_url;
-                if (token_balance !== undefined) payload.token_balance = token_balance;
-                return await supabase.from('profiles').upsert(payload, { onConflict: 'wallet_address' });
-            }
-            // No wallet → best-effort by username
-            if (uname) {
-                const { data: existing } = await supabase.from('profiles')
-                    .select('id').eq('username', uname).is('wallet_address', null).maybeSingle();
-                if (existing) {
-                    const upd = {};
-                    if (avatar_url !== undefined) upd.avatar_url = avatar_url;
-                    if (token_balance !== undefined) upd.token_balance = token_balance;
-                    if (Object.keys(upd).length) {
-                        return await supabase.from('profiles').update(upd).eq('id', existing.id);
-                    }
-                    return { data: null, error: null };
-                }
-                const ins = { username: uname };
-                if (avatar_url !== undefined) ins.avatar_url = avatar_url;
-                if (token_balance !== undefined) ins.token_balance = token_balance;
-                return await supabase.from('profiles').insert(ins);
-            }
+            const payload = { wallet_address: wallet };
+            if (uname !== undefined) payload.username = uname;
+            if (avatar_url !== undefined) payload.avatar_url = avatar_url;
+            if (token_balance !== undefined) payload.token_balance = token_balance;
+            return await supabase.from('profiles').upsert(payload, { onConflict: 'wallet_address' });
         } catch (err) {
             console.warn('upsertProfile failed:', err);
             return { data: null, error: err };
@@ -377,7 +361,6 @@
             }
             updateUserRank(targetBalance);
 
-            // ⚑ Save by wallet_address (source of truth)
             await upsertProfile({
                 username: username,
                 token_balance: targetBalance
@@ -875,7 +858,6 @@
         (data || []).forEach(p => {
             const hasWallet = p.wallet_address && String(p.wallet_address).length > 0;
             const exists    = p.username in avatarCache;
-            // Wallet-bearing rows always win; wallet-less rows only fill empty slots
             if (hasWallet || !exists) {
                 avatarCache[p.username] = p.avatar_url;
                 userBalances[p.username] = hasWallet ? (p.token_balance || 0) : null;
@@ -1705,22 +1687,38 @@
         setTimeout(() => refreshBtn.classList.remove('spinning'), 700);
     }
 
-    // ⚑ Rewritten to always tie writes to the wallet when one is connected
+    // ⚑ REQUIRES WALLET — refuses to save if Phantom disconnected.
+    // The write always targets the wallet row (no ghost rows possible).
     async function applyUsername(name) {
+        const wallet = getWalletAddress();
+        if (!wallet) {
+            showError('Connect Phantom before saving your profile.');
+            return false;
+        }
+
         username = name;
         localStorage.setItem(STORAGE_KEY_NAME, name);
         localStorage.setItem(LAST_USERNAME_KEY, name);
 
         let avatarUrlToUse = currentAvatarUrl;
-        if(profilePicFile) {
+        if (profilePicFile) {
             try {
                 avatarUrlToUse = await uploadToStorage(profilePicFile, AVATAR_BUCKET, 300);
                 currentAvatarUrl = avatarUrlToUse;
-            } catch(err) { showError('Avatar upload failed: ' + err.message); }
+            } catch (err) { showError('Avatar upload failed: ' + err.message); }
         }
 
-        // ⚑ Wallet-keyed save — falls back to username-only when no wallet
-        await upsertProfile({ username: name, avatar_url: avatarUrlToUse });
+        // ⚑ Wallet-keyed write — only path that exists now
+        const { error: upsertErr } = await upsertProfile({
+            username: name,
+            avatar_url: avatarUrlToUse
+        });
+
+        if (upsertErr) {
+            console.error('Profile save failed:', upsertErr);
+            showError('Profile save failed: ' + (upsertErr.message || 'unknown'));
+            return false;
+        }
 
         avatarCache[name] = avatarUrlToUse;
         if (sidebarBigAvatar) {
@@ -1738,8 +1736,9 @@
         setupTypingChannel();
         updateChatAccessibility();
 
-        // ⚑ Notify XP system to refresh the wallet-keyed badge
+        // Notify XP system to refresh the wallet-keyed badge
         try { window.dispatchEvent(new Event('msn:wallet-connected')); } catch (e) {}
+        return true;
     }
 
     // Event listeners
@@ -1786,9 +1785,19 @@
         reader.readAsDataURL(file);
     });
 
+    // ⚑ Require wallet at submit time
     nameSubmitBtn.addEventListener('click', async () => {
-        const newName = nameInput.value.trim(); if(!newName) return;
-        await applyUsername(newName);
+        const newName = nameInput.value.trim();
+        if (!newName) return;
+
+        if (!phantomConnected || !phantomWalletPublicKey) {
+            showError('Please connect Phantom before saving your profile.');
+            return;
+        }
+
+        const saved = await applyUsername(newName);
+        if (!saved) return;
+
         await loadMessages();
         subscribeToRealtime();
         setupPresence();
@@ -1800,7 +1809,13 @@
     });
     nameInput.addEventListener('keypress', (e) => { if(e.key==='Enter') nameSubmitBtn.click(); });
 
+    // ⚑ Require wallet before opening the edit overlay
     sidebarChangeNameBtn.addEventListener('click', () => {
+        if (!phantomConnected || !phantomWalletPublicKey) {
+            showError('Connect Phantom first to edit your profile.');
+            return;
+        }
+
         const prevName = username;
         const prevAvatar = getAvatarURL(prevName) || null;
         currentAvatarUrl = prevAvatar;
@@ -1865,7 +1880,7 @@
         inputAreaBar.classList.add('hidden');
 
         if(username) {
-            // ⚑ Read by wallet when one is connected — falls back to username
+            // ⚑ Read by wallet when one is connected — wallet is source of truth
             let profile = null;
             const walletForRead = getWalletAddress();
             if (walletForRead) {
@@ -1874,7 +1889,6 @@
                     .eq('wallet_address', walletForRead)
                     .maybeSingle();
                 profile = data;
-                // Sync local username to what the wallet row says (source of truth)
                 if (profile?.username && profile.username !== username) {
                     username = profile.username;
                     localStorage.setItem(STORAGE_KEY_NAME, username);
@@ -1926,7 +1940,6 @@
             }
         } else {
             const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
-            // ⚑ Prefer wallet lookup for the "welcome back" overlay
             const walletForLast = getWalletAddress();
             let lastProfile = null;
 
