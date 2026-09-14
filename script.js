@@ -2480,52 +2480,43 @@
     const _rsMoved = [];
 
     function buildRightSidebar() {
-        if (document.getElementById('msnRightSidebar')) return;
-        const chatPanel = document.getElementById('chatPanel');
-        if (!chatPanel) return;
+    if (document.getElementById('msnRightSidebar')) return;
+    const chatPanel = document.getElementById('chatPanel');
+    if (!chatPanel) return;
 
-        const right = document.createElement('aside');
-        right.id = 'msnRightSidebar';
-        right.className = 'msn-right-sidebar';
+    const right = document.createElement('aside');
+    right.id = 'msnRightSidebar';
+    right.className = 'msn-right-sidebar';
 
-        // Section 1: Chats (tabs)
-        const s1 = document.createElement('div');
-        s1.className = 'msn-rs-section';
-        s1.innerHTML = '<div class="msn-rs-label">Chats</div>';
-        const tabsWrap = document.createElement('div');
-        tabsWrap.className = 'msn-rs-tabs';
-        s1.appendChild(tabsWrap);
-        right.appendChild(s1);
+    // Single full-height section: Actions
+    const s2 = document.createElement('div');
+    s2.className = 'msn-rs-section';
+    s2.innerHTML = '<div class="msn-rs-label">Actions</div>';
+    const actionsWrap = document.createElement('div');
+    actionsWrap.className = 'msn-rs-actions';
+    s2.appendChild(actionsWrap);
+    right.appendChild(s2);
 
-        // Section 2: Actions
-        const s2 = document.createElement('div');
-        s2.className = 'msn-rs-section';
-        s2.innerHTML = '<div class="msn-rs-label">Actions</div>';
-        const actionsWrap = document.createElement('div');
-        actionsWrap.className = 'msn-rs-actions';
-        s2.appendChild(actionsWrap);
-        right.appendChild(s2);
+    chatPanel.appendChild(right);
 
-        chatPanel.appendChild(right);
+    // ⚑ chatTabs is intentionally NOT moved — it stays in the chat panel.
+    const moves = [
+        { el: document.getElementById('headerThemeBtn'), into: actionsWrap },
+        { el: document.getElementById('rankingsBtn'),    into: actionsWrap },
+        { el: document.getElementById('modSettingsBtn'), into: actionsWrap },
+        // ⚑ refreshBtn is intentionally NOT moved — stays in header right of Phantom
+    ];
 
-        const moves = [
-            { el: chatTabs,                                       into: tabsWrap },
-            { el: document.getElementById('headerThemeBtn'),      into: actionsWrap },
-            { el: document.getElementById('rankingsBtn'),         into: actionsWrap },
-            { el: document.getElementById('modSettingsBtn'),      into: actionsWrap },
-            // ⚑ refreshBtn is intentionally NOT moved — stays in header right of Phantom
-        ];
-
-        moves.forEach(({ el, into }) => {
-            if (!el || !into) return;
-            _rsMoved.push({
-                el,
-                parent: el.parentNode,
-                next: el.nextSibling
-            });
-            into.appendChild(el);
+    moves.forEach(({ el, into }) => {
+        if (!el || !into) return;
+        _rsMoved.push({
+            el,
+            parent: el.parentNode,
+            next: el.nextSibling
         });
-    }
+        into.appendChild(el);
+    });
+}
 
     function destroyRightSidebar() {
         const right = document.getElementById('msnRightSidebar');
