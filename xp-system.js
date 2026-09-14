@@ -205,14 +205,20 @@
     // ═══════════════════════════════════════════════════════
 
     function avatarHTML(row) {
-        const url = row.avatar_url || row.avatar || row.profile_pic ||
-                    row.profile_pic_url || row.pfp || null;
-        const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
-        if (url) {
-            return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" data-initial="${esc(initial)}">`;
-        }
-        return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
+    let url = row.avatar_url || row.avatar || row.profile_pic ||
+              row.profile_pic_url || row.pfp || null;
+
+    // Normalize relative paths to Supabase Storage URLs
+    if (url && !/^https?:\/\//i.test(url) && url.indexOf('/') !== -1) {
+        url = 'https://uxrpjfsouwxnlcbhjilz.supabase.co/storage/v1/object/public/' + url.replace(/^\/+/, '');
     }
+
+    const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
+    if (url) {
+        return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" data-initial="${esc(initial)}">`;
+    }
+    return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
+}
 
     function fixBrokenAvatars(container) {
         container.querySelectorAll('img.rank-avatar').forEach(img => {
