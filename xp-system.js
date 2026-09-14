@@ -1,4 +1,4 @@
-// xp-system.js – XP badge + dual rankings overlay (WALLET-KEYED v4)
+// xp-system.js – XP badge + dual rankings overlay (FINAL v5)
 (function () {
     const SUPABASE_URL = 'https://uxrpjfsouwxnlcbhjilz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
@@ -22,8 +22,7 @@
 
     function looksLikeWallet(v) {
         if (!v) return false;
-        const s = String(v).trim();
-        return BASE58_RE.test(s);
+        return BASE58_RE.test(String(v).trim());
     }
 
     function findWalletInObject(obj, depth) {
@@ -88,7 +87,6 @@
         cachedWalletTime = now;
         return w;
     }
-
     function refreshWallet() {
         cachedWallet = null;
         cachedWalletTime = 0;
@@ -96,6 +94,8 @@
     }
     window.msnRefreshWallet = refreshWallet;
 
+    // ═══════════════════════════════════════════════════════
+    //  HELPERS
     // ═══════════════════════════════════════════════════════
 
     function esc(t) {
@@ -131,25 +131,16 @@
         el.classList.remove('hidden');
     }
 
-    // ⚑ HARDENED — handles RPC returning a table (array of rows)
     async function loadXpForWallet(wallet) {
         if (!wallet) { updateLevelBadge(null, 0); return; }
 
-        // RPC first
         try {
             const { data, error } = await sb.rpc('get_xp_by_wallet', { p_wallet: wallet });
-            if (!error && data) {
-                // RPC returns TABLE → array; pick highest-XP row if dupes remain
-                const rows = Array.isArray(data) ? data : [data];
-                if (rows.length) {
-                    const row = rows.reduce((best, r) =>
-                        (Number(r?.xp || 0) > Number(best?.xp || 0) ? r : best), rows[0]);
-                    if (row) {
-                        const lvl = row.level || levelFromXp(row.xp || 0);
-                        updateLevelBadge(lvl, row.xp, row.in_level, row.needed);
-                        return;
-                    }
-                }
+            if (!error && data && data.length) {
+                const row = Array.isArray(data) ? data[0] : data;
+                const lvl = row.level || levelFromXp(row.xp || 0);
+                updateLevelBadge(lvl, row.xp, row.in_level, row.needed);
+                return;
             }
         } catch (e) {}
 
@@ -157,15 +148,13 @@
         try {
             const { data, error } = await sb
                 .from('profiles')
-                .select('xp, username, avatar_url')
+                .select('xp')
                 .eq('wallet_address', wallet)
-                .order('xp', { ascending: false })
                 .limit(1)
                 .maybeSingle();
             if (error || !data) { updateLevelBadge(null, 0); return; }
-            const xp  = Number(data.xp || 0);
-            const lvl = levelFromXp(xp);
-            updateLevelBadge(lvl, xp);
+            const xp = Number(data.xp || 0);
+            updateLevelBadge(levelFromXp(xp), xp);
         } catch (err) { console.warn('XP load error:', err); }
     }
 
@@ -205,20 +194,21 @@
     // ═══════════════════════════════════════════════════════
 
     function avatarHTML(row) {
-    let url = row.avatar_url || row.avatar || row.profile_pic ||
-              row.profile_pic_url || row.pfp || null;
+        let url = row.avatar_url || row.avatar || row.profile_pic ||
+                  row.profile_pic_url || row.pfp || null;
 
-    // Normalize relative paths to Supabase Storage URLs
-    if (url && !/^https?:\/\//i.test(url) && url.indexOf('/') !== -1) {
-        url = 'https://uxrpjfsouwxnlcbhjilz.supabase.co/storage/v1/object/public/' + url.replace(/^\/+/, '');
-    }
+        // Normalize relative paths to Supabase Storage URLs
+        if (url && !/^https?:\/\//i.test(url) && url.indexOf('/') !== -1) {
+            url = 'https://uxrpjfsouwxnlcbhjilz.supabase.co/storage/v1/object/public/' +
+                  url.replace(/^\/+/, '');
+        }
 
-    const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
-    if (url) {
-        return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" data-initial="${esc(initial)}">`;
+        const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
+        if (url) {
+            return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" data-initial="${esc(initial)}">`;
+        }
+        return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
     }
-    return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
-}
 
     function fixBrokenAvatars(container) {
         container.querySelectorAll('img.rank-avatar').forEach(img => {
@@ -250,17 +240,7 @@
                 return;
             }
 
-            const cleaned = data.filter(row => {
-                const wal = String(row.wallet_address || '').trim();
-                return wal.length > 0;
-            });
-
-            if (!cleaned.length) {
-                el.innerHTML = '<div class="rankings-empty">No holders yet</div>';
-                return;
-            }
-
-            el.innerHTML = cleaned.map(row => {
+            el.innerHTML = data.map(row => {
                 const tier  = String(row.holder_tier || 'Shrimp').toUpperCase();
                 const emoji = TIER_EMOJI[tier] || '🦐';
                 const bal   = Number(row.token_balance || 0).toLocaleString();
@@ -303,18 +283,7 @@
                 return;
             }
 
-            // ⚑ RELAXED — RPC already filters and sorts; only skip wallet-less rows
-            const cleaned = data.filter(row => {
-                const wal = String(row.wallet_address || '').trim();
-                return wal.length > 0;
-            });
-
-            if (!cleaned.length) {
-                el.innerHTML = '<div class="rankings-empty">No activity yet</div>';
-                return;
-            }
-
-            el.innerHTML = cleaned.map(row => {
+            el.innerHTML = data.map(row => {
                 const level = Number(row.level || levelFromXp(Number(row.xp || 0)));
                 const xp    = Number(row.xp || 0);
                 const today = Number(row.xp_today || 0);
@@ -342,52 +311,31 @@
     function refreshBoth() { loadHoldersBoard(); loadActivityBoard(); }
 
     // ═══════════════════════════════════════════════════════
-    //  ADD XP
+    //  ADD XP — wallet-keyed, holder-gated by SQL
     // ═══════════════════════════════════════════════════════
 
     window.addXP = async function (messageId) {
-        const wallet   = getWallet();
-        const username = localStorage.getItem('msn_chat_username');
-        if (!messageId) return null;
-        if (!wallet && !username) return null;
+        const wallet = getWallet();
+        if (!wallet || !messageId) return null;
 
-        if (wallet) {
-            try {
-                const { data, error } = await sb.rpc('add_xp', {
-                    p_wallet:     wallet,
-                    p_message_id: messageId
-                });
-                if (!error && data) {
-                    if (data.granted > 0) {
-                        const lvl = data.level || levelFromXp(data.xp || 0);
-                        updateLevelBadge(lvl, data.xp, data.in_level, data.needed);
-                    }
-                    if (data.leveled_up) showLevelToast(data.level);
-                    return data;
-                }
-            } catch (e) {}
-        }
+        try {
+            const { data, error } = await sb.rpc('add_xp', {
+                p_wallet:     wallet,
+                p_message_id: messageId
+            });
+            if (error) { console.warn('add_xp failed:', error); return null; }
+            if (!data || data.error) return null;
 
-        if (username) {
-            try {
-                const { data, error } = await sb.rpc('add_xp', {
-                    p_username:   username,
-                    p_message_id: messageId
-                });
-                if (error) { console.warn('add_xp failed:', error); return null; }
-                if (!data || data.error) return null;
-                if (data.granted > 0) {
-                    const lvl = data.level || levelFromXp(data.xp || 0);
-                    updateLevelBadge(lvl, data.xp, data.in_level, data.needed);
-                }
-                if (data.leveled_up) showLevelToast(data.level);
-                return data;
-            } catch (err) {
-                console.warn('add_xp error:', err);
-                return null;
+            if (data.granted > 0) {
+                const lvl = data.level || levelFromXp(data.xp || 0);
+                updateLevelBadge(lvl, data.xp, data.in_level, data.needed);
             }
+            if (data.leveled_up) showLevelToast(data.level);
+            return data;
+        } catch (err) {
+            console.warn('add_xp error:', err);
+            return null;
         }
-        return null;
     };
 
     function showLevelToast(level) {
@@ -408,19 +356,16 @@
         if (!provider || provider.__msnHooked) return false;
         try {
             provider.__msnHooked = true;
-
             provider.on?.('connect', () => {
                 refreshWallet();
                 const w = getWallet();
                 if (w) loadXpForWallet(w);
             });
-
             provider.on?.('accountChanged', () => {
                 refreshWallet();
                 const w = getWallet();
                 if (w) loadXpForWallet(w);
             });
-
             return true;
         } catch (e) {
             return false;
@@ -513,7 +458,6 @@
 
     window.msnXpDebug = () => ({
         wallet: getWallet(),
-        username: localStorage.getItem('msn_chat_username'),
         lastWallet,
         cacheAge: cachedWallet ? (Date.now() - cachedWalletTime) + 'ms' : 'none'
     });
