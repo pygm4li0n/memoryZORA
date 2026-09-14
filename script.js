@@ -380,6 +380,19 @@
                     min-height: 0;
                     overflow-y: auto;
                     overflow-x: hidden;
+
+                    /* ⚑ Alpha-mask texture — uses the image's transparency
+                       to let the page background show through subtly. */
+                    -webkit-mask-image: url('https://i.postimg.cc/85PqTLJq/Chat-GPT-Image-14-sept-2026-03-21-20-a-m-(1).png');
+                    mask-image: url('https://i.postimg.cc/85PqTLJq/Chat-GPT-Image-14-sept-2026-03-21-20-a-m-(1).png');
+                    -webkit-mask-mode: alpha;
+                    mask-mode: alpha;
+                    -webkit-mask-size: cover;
+                    mask-size: cover;
+                    -webkit-mask-position: center;
+                    mask-position: center;
+                    -webkit-mask-repeat: no-repeat;
+                    mask-repeat: no-repeat;
                 }
                 .msn-right-sidebar .msn-rs-actions::-webkit-scrollbar { width: 6px; }
                 .msn-right-sidebar .msn-rs-actions::-webkit-scrollbar-track { background: transparent; }
