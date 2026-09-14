@@ -762,7 +762,7 @@
         return null;
     }
 
-    function checkIfModWallet() {
+        function checkIfModWallet() {
         // Mod only when: connected AND wallet matches MOD_WALLET
         if (phantomConnected && phantomWalletPublicKey) {
             try {
@@ -774,7 +774,7 @@
             isModWallet = false;
         }
 
-        // ⚑ Show ONLY for the mod wallet — force-hide everywhere else.
+        // Show ONLY for the mod wallet — force-hide everywhere else.
         if (isModWallet) {
             modSettingsBtn.classList.remove('hidden');
             modSettingsBtn.style.removeProperty('display');
