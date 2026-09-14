@@ -1,4 +1,4 @@
-// xp-system.js – XP badge + dual rankings overlay (WALLET-KEYED v2)
+// xp-system.js – XP badge + dual rankings overlay (WALLET-KEYED v3)
 (function () {
     const SUPABASE_URL = 'https://uxrpjfsouwxnlcbhjilz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
@@ -8,13 +8,14 @@
     let lastWallet = null;
 
     // ═══════════════════════════════════════════════════════
-    //  WALLET DETECTION — auto-scan (no key names needed)
+    //  WALLET DETECTION
+    //  · Known keys fast path
+    //  · Direct-value scan (localStorage + sessionStorage)
+    //  · Deep JSON scan (up to 4 levels) — catches {publicKey:"..."}
     // ═══════════════════════════════════════════════════════
 
-    // Solana base58 addresses: 32–44 chars, no 0/O/I/l
     const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
-    // Known keys to try first (fast path)
     const KNOWN_WALLET_KEYS = [
         'msn_wallet', 'msn_wallet_address', 'wallet_address', 'walletAddress',
         'phantom_wallet', 'phantomWallet', 'sol_wallet', 'solana_wallet',
@@ -28,8 +29,23 @@
         return BASE58_RE.test(s);
     }
 
+    // Walk a JSON value up to N levels deep, looking for a base58 string
+    function findWalletInObject(obj, depth) {
+        depth = depth || 0;
+        if (depth > 4 || !obj || typeof obj !== 'object') return null;
+        for (const k of Object.keys(obj)) {
+            const v = obj[k];
+            if (typeof v === 'string' && BASE58_RE.test(v.trim())) return v.trim();
+            if (typeof v === 'object' && v) {
+                const nested = findWalletInObject(v, depth + 1);
+                if (nested) return nested;
+            }
+        }
+        return null;
+    }
+
     function findWallet() {
-        // 1) Try known keys first
+        // 1) Known keys (fast path)
         try {
             for (const k of KNOWN_WALLET_KEYS) {
                 const v = localStorage.getItem(k);
@@ -40,7 +56,7 @@
             }
         } catch (e) {}
 
-        // 2) Scan every localStorage entry for a base58 value
+        // 2) Scan every localStorage value directly
         try {
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -52,7 +68,7 @@
             }
         } catch (e) {}
 
-        // 3) Same scan on sessionStorage
+        // 3) Scan every sessionStorage value directly
         try {
             for (let i = 0; i < sessionStorage.length; i++) {
                 const key = sessionStorage.key(i);
@@ -64,29 +80,46 @@
             }
         } catch (e) {}
 
-        console.warn('[xp] no wallet found in storage');
+        // 4) Deep JSON scan on localStorage
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const raw = localStorage.getItem(key);
+                if (!raw) continue;
+                const first = raw[0];
+                if (first !== '{' && first !== '[') continue;
+                try {
+                    const obj = JSON.parse(raw);
+                    const found = findWalletInObject(obj);
+                    if (found) {
+                        console.log('[xp] wallet found inside JSON at key:', key, '→', found);
+                        return found;
+                    }
+                } catch (e) {}
+            }
+        } catch (e) {}
+
         return null;
     }
 
-    // Cache so we don't re-scan on every 1.5s tick
+    // 500ms cache — snappy but avoids hammering localStorage
     let cachedWallet = null;
     let cachedWalletTime = 0;
     function getWallet() {
         const now = Date.now();
-        if (cachedWallet && (now - cachedWalletTime) < 5000) return cachedWallet;
+        if (cachedWallet && (now - cachedWalletTime) < 500) return cachedWallet;
         const w = findWallet();
         cachedWallet = w;
         cachedWalletTime = now;
         return w;
     }
 
-    // Force re-scan (call when Phantom connects)
     function refreshWallet() {
         cachedWallet = null;
         cachedWalletTime = 0;
         return getWallet();
     }
-    window.msnRefreshWallet = refreshWallet;  // expose for debug
+    window.msnRefreshWallet = refreshWallet;
 
     // ═══════════════════════════════════════════════════════
 
@@ -126,7 +159,7 @@
     async function loadXpForWallet(wallet) {
         if (!wallet) { updateLevelBadge(null, 0); return; }
 
-        // Try RPC first
+        // RPC first
         try {
             const { data, error } = await sb.rpc('get_xp_by_wallet', { p_wallet: wallet });
             if (!error && data && data.length) {
@@ -210,7 +243,7 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    //  HOLDERS BOARD — filters ghosts client-side too
+    //  HOLDERS BOARD
     // ═══════════════════════════════════════════════════════
 
     async function loadHoldersBoard() {
@@ -228,7 +261,6 @@
                 return;
             }
 
-            // 🚫 Client-side ghost filter — belt & suspenders
             const cleaned = data.filter(row => {
                 const bal = Number(row.token_balance || 0);
                 const wal = String(row.wallet_address || '').trim();
@@ -283,7 +315,6 @@
                 return;
             }
 
-            // Also filter to wallets with actual XP
             const cleaned = data.filter(row => {
                 const xp = Number(row.xp || 0);
                 const wal = String(row.wallet_address || '').trim();
@@ -323,7 +354,7 @@
     function refreshBoth() { loadHoldersBoard(); loadActivityBoard(); }
 
     // ═══════════════════════════════════════════════════════
-    //  ADD XP — wallet-keyed with username fallback
+    //  ADD XP
     // ═══════════════════════════════════════════════════════
 
     window.addXP = async function (messageId) {
@@ -381,15 +412,109 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    //  WALLET POLL — also catches Phantom connect events
+    //  WALLET EVENT HOOKS — instant detection
     // ═══════════════════════════════════════════════════════
 
-    // Listen for Phantom connect (fires when wallet links)
-    window.addEventListener('storage', () => { refreshWallet(); });
+    function tryHookPhantom() {
+        const provider = window.phantom?.solana || window.solana;
+        if (!provider || provider.__msnHooked) return false;
+        try {
+            provider.__msnHooked = true;
 
-    // Listen for our own wallet-connect flow if the app dispatches one
-    window.addEventListener('msn:wallet-connected', () => { refreshWallet(); });
+            provider.on?.('connect', () => {
+                console.log('[xp] Phantom connect event');
+                refreshWallet();
+                const w = getWallet();
+                if (w) loadXpForWallet(w);
+            });
 
+            provider.on?.('accountChanged', () => {
+                console.log('[xp] Phantom account changed');
+                refreshWallet();
+                const w = getWallet();
+                if (w) loadXpForWallet(w);
+            });
+
+            console.log('[xp] Phantom provider hooked');
+            return true;
+        } catch (e) {
+            console.warn('[xp] Phantom hook failed:', e);
+            return false;
+        }
+    }
+
+    tryHookPhantom();
+    let phantomTries = 0;
+    const phantomTimer = setInterval(() => {
+        phantomTries++;
+        if (tryHookPhantom() || phantomTries > 30) clearInterval(phantomTimer);
+    }, 1000);
+
+    // Cross-tab wallet changes
+    window.addEventListener('storage', (e) => {
+        if (!e.key || /wallet|phantom|sol|pubkey|address/i.test(e.key)) {
+            refreshWallet();
+            const w = getWallet();
+            if (w && w !== lastWallet) {
+                lastWallet = w;
+                loadXpForWallet(w);
+            }
+        }
+    });
+
+    // Custom app event
+    window.addEventListener('msn:wallet-connected', () => {
+        console.log('[xp] msn:wallet-connected fired');
+        refreshWallet();
+        const w = getWallet();
+        if (w) { lastWallet = w; loadXpForWallet(w); }
+    });
+
+    // Tab refocus
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            const w = findWallet();
+            if (w && w !== lastWallet) {
+                lastWallet = w;
+                loadXpForWallet(w);
+            }
+        }
+    });
+
+    // First user interaction — catches wallet written after page load
+    const firstTouch = () => {
+        refreshWallet();
+        const w = getWallet();
+        if (w && w !== lastWallet) {
+            lastWallet = w;
+            loadXpForWallet(w);
+        }
+        ['click', 'keydown', 'touchstart'].forEach(ev =>
+            document.removeEventListener(ev, firstTouch, true));
+    };
+    ['click', 'keydown', 'touchstart'].forEach(ev =>
+        document.addEventListener(ev, firstTouch, true));
+
+    // ═══════════════════════════════════════════════════════
+    //  WALLET POLL — aggressive startup, then steady
+    // ═══════════════════════════════════════════════════════
+
+    // Phase 1: 500ms poll for the first 20 seconds
+    let startupTicks = 0;
+    const startupPoll = setInterval(() => {
+        startupTicks++;
+        const w = findWallet();
+        if (w && w !== lastWallet) {
+            console.log('[xp] wallet appeared during startup:', w);
+            lastWallet = w;
+            cachedWallet = w;
+            cachedWalletTime = Date.now();
+            loadXpForWallet(w);
+        }
+        if (startupTicks >= 40) clearInterval(startupPoll);
+    }, 500);
+
+    // Phase 2: 1.5s steady-state forever
     setInterval(() => {
         const current = getWallet();
         if (current && current !== lastWallet) {
@@ -401,16 +526,21 @@
         }
     }, 1500);
 
+    // Initial fire
     setTimeout(() => {
         const w = getWallet();
         if (w) { lastWallet = w; loadXpForWallet(w); }
-    }, 800);
+    }, 300);
 
-    // Expose diagnostics for debugging
+    // ═══════════════════════════════════════════════════════
+    //  DEBUG
+    // ═══════════════════════════════════════════════════════
+
     window.msnXpDebug = () => ({
         wallet: getWallet(),
         username: localStorage.getItem('msn_chat_username'),
-        lastWallet
+        lastWallet,
+        cacheAge: cachedWallet ? (Date.now() - cachedWalletTime) + 'ms' : 'none'
     });
     console.log('[xp-system] loaded — run msnXpDebug() to see detected wallet');
 })();
