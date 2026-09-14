@@ -131,6 +131,75 @@
     const solanaConnection = new solanaWeb3.Connection(SOLANA_RPC_ENDPOINT);
     let tokenListContainer = null;
 
+    // ============================================================
+    // ⚑ OVERLAY MESSAGING — inline feedback inside the identity overlay
+    // ============================================================
+    function ensureOverlayMessageEl() {
+        if (!nameOverlay) return null;
+        let el = document.getElementById('nameOverlayMessage');
+        if (!el) {
+            const card = nameOverlay.querySelector('.overlay-card');
+            if (!card) return null;
+            el = document.createElement('div');
+            el.id = 'nameOverlayMessage';
+            el.style.cssText = [
+                'display:none',
+                'margin:10px 0 0',
+                'padding:9px 12px',
+                'border-radius:5px',
+                'font-size:0.8rem',
+                'text-align:center',
+                'font-family:var(--font-mono, monospace)',
+                'border:1px solid',
+                'line-height:1.4',
+                'word-break:break-word'
+            ].join(';');
+            const joinBtn = document.getElementById('nameSubmitBtn');
+            if (joinBtn && joinBtn.parentNode === card) {
+                card.insertBefore(el, joinBtn);
+            } else {
+                card.appendChild(el);
+            }
+        }
+        return el;
+    }
+
+    function showOverlayMessage(msg, type) {
+        if (!nameOverlay || nameOverlay.classList.contains('hidden')) return;
+        const el = ensureOverlayMessageEl();
+        if (!el) return;
+        el.textContent = msg;
+        if (type === 'success') {
+            el.style.background = 'rgba(74, 222, 128, 0.12)';
+            el.style.borderColor = '#4ade80';
+            el.style.color = '#4ade80';
+        } else if (type === 'error') {
+            el.style.background = 'rgba(239, 68, 68, 0.12)';
+            el.style.borderColor = '#ef4444';
+            el.style.color = '#ef4444';
+        } else {
+            el.style.background = 'rgba(255, 193, 7, 0.12)';
+            el.style.borderColor = '#ffc107';
+            el.style.color = '#ffc107';
+        }
+        el.style.display = 'block';
+        clearTimeout(el._timeout);
+        if (type !== 'error') {
+            el._timeout = setTimeout(() => { el.style.display = 'none'; }, 5000);
+        }
+    }
+
+    function hideOverlayMessage() {
+        const el = document.getElementById('nameOverlayMessage');
+        if (el) {
+            el.style.display = 'none';
+            clearTimeout(el._timeout);
+        }
+    }
+
+    // ============================================================
+    // TWITTER EMBED
+    // ============================================================
     let twttrReadyPromise = null;
     function waitForTwttr() {
         if (twttrReadyPromise) return twttrReadyPromise;
@@ -244,6 +313,7 @@
             walletAddressOverlay.textContent = connected ? `👛 ${shortAddr}` : '';
             phantomConnectBtnOverlay.title = connected ? 'Disconnect Phantom' : 'Connect Phantom Wallet';
             phantomConnectBtnOverlay.classList.toggle('connected', connected);
+            phantomConnectBtnOverlay.disabled = false;
             phantomConnectBtnOverlay.innerHTML = connected
                 ? `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Disconnect</span>`
                 : `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connect Phantom</span>`;
@@ -360,10 +430,11 @@
                 hasTokenAccess = true;
             } else if (targetBalance > modTokenRequirement) {
                 hasTokenAccess = true;
-                showError(`✅ You hold ${targetBalance} tokens – access granted!`);
+                // ⚑ positive → showSuccess (green in overlay)
+                showSuccess(`You hold ${targetBalance.toLocaleString()} tokens — access granted!`);
             } else {
                 hasTokenAccess = false;
-                showError(`❌ You need more than ${modTokenRequirement} tokens (you have ${targetBalance}).`);
+                showError(`You need more than ${modTokenRequirement.toLocaleString()} tokens (you have ${targetBalance.toLocaleString()}).`);
             }
             updateChatAccessibility();
         } catch (err) {
@@ -393,28 +464,55 @@
         }
     }
 
+    // ⚑ connectPhantom — feedback shown inside overlay while connecting
     async function connectPhantom() {
         const provider = getPhantomProvider();
-        if (!provider) { showError('Phantom wallet not installed. Please install it from phantom.app'); return; }
+        if (!provider) {
+            showError('Phantom wallet not installed. Please install it from phantom.app');
+            return;
+        }
+
+        // ⚑ Show "Connecting…" state on the overlay button
+        if (phantomConnectBtnOverlay) {
+            phantomConnectBtnOverlay.disabled = true;
+            phantomConnectBtnOverlay.innerHTML =
+                `<img src="https://i.postimg.cc/kXtLPZVF/Phanyoms2.png" alt="Phantom" class="phantom-icon"> <span>Connecting…</span>`;
+        }
+        showOverlayMessage('Waiting for Phantom approval…', 'info');
+
         try {
             const resp = await provider.connect({ onlyIfTrusted: true });
             phantomWalletPublicKey = resp.publicKey;
             phantomConnected = true;
             updatePhantomUI();
             fetchAndDisplayAllTokens();
+            const addr = phantomWalletPublicKey.toBase58();
+            showSuccess(`Phantom connected: ${addr.slice(0,4)}…${addr.slice(-4)}`);
             return;
-        } catch (silentErr) { /* fall through */ }
+        } catch (silentErr) { /* fall through to non-trusted connect */ }
+
         try {
             const resp = await provider.connect({ onlyIfTrusted: false });
             phantomWalletPublicKey = resp.publicKey;
             phantomConnected = true;
             updatePhantomUI();
             const addr = phantomWalletPublicKey.toBase58();
-            showError(`✅ Phantom connected: ${addr.slice(0,4)}...${addr.slice(-4)}`);
+            showSuccess(`Phantom connected: ${addr.slice(0,4)}…${addr.slice(-4)}`);
             await fetchAndDisplayAllTokens();
         } catch (err) {
             console.error('Phantom connection error:', err);
-            showError('Could not connect Phantom: ' + err.message);
+            if (phantomConnectBtnOverlay) phantomConnectBtnOverlay.disabled = false;
+            updatePhantomUI(); // resets button back to "Connect Phantom"
+
+            // ⚑ Friendly error mapping
+            const raw = String((err && err.message) || err || '').trim();
+            let friendly = raw;
+            if (/user rejected|rejected by user|cancell?ed|declined/i.test(raw)) {
+                friendly = 'Connection cancelled';
+            } else if (!raw) {
+                friendly = 'Could not connect Phantom';
+            }
+            showError(friendly);
         }
     }
 
@@ -429,6 +527,8 @@
         if (container) container.innerHTML = '';
         if (cooldownInterval) { clearInterval(cooldownInterval); cooldownInterval = null; }
         hideCooldown();
+        // ⚑ Notify overlay too
+        showOverlayMessage('Phantom disconnected', 'info');
     }
     function togglePhantomConnection() {
         if (phantomConnected) disconnectPhantom(); else connectPhantom();
@@ -464,7 +564,7 @@
                 .from('settings')
                 .upsert({ id: 1, token_requirement: modTokenRequirement, cooldown_seconds: modCooldownSeconds });
             if (error) throw error;
-            showError('✅ Mod settings updated globally!');
+            showSuccess('Mod settings updated globally!');
         } catch (err) {
             console.error('Error saving settings:', err);
             showError('Failed to save settings: ' + err.message);
@@ -484,7 +584,7 @@
             const { error } = await supabase.from('settings').upsert({ id: 1, mod_announcement: message }, { onConflict: 'id' });
             if (error) throw error;
             modAnnouncement = message;
-            showError('✅ Announcement posted!');
+            showSuccess('Announcement posted!');
         } catch (err) {
             console.error('Error posting announcement:', err);
             showError('Failed to post announcement: ' + err.message);
@@ -804,11 +904,27 @@
     function escapeHtml(t) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(t).replace(/[&<>"']/g, m=>map[m]); }
     function trunc(t, l=45) { return t && t.length>l ? t.substring(0,l)+'…' : t||''; }
 
+    // ⚑ showError — mirrors into overlay when open
     function showError(msg) {
         errorToast.textContent = '⚠️ ' + msg;
         errorToast.classList.add('visible');
         clearTimeout(errorToast._timeout);
         errorToast._timeout = setTimeout(() => errorToast.classList.remove('visible'), 8000);
+        if (nameOverlay && !nameOverlay.classList.contains('hidden')) {
+            showOverlayMessage(msg, 'error');
+        }
+    }
+
+    // ⚑ showSuccess — green, mirrors into overlay when open
+    function showSuccess(msg) {
+        const clean = String(msg).replace(/^✅\s*/, '').replace(/^⚠️\s*/, '');
+        errorToast.textContent = '✅ ' + clean;
+        errorToast.classList.add('visible');
+        clearTimeout(errorToast._timeout);
+        errorToast._timeout = setTimeout(() => errorToast.classList.remove('visible'), 5000);
+        if (nameOverlay && !nameOverlay.classList.contains('hidden')) {
+            showOverlayMessage(clean, 'success');
+        }
     }
 
     function setConnection(state) {
@@ -1356,8 +1472,6 @@
         switchTab(tabName);
     });
 
-    // ⚑ FIXED — never reload the same partner that's already rendered.
-    // Only re-fetch when the partner actually changed OR the container is empty.
     function setActivePrivateChat(partnerUsername) {
         const isSamePartner = (partnerUsername === activePrivateChat);
         activePrivateChat = partnerUsername;
@@ -1389,8 +1503,6 @@
     }
     cancelPrivateBtn.addEventListener('click', () => setActivePrivateChat(null));
 
-    // ⚑ FIXED — clears this partner's message IDs from the dedup set BEFORE
-    // wiping the container, so they can render again into the fresh DOM.
     async function loadPrivateMessages(partner) {
         if (!username || !partner) return;
         privateContainer.innerHTML = '<div class="empty-chat-hint">Loading…</div>';
@@ -1419,7 +1531,6 @@
                 return tx - ty;
             });
 
-            // ⚑ Drop this conversation's message IDs so they re-render.
             for (const msg of unique) knownMessageIds.delete(msg.id);
 
             lastLoadedPrivatePartner = partner;
@@ -1572,7 +1683,7 @@
             saveAcceptedChats();
             if (activePrivateChat !== fromUser) setActivePrivateChat(fromUser);
             updateSidebarUI();
-            showError('✅ Chat with ' + fromUser + ' active!');
+            showSuccess('Chat with ' + fromUser + ' active!');
         } catch(err) { showError('Accept error: '+err.message); }
     }
     async function loadPendingRequests() {
@@ -1781,6 +1892,7 @@
 
         inputAreaBar.classList.remove('hidden');
         nameOverlay.classList.add('hidden');
+        hideOverlayMessage();
         setReplyingTo(null);
         setActivePrivateChat(null);
         switchTab('public');
@@ -1872,6 +1984,7 @@
         username = '';
         inputAreaBar.classList.add('hidden');
         nameOverlay.classList.remove('hidden');
+        hideOverlayMessage(); // ⚑ clear stale overlay message
         nameInput.value = prevName || '';
         nameInput.focus();
 
@@ -2022,6 +2135,7 @@
                 profilePicPreview.innerHTML = '<span>📷</span>';
             }
             nameOverlay.classList.remove('hidden');
+            hideOverlayMessage(); // ⚑ clear any stale message on fresh open
             nameInput.focus();
             subscribeToRealtime();
         }
