@@ -150,6 +150,64 @@
                     height: 22px !important;
                 }
             }
+
+            /* ⚑ ── Clean message loading state ── */
+            .messages-container {
+                position: relative;
+                transition: opacity 0.28s ease;
+            }
+            .messages-container.msn-loading {
+                opacity: 0;
+            }
+            .messages-container.msn-ready {
+                opacity: 1;
+            }
+
+            /* Centered loader overlay */
+            .msn-msg-loader {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                pointer-events: none;
+                z-index: 5;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+            .msn-msg-loader.msn-show {
+                opacity: 1;
+            }
+            .msn-msg-loader-inner {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 14px;
+                color: var(--text-muted, #426080);
+                font-family: var(--font-mono, monospace);
+                font-size: 0.68rem;
+                letter-spacing: 0.22em;
+                text-transform: uppercase;
+            }
+            .msn-loader-dots {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .msn-loader-dots span {
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                background: currentColor;
+                animation: msnLoaderPulse 1.3s ease-in-out infinite;
+                box-shadow: 0 0 6px currentColor;
+            }
+            .msn-loader-dots span:nth-child(2) { animation-delay: 0.18s; }
+            .msn-loader-dots span:nth-child(3) { animation-delay: 0.36s; }
+            @keyframes msnLoaderPulse {
+                0%, 100% { opacity: 0.28; transform: translateY(0) scale(0.85); }
+                50%      { opacity: 1;    transform: translateY(-4px) scale(1); }
+            }
         `;
         const tag = document.createElement('style');
         tag.setAttribute('data-msn-phantom-fixes', '1');
@@ -270,7 +328,6 @@
     const modAnnouncementInput = document.getElementById('modAnnouncementInput');
     const modPostAnnouncementBtn = document.getElementById('modPostAnnouncementBtn');
 
-    // ⚑ Warn if critical mobile elements are missing from index.html
     if (!document.getElementById('sidebarBigLevel')) console.warn('[msn] sidebarBigLevel missing');
     if (!document.getElementById('sidebarBigRank'))  console.warn('[msn] sidebarBigRank missing');
     if (!document.getElementById('rankingsBtn'))      console.warn('[msn] rankingsBtn missing');
@@ -291,7 +348,7 @@
     let tokenListContainer = null;
 
     // ============================================================
-    // ⚑ OVERLAY MESSAGING — inline feedback inside the identity overlay
+    // ⚑ OVERLAY MESSAGING
     // ============================================================
     function ensureOverlayMessageEl() {
         if (!nameOverlay) return null;
@@ -544,7 +601,6 @@
         return getBadge(bal);
     }
 
-    // ⚑ Rank badge — shows the holder tier next to your name on the sidebar
     function updateUserRank(balance) {
         if (!sidebarBigRank) return;
         const bal = Number(balance);
@@ -1288,21 +1344,19 @@
         return html;
     }
 
-    async function renderMessage(msg, isPrivate = false, shouldScroll = true) {
-        if(knownMessageIds.has(msg.id)) return;
-        knownMessageIds.add(msg.id);
-        const container = isPrivate ? privateContainer : publicContainer;
-        const emptyHint = isPrivate ? privateEmptyHint : publicEmptyHint;
-        if(emptyHint) emptyHint.style.display = 'none';
+    // ⚑ Builds a message element into ANY target container (used for off-screen builds)
+    async function buildMessageNode(msg, isPrivate) {
         const user = isPrivate ? msg.from_user : msg.username;
         if (!getAvatarURL(user)) await fetchAvatars([user]);
         const isOwn = user === username;
+
         const wrapper = document.createElement('div');
         wrapper.className = 'msg-wrapper' + (isOwn ? ' own' : '');
         wrapper.setAttribute('data-msg-id', msg.id);
+
         const bubble = document.createElement('div');
         bubble.className = 'msg-bubble';
-        if(isPrivate) bubble.classList.add('private-msg');
+        if (isPrivate) bubble.classList.add('private-msg');
 
         let innerHTML = '';
         if (msg.reply_to_username && (msg.reply_to_message || msg.reply_to_image_url)) {
@@ -1348,10 +1402,8 @@
 
         bubble.innerHTML = innerHTML;
         wrapper.appendChild(bubble);
-        container.appendChild(wrapper);
 
-        if (shouldScroll) container.scrollTop = container.scrollHeight;
-
+        // Wire up
         observeTweetsInWrapper(wrapper);
 
         const replyBtn = bubble.querySelector('.reply-btn');
@@ -1379,7 +1431,6 @@
         if (replyRef && msg.reply_to_id) {
             replyRef.addEventListener('click', () => scrollToMessage(msg.reply_to_id));
         }
-
         if (isOwn && !msg.is_deleted) {
             const editBtn = bubble.querySelector('.edit-btn');
             const deleteBtn = bubble.querySelector('.delete-btn');
@@ -1387,6 +1438,49 @@
             if (deleteBtn) deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteMessage(msg, isPrivate); });
         }
         updateReactionUI(wrapper, isPrivate);
+
+        return wrapper;
+    }
+
+    // ⚑ Loader helpers
+    function showMsgLoader(container, label) {
+        const host = container.parentNode;
+        if (!host) return;
+        if (!host.style.position) host.style.position = 'relative';
+        let loader = host.querySelector('.msn-msg-loader');
+        if (!loader) {
+            loader = document.createElement('div');
+            loader.className = 'msn-msg-loader';
+            loader.innerHTML = `
+                <div class="msn-msg-loader-inner">
+                    <div class="msn-loader-dots"><span></span><span></span><span></span></div>
+                    <div class="msn-msg-loader-label">${escapeHtml(label || 'Loading')}</div>
+                </div>
+            `;
+            host.appendChild(loader);
+        } else {
+            const lbl = loader.querySelector('.msn-msg-loader-label');
+            if (lbl) lbl.textContent = label || 'Loading';
+        }
+        loader.classList.add('msn-show');
+    }
+
+    function hideMsgLoader(container) {
+        const host = container.parentNode;
+        if (!host) return;
+        const loader = host.querySelector('.msn-msg-loader');
+        if (loader) loader.classList.remove('msn-show');
+    }
+
+    async function renderMessage(msg, isPrivate = false, shouldScroll = true) {
+        if(knownMessageIds.has(msg.id)) return;
+        knownMessageIds.add(msg.id);
+        const container = isPrivate ? privateContainer : publicContainer;
+        const emptyHint = isPrivate ? privateEmptyHint : publicEmptyHint;
+        if(emptyHint) emptyHint.style.display = 'none';
+        const wrapper = await buildMessageNode(msg, isPrivate);
+        container.appendChild(wrapper);
+        if (shouldScroll) container.scrollTop = container.scrollHeight;
     }
 
     function setReplyingTo(ref) {
@@ -1675,9 +1769,13 @@
     }
     cancelPrivateBtn.addEventListener('click', () => setActivePrivateChat(null));
 
+    // ⚑ Rewritten — off-screen build, atomic swap, fade reveal, pinned to bottom
     async function loadPrivateMessages(partner) {
         if (!username || !partner) return;
-        privateContainer.innerHTML = '<div class="empty-chat-hint">Loading…</div>';
+        privateContainer.classList.add('msn-loading');
+        privateContainer.classList.remove('msn-ready');
+        showMsgLoader(privateContainer, 'Loading conversation');
+
         try {
             const [{ data: a, error: e1 }, { data: b, error: e2 }] = await Promise.all([
                 supabase.from('private_messages').select('*')
@@ -1687,6 +1785,9 @@
             ]);
             if (e1 || e2) {
                 console.warn('loadPrivateMessages error:', e1 || e2);
+                hideMsgLoader(privateContainer);
+                privateContainer.classList.remove('msn-loading');
+                privateContainer.classList.add('msn-ready');
                 privateContainer.innerHTML = '<div class="empty-chat-hint">Failed to load messages</div>';
                 return;
             }
@@ -1706,21 +1807,38 @@
             for (const msg of unique) knownMessageIds.delete(msg.id);
 
             lastLoadedPrivatePartner = partner;
-            privateContainer.innerHTML = '';
+
+            // Build into a detached holder so nothing flashes
+            const holder = document.createElement('div');
+            holder.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
+
             if (unique.length === 0) {
                 privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
             } else {
                 const users = [...new Set(unique.flatMap(m => [m.from_user, m.to_user]).filter(Boolean))];
                 await fetchAvatars(users);
-                for (const msg of unique) await renderMessage(msg, true, false);
-                autoScroll = true;
-                scrollContainerToBottom(privateContainer);
-                pinToBottom(privateContainer, 4000);
-                updateScrollButtonVisibility(privateContainer);
+                for (const msg of unique) {
+                    const node = await buildMessageNode(msg, true);
+                    holder.appendChild(node);
+                }
+                privateContainer.innerHTML = '';
+                while (holder.firstChild) privateContainer.appendChild(holder.firstChild);
             }
+
+            privateContainer.scrollTop = privateContainer.scrollHeight;
+            requestAnimationFrame(() => {
+                privateContainer.scrollTop = privateContainer.scrollHeight;
+                privateContainer.classList.remove('msn-loading');
+                privateContainer.classList.add('msn-ready');
+                hideMsgLoader(privateContainer);
+            });
+
             loadReactions('private_message_reactions', true);
         } catch (err) {
             console.error('loadPrivateMessages failed:', err);
+            hideMsgLoader(privateContainer);
+            privateContainer.classList.remove('msn-loading');
+            privateContainer.classList.add('msn-ready');
             privateContainer.innerHTML = '<div class="empty-chat-hint">Error loading private messages</div>';
         }
     }
@@ -1897,31 +2015,61 @@
             }).subscribe();
     }
 
+    // ⚑ Rewritten — off-screen build, atomic swap, fade reveal, pinned to bottom
     async function loadMessages() {
         setConnection('connecting');
+        publicContainer.classList.add('msn-loading');
+        publicContainer.classList.remove('msn-ready');
+        showMsgLoader(publicContainer, 'Loading messages');
+
         try {
             const { data, error } = await supabase
                 .from('message_feed')
                 .select('*').order('sort_order', { ascending: false }).range(0, 29);
             if (error) throw error;
+
             data.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-            publicContainer.innerHTML = '';
             knownMessageIds.clear();
+
+            // Seed caches
+            data.forEach(msg => {
+                if (msg.avatar_url) avatarCache[msg.username] = msg.avatar_url;
+                if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
+            });
+
+            // Build everything off-screen first
+            const holder = document.createElement('div');
+            holder.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
+
             if (data.length === 0) {
                 publicContainer.innerHTML = '<div class="empty-chat-hint">No messages yet. ⚡</div>';
             } else {
-                data.forEach(msg => {
-                    if (msg.avatar_url) avatarCache[msg.username] = msg.avatar_url;
-                    if (msg.wallet_address) userBalances[msg.username] = msg.token_balance || 0;
-                });
-                for (const msg of data) await renderMessage(msg, false, false);
-                autoScroll = true;
-                scrollContainerToBottom(publicContainer);
-                pinToBottom(publicContainer, 4000);
-                updateScrollButtonVisibility(publicContainer);
+                for (const msg of data) {
+                    const node = await buildMessageNode(msg, false);
+                    holder.appendChild(node);
+                }
+                // Atomic swap — single paint
+                publicContainer.innerHTML = '';
+                while (holder.firstChild) publicContainer.appendChild(holder.firstChild);
             }
+
+            autoScroll = true;
+            // Pin to bottom, then re-pin on next frame to catch late layout shifts
+            publicContainer.scrollTop = publicContainer.scrollHeight;
+            requestAnimationFrame(() => {
+                publicContainer.scrollTop = publicContainer.scrollHeight;
+                publicContainer.classList.remove('msn-loading');
+                publicContainer.classList.add('msn-ready');
+                hideMsgLoader(publicContainer);
+                updateScrollButtonVisibility(publicContainer);
+                pinToBottom(publicContainer, 4000);
+            });
+
             setConnection('connected');
         } catch (err) {
+            hideMsgLoader(publicContainer);
+            publicContainer.classList.remove('msn-loading');
+            publicContainer.classList.add('msn-ready');
             showError('Load failed: ' + err.message);
             setConnection('disconnected');
         }
