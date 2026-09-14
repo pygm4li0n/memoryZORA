@@ -879,6 +879,52 @@ html body .streak-toast.visible {
 }
 
 /* ═════════════════════════════════════════════════════
+   ⚑ RANK ICON CONTAINER — soft alpha blend (DESKTOP ONLY)
+   Same treatment as the theme icon container, its own image.
+═════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+    .msn-right-sidebar .msn-rs-actions #rankingsBtn.msn-rs-card {
+        position: relative !important;
+        isolation: isolate !important;
+        overflow: hidden !important;
+    }
+
+    .msn-right-sidebar .msn-rs-actions #rankingsBtn.msn-rs-card::after {
+        content: '' !important;
+        position: absolute !important;
+        inset: 0 !important;
+
+        background-image: url('https://i.postimg.cc/yxPGtPTx/Chat-GPT-Image-14-sept-2026-04-59-15.png') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+
+        opacity: 0.18 !important;
+        mix-blend-mode: soft-light !important;
+
+        -webkit-mask-image: radial-gradient(ellipse at center,
+            rgba(0,0,0,1) 0%,
+            rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%,
+            rgba(0,0,0,0) 100%) !important;
+        mask-image: radial-gradient(ellipse at center,
+            rgba(0,0,0,1) 0%,
+            rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%,
+            rgba(0,0,0,0) 100%) !important;
+
+        pointer-events: none !important;
+        z-index: 0 !important;
+        border-radius: inherit !important;
+    }
+
+    .msn-right-sidebar .msn-rs-actions #rankingsBtn.msn-rs-card > * {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+}
+
+/* ═════════════════════════════════════════════════════
    ⚑ RANKINGS OVERLAY — BULLETPROOF
    Now lives here (theme-fixes.css) so it always loads.
    #rankingsOverlay prefix → (1,0,0) specificity, cannot
