@@ -71,6 +71,9 @@ html, body {
         font-size: 1.05rem !important;
         min-width: 260px !important;
         max-width: 480px !important;
+        /* ⚑ Offset left by half the right-sidebar width so the toast
+           centers over the visible chat area, not the raw viewport. */
+        left: calc(50% - 140px) !important;
     }
 }
 
@@ -741,13 +744,15 @@ html, body {
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* Desktop – slightly larger */
+/* Desktop – slightly larger + centered over chat (offset by half sidebar) */
 @media (min-width: 769px) {
     .streak-toast {
         padding: 14px 32px;
         font-size: 1.05rem;
         min-width: 260px;
         max-width: 480px;
+        left: calc(50% - 140px) !important;
+        transform: translate(-50%, -50%) !important;
     }
 }
 
@@ -807,191 +812,4 @@ html, body {
 }
 .phantom-overlay-btn.connected:hover {
     background: rgba(255,92,124,0.25) !important;
-}
-
-/* =====================================================
-   RANKINGS OVERLAY – trophy button + dual boards
-===================================================== */
-
-/* Trophy button (inherits .btn-icon) */
-.rankings-btn {
-    /* nothing extra needed — uses base .btn-icon */
-}
-
-/* Overlay card */
-.rankings-card {
-    max-width: 720px !important;
-    width: 92% !important;
-    max-height: 85vh !important;
-    padding: 0 !important;
-    text-align: left !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-}
-
-.rankings-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 22px 14px;
-    border-bottom: 1px solid var(--border-default, #233261);
-    flex-shrink: 0;
-}
-.rankings-header h3 {
-    margin: 0 !important;
-    font-size: 1.1rem !important;
-    color: var(--text-primary, #fff);
-    text-shadow: 0 0 12px rgba(0,240,255,0.4);
-}
-.rankings-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border-default, #233261);
-    background: transparent;
-    color: var(--text-secondary, #94a3b8);
-    cursor: pointer;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-.rankings-close-btn:hover {
-    border-color: var(--accent-red, #ff5c7c);
-    color: var(--accent-red, #ff5c7c);
-    background: rgba(255,92,124,0.1);
-}
-
-/* Two-column body */
-.rankings-body {
-    display: flex;
-    gap: 0;
-    overflow: hidden;
-    flex: 1;
-    min-height: 0;
-}
-.rankings-column {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-.rankings-column:first-child {
-    border-right: 1px solid var(--border-default, #233261);
-}
-.rankings-column-title {
-    padding: 12px 18px 8px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--text-muted, #64748b);
-    text-transform: uppercase;
-    flex-shrink: 0;
-}
-.rankings-list {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 0 12px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.rankings-list::-webkit-scrollbar {
-    width: 5px;
-}
-.rankings-list::-webkit-scrollbar-thumb {
-    background: var(--bg-secondary, #233261);
-    border-radius: 10px;
-}
-
-/* Ranking rows */
-.ranking-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm, 6px);
-    background: rgba(255,255,255,0.03);
-    transition: background 0.2s;
-    font-size: 0.82rem;
-}
-.ranking-row:hover {
-    background: rgba(0, 240, 255, 0.08);
-}
-
-.rk-pos {
-    width: 26px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 0.78rem;
-    color: var(--text-secondary, #94a3b8);
-    flex-shrink: 0;
-}
-.rk-tier {
-    font-size: 1rem;
-    width: 22px;
-    text-align: center;
-    flex-shrink: 0;
-    filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
-}
-.rk-name {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 600;
-    color: var(--text-primary, #fff);
-}
-.rk-streak {
-    color: var(--accent-orange, #f97316);
-    font-weight: 700;
-    font-size: 0.75rem;
-    text-shadow: 0 0 8px rgba(249,115,22,0.4);
-}
-.rk-stat {
-    color: var(--text-secondary, #94a3b8);
-    font-variant-numeric: tabular-nums;
-    font-size: 0.72rem;
-    flex-shrink: 0;
-    max-width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.rankings-empty {
-    text-align: center;
-    color: var(--text-muted, #64748b);
-    font-style: italic;
-    font-size: 0.8rem;
-    padding: 24px 12px;
-}
-
-/* Mobile: stack the two columns vertically */
-@media (max-width: 768px) {
-    .rankings-card {
-        width: 95% !important;
-        max-height: 88vh !important;
-    }
-    .rankings-body {
-        flex-direction: column;
-    }
-    .rankings-column:first-child {
-        border-right: none;
-        border-bottom: 1px solid var(--border-default, #233261);
-        max-height: 45%;
-    }
-    .rankings-column {
-        max-height: 50%;
-    }
-    .rankings-header {
-        padding: 14px 16px 10px;
-    }
-    .rankings-header h3 {
-        font-size: 1rem !important;
-    }
 }
