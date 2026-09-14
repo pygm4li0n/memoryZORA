@@ -64,16 +64,15 @@ html, body {
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* Explicit desktop styling – larger, more visible */
+/* Explicit desktop styling – larger, more visible.
+   No left offset — the 280px left sidebar + 280px right sidebar
+   balance, so left:50% IS the center of the visible chat area. */
 @media (min-width: 769px) {
     .error-toast.visible {
         padding: 14px 32px !important;
         font-size: 1.05rem !important;
         min-width: 260px !important;
         max-width: 480px !important;
-        /* Offset left by half the right-sidebar width so the toast
-           centers over the visible chat area, not the raw viewport. */
-        left: calc(50% - 140px) !important;
     }
 }
 
@@ -373,17 +372,13 @@ html, body {
 
 /* =====================================================
    MESSAGES + REACTIONS
-   Consistent sizing for ALL messages (own + others)
 ===================================================== */
 
-/* ── Wrapper: other users' messages hug their content ── */
 .msg-wrapper {
     overflow: visible !important;
     max-width: 82% !important;
     align-self: flex-start !important;
 }
-
-/* Own messages: right-aligned, same shrink behavior */
 .msg-wrapper.own {
     overflow: visible !important;
     max-width: 82% !important;
@@ -401,7 +396,6 @@ html, body {
     }
 }
 
-/* ── Bubble: consistent internal layout + safe wrapping ── */
 .msg-bubble {
     display: flex;
     flex-direction: column;
@@ -421,7 +415,6 @@ html, body {
     }
 }
 
-/* ── Text: wrap long words and URLs for everyone ── */
 .msg-text,
 .msg-text a,
 .reply-ref-block .r-text {
@@ -434,7 +427,6 @@ html, body {
     word-break: break-all !important;
 }
 
-/* ── Images: never exceed the bubble ── */
 .msg-image-wrap,
 .msg-image-wrap img {
     max-width: 100% !important;
@@ -445,7 +437,6 @@ html, body {
     object-fit: contain;
 }
 
-/* ── Reactions: single horizontal row, never clipped ── */
 .reactions-bar {
     display: flex !important;
     gap: 6px !important;
@@ -473,10 +464,9 @@ html, body {
 }
 
 /* =====================================================
-   X / TWITTER EMBEDS – spinner while loading, clean embed when ready
+   X / TWITTER EMBEDS
 ===================================================== */
 
-/* ── Rendered embed: fits the bubble cleanly ── */
 .msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
     max-width: 100% !important;
@@ -488,7 +478,6 @@ html, body {
     box-shadow: none !important;
 }
 
-/* ── Pre-render blockquote: reserve space for spinner ── */
 .msg-bubble blockquote.twitter-tweet {
     position: relative;
     display: block;
@@ -502,7 +491,6 @@ html, body {
     overflow: visible;
 }
 
-/* ── Visually hide the raw URL but keep it in the DOM for Twitter to read ── */
 .msg-bubble blockquote.twitter-tweet a {
     position: absolute !important;
     width: 1px !important;
@@ -516,7 +504,6 @@ html, body {
     opacity: 0 !important;
 }
 
-/* ── SPINNER – shown on every blockquote that has NOT yet rendered ── */
 .msg-bubble blockquote.twitter-tweet::before {
     content: '';
     position: absolute;
@@ -537,7 +524,6 @@ html, body {
     to { transform: rotate(360deg); }
 }
 
-/* ── Kill spinner the moment Twitter renders – covers BOTH cases ── */
 .msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered::before,
 .msg-bubble blockquote.twitter-tweet:has(iframe[id^="twitter-widget"])::before {
     content: none !important;
@@ -545,14 +531,12 @@ html, body {
     animation: none !important;
 }
 
-/* Collapse the blockquote once rendered so it takes only the iframe's space */
 .msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered,
 .msg-bubble blockquote.twitter-tweet:has(iframe[id^="twitter-widget"]) {
     min-height: 0 !important;
     padding: 0 !important;
 }
 
-/* ── Desktop: tweet bubbles need a wider floor so embed fits ── */
 @media (min-width: 769px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
@@ -562,7 +546,6 @@ html, body {
     }
 }
 
-/* ── Mobile: tweet bubbles take full width of the wrapper ── */
 @media (max-width: 768px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
@@ -578,7 +561,7 @@ html, body {
 }
 
 /* =====================================================
-   XP LEVEL BADGE (sidebar profile card)
+   XP LEVEL BADGE
 ===================================================== */
 .big-level {
     font-size: 0.72rem;
@@ -645,14 +628,12 @@ html, body {
     transition: all 0.3s;
 }
 
-/* Filled fire – full color + glow */
 .fire-slot.fire-filled {
     filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.9))
             drop-shadow(0 0 12px rgba(255, 165, 0, 0.4));
     animation: fireFlicker 1.8s ease-in-out infinite;
 }
 
-/* Empty fire – dimmed grey, no glow */
 .fire-slot.fire-empty {
     filter: grayscale(100%) brightness(0.4);
     opacity: 0.25;
@@ -663,7 +644,6 @@ html, body {
     50%      { transform: scale(1.08); }
 }
 
-/* Overflow counter for >7 days */
 .streak-overflow {
     font-size: 0.82rem;
     font-weight: 800;
@@ -674,7 +654,6 @@ html, body {
 }
 .streak-overflow.hidden { display: none; }
 
-/* HIDE on mobile — desktop only */
 @media (max-width: 768px) {
     .sidebar-streak-display {
         display: none !important;
@@ -682,7 +661,7 @@ html, body {
 }
 
 /* =====================================================
-   RESET LOGIN BUTTON (inside Mod Settings panel)
+   RESET LOGIN BUTTON
 ===================================================== */
 .reset-login-btn {
     width: 100%;
@@ -710,7 +689,7 @@ html, body {
 }
 
 /* =====================================================
-   STREAK TOAST – separate from wallet connect toast
+   STREAK TOAST
 ===================================================== */
 .streak-toast {
     display: none;
@@ -744,21 +723,18 @@ html, body {
     100% { opacity: 0; visibility: hidden; }
 }
 
-/* Desktop – slightly larger + centered over chat (offset by half sidebar) */
+/* Desktop – larger text/padding. No left offset. */
 @media (min-width: 769px) {
     .streak-toast {
         padding: 14px 32px;
         font-size: 1.05rem;
         min-width: 260px;
         max-width: 480px;
-        left: calc(50% - 140px) !important;
-        transform: translate(-50%, -50%) !important;
     }
 }
 
 /* =====================================================
-   PHANTOM BUTTON – connected / disconnected states
-   Green is fixed to #22c55e on every theme
+   PHANTOM BUTTON
 ===================================================== */
 .phantom-btn,
 .phantom-overlay-btn {
@@ -816,9 +792,8 @@ html, body {
 
 /* ═════════════════════════════════════════════════════
    ⚑ TOASTS FORCED CENTERED ON EVERY THEME
-   (overrides orange-theme.css and any other theme rules)
-   Rankings styling lives in ranking-epics.css — do not
-   duplicate it here.
+   Center = 50% (280px left sidebar + 280px right sidebar
+   balance out). No offset. Works on OG, Orange, all themes.
 ═════════════════════════════════════════════════════ */
 .error-toast.visible,
 body .error-toast.visible,
@@ -858,22 +833,8 @@ html body .streak-toast.visible {
     animation: streakToastFadeOut 6.5s ease-in-out forwards !important;
 }
 
-/* Desktop — offset left by half the right sidebar so toasts center on the chat area */
-@media (min-width: 769px) {
-    .error-toast.visible,
-    body .error-toast.visible,
-    html body .error-toast.visible,
-    .streak-toast.visible,
-    body .streak-toast.visible,
-    html body .streak-toast.visible {
-        left: calc(50% - 140px) !important;
-    }
-}
-
 /* ═════════════════════════════════════════════════════
    ⚑ THEME ICON CONTAINER — soft alpha blend (DESKTOP ONLY)
-   Applied to the SKINS card in the right sidebar only.
-   Mobile theme button is untouched.
 ═════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
     .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card {
@@ -887,17 +848,14 @@ html body .streak-toast.visible {
         position: absolute !important;
         inset: 0 !important;
 
-        /* The image, edge-to-edge over the card */
         background-image: url('https://i.postimg.cc/85PqTLJq/Chat-GPT-Image-14-sept-2026-03-21-20-a-m-(1).png') !important;
         background-size: cover !important;
         background-position: center !important;
         background-repeat: no-repeat !important;
 
-        /* ⚑ Soft blend into the card surface */
         opacity: 0.18 !important;
         mix-blend-mode: soft-light !important;
 
-        /* Fade toward the edges so it doesn't cut off hard */
         -webkit-mask-image: radial-gradient(ellipse at center,
             rgba(0,0,0,1) 0%,
             rgba(0,0,0,0.85) 55%,
@@ -914,9 +872,423 @@ html body .streak-toast.visible {
         border-radius: inherit !important;
     }
 
-    /* Icon + label sit above the texture */
     .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card > * {
         position: relative !important;
         z-index: 1 !important;
+    }
+}
+
+/* ═════════════════════════════════════════════════════
+   ⚑ RANKINGS OVERLAY — BULLETPROOF
+   Now lives here (theme-fixes.css) so it always loads.
+   #rankingsOverlay prefix → (1,0,0) specificity, cannot
+   be overridden by any class-based rule from any theme.
+═════════════════════════════════════════════════════ */
+#rankingsOverlay .rankings-card {
+    max-width: 900px !important;
+    width: 94% !important;
+    min-height: 62vh !important;
+    max-height: 90vh !important;
+    padding: 22px 22px 18px !important;
+    background: var(--bg-panel) !important;
+    border: 1px solid var(--border-default) !important;
+    border-radius: 8px !important;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 20px 60px rgba(0, 0, 0, 0.75) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: relative !important;
+    text-align: left !important;
+}
+#rankingsOverlay .rankings-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0; left: 0; right: 0;
+    height: 2px !important;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--accent-cyan) 30%,
+        var(--accent-magenta) 70%,
+        transparent 100%) !important;
+    opacity: 0.85 !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+}
+
+#rankingsOverlay .rankings-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 2px 12px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    flex-shrink: 0 !important;
+}
+#rankingsOverlay .rankings-header h3 {
+    font-family: var(--font-mono) !important;
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    color: var(--accent-yellow) !important;
+    text-shadow: 0 0 10px rgba(246, 187, 22, 0.5) !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+}
+#rankingsOverlay .rankings-close-btn {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    max-width: 30px !important;
+    border-radius: 5px !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-default) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                border-color 0.2s, color 0.2s, box-shadow 0.2s !important;
+}
+#rankingsOverlay .rankings-close-btn:hover {
+    border-color: var(--accent-red) !important;
+    color: var(--accent-red) !important;
+    box-shadow: 0 0 12px rgba(255, 32, 42, 0.5) !important;
+    transform: rotate(90deg) !important;
+}
+
+#rankingsOverlay .rankings-body {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+#rankingsOverlay .rankings-column {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+#rankingsOverlay .rankings-column-title {
+    font-family: var(--font-mono) !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.24em !important;
+    text-transform: uppercase !important;
+    padding: 0 0 8px !important;
+    margin-bottom: 6px !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+}
+#rankingsOverlay .rankings-column-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -1px !important;
+    left: 0 !important;
+    width: 60px !important;
+    height: 2px !important;
+    background: currentColor !important;
+    box-shadow: 0 0 8px currentColor !important;
+}
+#rankingsOverlay .rankings-column:nth-child(1) .rankings-column-title { color: var(--accent-cyan) !important; }
+#rankingsOverlay .rankings-column:nth-child(2) .rankings-column-title { color: var(--accent-orange) !important; }
+
+#rankingsOverlay .rankings-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 2px 4px 2px 0 !important;
+    counter-reset: rank !important;
+}
+#rankingsOverlay .rankings-list::-webkit-scrollbar { width: 6px !important; }
+#rankingsOverlay .rankings-list::-webkit-scrollbar-track { background: transparent !important; }
+#rankingsOverlay .rankings-list::-webkit-scrollbar-thumb {
+    background: var(--border-default) !important;
+    border-radius: 3px !important;
+}
+
+#rankingsOverlay .rankings-empty {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 40px 12px !important;
+    color: var(--text-muted) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.72rem !important;
+    text-align: center !important;
+    letter-spacing: 0.18em !important;
+    text-transform: uppercase !important;
+    border: 1px dashed var(--border-subtle) !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+}
+
+#rankingsOverlay .rankings-list > .rank-row {
+    counter-increment: rank !important;
+    display: grid !important;
+    grid-template-columns: 26px 32px 1fr auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 12px !important;
+    min-height: 46px !important;
+    border-radius: 6px !important;
+    background: rgba(0, 0, 0, 0.32) !important;
+    border: 1px solid var(--border-subtle) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.8rem !important;
+    color: var(--text-primary) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+#rankingsOverlay .rankings-list > .rank-row::before {
+    content: counter(rank) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.68rem !important;
+    font-weight: 900 !important;
+    color: var(--text-muted) !important;
+    line-height: 1 !important;
+}
+#rankingsOverlay .rankings-list > .rank-row::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0; bottom: 0; right: 0 !important;
+    width: 3px !important;
+    background: transparent !important;
+    transition: background 0.15s ease, box-shadow 0.15s ease !important;
+    border-radius: 0 6px 6px 0 !important;
+    pointer-events: none !important;
+}
+#rankingsOverlay .rankings-list > .rank-row:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: var(--accent-cyan) !important;
+}
+#rankingsOverlay .rankings-list > .rank-row:hover::before { color: var(--accent-cyan) !important; }
+#rankingsOverlay .rankings-list > .rank-row:hover::after {
+    background: var(--accent-cyan) !important;
+    box-shadow: 0 0 8px var(--accent-cyan) !important;
+}
+
+#rankingsOverlay .rank-avatar,
+#rankingsOverlay .rank-avatar-fallback {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 1px solid var(--border-default) !important;
+    background: var(--bg-input) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 900 !important;
+    font-size: 0.78rem !important;
+    color: var(--accent-cyan) !important;
+    flex-shrink: 0 !important;
+}
+
+#rankingsOverlay .rank-info,
+#rankingsOverlay .rank-meta-block {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+#rankingsOverlay .rank-name {
+    font-size: 0.82rem !important;
+    font-weight: 800 !important;
+    color: var(--text-primary) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-transform: uppercase !important;
+    line-height: 1.1 !important;
+}
+#rankingsOverlay .rank-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+}
+#rankingsOverlay .rank-level {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+    padding: 1px 6px !important;
+    border-radius: 3px !important;
+    background: rgba(1, 225, 234, 0.08) !important;
+    border: 1px solid rgba(1, 225, 234, 0.5) !important;
+    color: var(--accent-cyan) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 0.6rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    line-height: 1.4 !important;
+}
+#rankingsOverlay .rank-detail {
+    color: var(--text-muted) !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+#rankingsOverlay .rank-stats {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+}
+#rankingsOverlay .rank-score {
+    font-weight: 900 !important;
+    font-size: 0.82rem !important;
+    color: var(--accent-cyan) !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+}
+
+/* Podium — gold / silver / bronze */
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) {
+    background: linear-gradient(90deg, rgba(246, 187, 22, 0.14) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+    border-color: rgba(255, 213, 74, 0.65) !important;
+    box-shadow: inset 0 0 20px rgba(246, 187, 22, 0.06) !important;
+}
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1)::before { color: #FFD54A !important; text-shadow: 0 0 8px rgba(246, 187, 22, 0.7) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1)::after { background: #FFD54A !important; box-shadow: 0 0 8px rgba(246, 187, 22, 0.7) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-avatar,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-avatar-fallback { border-color: #FFD54A !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-name,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-score { color: #FFD54A !important; }
+
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) {
+    background: linear-gradient(90deg, rgba(200, 220, 240, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+    border-color: rgba(200, 220, 240, 0.5) !important;
+}
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2)::before { color: #E4EEFA !important; text-shadow: 0 0 6px rgba(200, 220, 240, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2)::after { background: #C8DCF0 !important; box-shadow: 0 0 6px rgba(200, 220, 240, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-avatar,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-avatar-fallback { border-color: #C8DCF0 !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-name,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-score { color: #E4EEFA !important; }
+
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) {
+    background: linear-gradient(90deg, rgba(230, 140, 60, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
+    border-color: rgba(230, 140, 60, 0.5) !important;
+}
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3)::before { color: #FFB073 !important; text-shadow: 0 0 6px rgba(230, 140, 60, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3)::after { background: #E68C3C !important; box-shadow: 0 0 6px rgba(230, 140, 60, 0.6) !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-avatar,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-avatar-fallback { border-color: #E68C3C !important; }
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-name,
+#rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-score { color: #FFB073 !important; }
+
+/* Mobile — stacked cards */
+@media (max-width: 768px) {
+    #rankingsOverlay .rankings-card {
+        max-width: 96% !important;
+        width: 96% !important;
+        min-height: auto !important;
+        max-height: 92vh !important;
+        padding: 14px 12px 14px !important;
+        border-radius: 10px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    #rankingsOverlay .rankings-header {
+        padding: 0 2px 10px !important;
+        margin-bottom: 10px !important;
+    }
+    #rankingsOverlay .rankings-header h3 { font-size: 0.9rem !important; letter-spacing: 0.12em !important; }
+    #rankingsOverlay .rankings-close-btn {
+        width: 28px !important; height: 28px !important;
+        min-width: 28px !important; max-width: 28px !important;
+        font-size: 0.78rem !important;
+    }
+    #rankingsOverlay .rankings-body {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    #rankingsOverlay .rankings-column {
+        background: rgba(0, 0, 0, 0.28) !important;
+        border: 1px solid var(--border-subtle) !important;
+        border-radius: 8px !important;
+        padding: 10px 10px 8px !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    #rankingsOverlay .rankings-column::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important; left: 0 !important; bottom: 0 !important;
+        width: 3px !important;
+        pointer-events: none !important;
+    }
+    #rankingsOverlay .rankings-column:nth-child(1)::before {
+        background: var(--accent-cyan) !important;
+        box-shadow: 0 0 10px var(--accent-cyan) !important;
+    }
+    #rankingsOverlay .rankings-column:nth-child(2)::before {
+        background: var(--accent-orange) !important;
+        box-shadow: 0 0 10px var(--accent-orange) !important;
+    }
+    #rankingsOverlay .rankings-column-title {
+        padding-left: 8px !important;
+    }
+    #rankingsOverlay .rankings-column-title::after { display: none !important; }
+    #rankingsOverlay .rankings-list > .rank-row {
+        grid-template-columns: 20px 34px 1fr auto !important;
+        grid-template-areas:
+            "rank avatar name  score"
+            "rank avatar meta  meta" !important;
+        column-gap: 10px !important;
+        row-gap: 2px !important;
+    }
+    #rankingsOverlay .rankings-list > .rank-row::before {
+        grid-area: rank !important;
+        align-self: center !important;
+    }
+    #rankingsOverlay .rank-avatar,
+    #rankingsOverlay .rank-avatar-fallback {
+        grid-area: avatar !important;
+        align-self: center !important;
+        width: 34px !important; height: 34px !important;
+        min-width: 34px !important; min-height: 34px !important;
+    }
+    #rankingsOverlay .rank-info { display: contents !important; }
+    #rankingsOverlay .rank-name {
+        grid-area: name !important;
+        align-self: end !important;
+    }
+    #rankingsOverlay .rank-meta {
+        grid-area: meta !important;
+        align-self: start !important;
+    }
+    #rankingsOverlay .rank-stats { display: contents !important; }
+    #rankingsOverlay .rank-score {
+        grid-area: score !important;
+        align-self: end !important;
     }
 }
