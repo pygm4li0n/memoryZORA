@@ -1,37 +1,18 @@
 /* =========================================================
-   CHAT TEXTURE — Neon glow + subtle maze pattern
-   Standalone file. Loaded last in index.html so it wins.
+   CHAT TEXTURE — soft alpha-mask blend
+   Single layer. No glow. Integrates the maze pattern
+   into the chat panel as a subtle background texture.
    Applies on desktop + Phantom (mobile) automatically.
-   To disable: remove the <link> in index.html. That's it.
    ========================================================= */
 
-/* ── CHAT PANEL — anchors + stacking context ── */
+/* ── Anchor the pseudo-element + create stacking context ── */
 .chat-panel {
     position: relative !important;
     isolation: isolate !important;
     overflow: hidden !important;
 }
 
-/* ── LAYER 1 — GLOW (blurred bright copy of the image) ── */
-.chat-panel::before {
-    content: '' !important;
-    position: absolute !important;
-    inset: -25% !important;
-
-    background-image: url('https://i.postimg.cc/t446TVgs/abstract-geometric-maze-pattern-using-tess-wang-tiles-vibrant-neon-acid-palette-ideal-modern-web-gra.png') !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-
-    filter: blur(70px) saturate(2.5) brightness(1.7) !important;
-    opacity: 0.55 !important;
-    mix-blend-mode: screen !important;
-
-    pointer-events: none !important;
-    z-index: 0 !important;
-}
-
-/* ── LAYER 2 — PATTERN (crisp, subtle, radial-faded) ── */
+/* ── Texture layer ── */
 .chat-panel::after {
     content: '' !important;
     position: absolute !important;
@@ -42,9 +23,11 @@
     background-position: center !important;
     background-repeat: no-repeat !important;
 
-    opacity: 0.10 !important;
+    /* Soft blend — reads as part of the surface, not a sticker */
+    opacity: 0.12 !important;
     mix-blend-mode: soft-light !important;
 
+    /* Radial fade so the pattern melts toward the edges */
     -webkit-mask-image: radial-gradient(ellipse at center,
         rgba(0,0,0,1) 0%,
         rgba(0,0,0,0.85) 55%,
@@ -60,7 +43,7 @@
     z-index: 0 !important;
 }
 
-/* ── Push all chat content above both texture layers ── */
+/* ── Push all chat content above the texture ── */
 .chat-panel > * {
     position: relative !important;
     z-index: 1 !important;
