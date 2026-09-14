@@ -367,20 +367,9 @@
                 .msn-right-sidebar .msn-rs-section {
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
+                    gap: 0;
                     flex: 1 1 auto;
                     min-height: 0;
-                }
-                .msn-right-sidebar .msn-rs-label {
-                    font-size: 0.62rem;
-                    font-weight: 800;
-                    letter-spacing: 0.18em;
-                    text-transform: uppercase;
-                    color: var(--text-muted, #426080);
-                    padding-bottom: 6px;
-                    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
-                    text-shadow: 0 1px 0 rgba(0,0,0,0.3);
-                    flex-shrink: 0;
                 }
                 .msn-right-sidebar .msn-rs-actions {
                     display: grid;
