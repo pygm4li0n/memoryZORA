@@ -10,14 +10,13 @@
     (function injectPhantomFixes() {
         if (document.querySelector('style[data-msn-phantom-fixes]')) return;
         const css = `
-            /* ── Phantom connect button: bigger, nudged left, green when connected ── */
+            /* ── Phantom connect button ── */
             .btn-icon.phantom-btn,
             #phantomConnectBtn {
                 width: 44px !important;
                 height: 44px !important;
-                margin-right: auto !important;
-                margin-left: -2px !important;
                 position: relative;
+                flex-shrink: 0 !important;
                 transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
             }
             .btn-icon.phantom-btn img,
@@ -42,10 +41,8 @@
             #phantomConnectBtn.connected::after {
                 content: '';
                 position: absolute;
-                top: -3px;
-                right: -3px;
-                width: 11px;
-                height: 11px;
+                top: -3px; right: -3px;
+                width: 11px; height: 11px;
                 border-radius: 50%;
                 background: #4ade80;
                 border: 2px solid var(--bg-panel, #01091A);
@@ -58,7 +55,56 @@
                 50%      { opacity: 0.55; transform: scale(0.82); }
             }
 
-            /* ── Rankings trophy button — visible + bigger ── */
+            /* ═══════════════════════════════════════════════════════════
+               ⚑ HEADER LAYOUT — desktop + mobile
+               · Hide LIVE badge + online count from header (they live in sidebar)
+               · Wallet → LEFT of Phantom (fixed slot so nothing shifts)
+               · Refresh → RIGHT of Phantom
+            ═══════════════════════════════════════════════════════════ */
+            #connectionPill,
+            #onlineCountBadge {
+                display: none !important;
+            }
+            .header-right {
+                justify-content: flex-end !important;
+                align-items: center !important;
+            }
+            .header-right #walletAddress {
+                order: 1;
+                min-width: 0;
+                max-width: 150px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: right;
+                margin-right: 4px;
+            }
+            .header-right #phantomConnectBtn {
+                order: 2;
+                flex-shrink: 0 !important;
+            }
+            .header-right #refreshBtn {
+                order: 3;
+                flex-shrink: 0 !important;
+            }
+            .header-right #mobileEditBtn {
+                order: 4;
+            }
+            .header-right #rankingsBtn {
+                order: 5;
+            }
+            .header-right #modSettingsBtn {
+                order: 6;
+            }
+            .header-right #headerThemeBtn {
+                order: 7;
+            }
+            /* When wallet empty, do not leave a gap */
+            .header-right #walletAddress:empty {
+                display: none !important;
+            }
+
+            /* ── Rankings trophy button ── */
             .rankings-btn,
             #rankingsBtn {
                 width: 44px !important;
@@ -75,10 +121,8 @@
                 }
             }
 
-            /* ── Sidebar theme button — visible on mobile / Phantom ── */
-            .sidebar-theme-btn {
-                display: none;
-            }
+            /* ── Sidebar theme button — mobile only ── */
+            .sidebar-theme-btn { display: none; }
             @media (max-width: 768px) {
                 .sidebar-theme-btn {
                     display: flex !important;
@@ -104,7 +148,7 @@
                 }
             }
 
-            /* ── Sidebar rank badge (tier) — visible on mobile ── */
+            /* ── Rank + XP badges ── */
             .big-rank {
                 display: inline-block !important;
                 font-size: 0.72rem !important;
@@ -120,8 +164,6 @@
                 border: none !important;
             }
             .big-rank.hidden { display: none !important; }
-
-            /* ── Sidebar XP level badge — visible on mobile ── */
             .big-level {
                 display: inline-block !important;
                 font-size: 0.72rem !important;
@@ -138,7 +180,6 @@
             }
             .big-level.hidden { display: none !important; }
 
-            /* ── Ensure header-right icons are all same size on mobile ── */
             @media (max-width: 768px) {
                 .header-right .btn-icon {
                     width: 40px !important;
@@ -151,22 +192,15 @@
                 }
             }
 
-            /* ⚑ ── Clean message loading state ── */
+            /* ⚑ ── Clean message loading state (container is EMPTY while loading) ── */
             .messages-container {
                 position: relative;
-                transition: opacity 0.28s ease;
-            }
-            .messages-container.msn-loading {
-                opacity: 0;
-            }
-            .messages-container.msn-ready {
-                opacity: 1;
             }
 
-            /* Centered loader overlay */
+            /* Centered loader — inside the messages container */
             .msn-msg-loader {
                 position: absolute;
-                inset: 0;
+                top: 0; left: 0; right: 0; bottom: 0;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -175,9 +209,7 @@
                 opacity: 0;
                 transition: opacity 0.2s ease;
             }
-            .msn-msg-loader.msn-show {
-                opacity: 1;
-            }
+            .msn-msg-loader.msn-show { opacity: 1; }
             .msn-msg-loader-inner {
                 display: flex;
                 flex-direction: column;
@@ -209,7 +241,7 @@
                 50%      { opacity: 1;    transform: translateY(-4px) scale(1); }
             }
 
-            /* ⚑ ── Pinned announcement as centered chat bubble ── */
+            /* ── Pinned announcement as centered chat bubble ── */
             .mod-message-box {
                 display: flex !important;
                 flex-direction: row !important;
@@ -235,7 +267,6 @@
                 pointer-events: auto;
             }
             .mod-message-box.hidden { display: none !important; }
-
             .mod-message-box .mod-badge {
                 background: linear-gradient(180deg, #C9A84E 0%, #A88A3A 100%);
                 color: #1a0f00;
@@ -251,7 +282,6 @@
                 line-height: 1.2;
                 white-space: nowrap;
             }
-
             .mod-message-box .mod-message-text {
                 color: var(--cream, #F3E7B8);
                 font-size: 0.82rem;
@@ -266,14 +296,11 @@
                 text-align: left;
                 letter-spacing: 0.01em;
             }
-
             .mod-message-box .mod-message-text a {
                 color: var(--accent-cyan, #01E1EA);
                 text-decoration: underline;
                 text-underline-offset: 2px;
             }
-
-            /* Mobile — full width minus tiny margins, softer radius */
             @media (max-width: 768px) {
                 .mod-message-box {
                     max-width: calc(100% - 24px) !important;
@@ -294,15 +321,10 @@
             }
 
             /* ═══════════════════════════════════════════════════════════
-               ⚑ CHAT AREA + RIGHT SIDEBAR — DESKTOP ONLY
-               · Full-width header across the whole remaining screen
-               · Chat content below header, left-anchored
-               · Right 280px = utility sidebar (tabs + actions)
-               · Mobile (< 769px) untouched
+               ⚑ CHAT + RIGHT SIDEBAR — DESKTOP ONLY
             ═══════════════════════════════════════════════════════════ */
             @media (min-width: 769px) {
 
-                /* Chat panel reserves 280px on the right for the sidebar */
                 .chat-panel {
                     padding-right: 280px !important;
                     position: relative !important;
@@ -311,20 +333,15 @@
                     border-radius: 0 !important;
                 }
 
-                /* Header extends into the reserved space — spans full width */
                 .chat-header-bar {
                     width: calc(100% + 280px) !important;
                     position: relative !important;
                     z-index: 10 !important;
                 }
 
-                /* Messages scrollbar — wider, separated at the boundary */
-                .messages-container::-webkit-scrollbar {
-                    width: 10px;
-                }
-                .messages-container::-webkit-scrollbar-track {
-                    background: transparent;
-                }
+                /* Wider scrollbar, separated at the boundary */
+                .messages-container::-webkit-scrollbar { width: 10px; }
+                .messages-container::-webkit-scrollbar-track { background: transparent; }
                 .messages-container::-webkit-scrollbar-thumb {
                     background: var(--border-default, #1a3a5c);
                     border-radius: 5px;
@@ -336,7 +353,7 @@
                     background-clip: padding-box;
                 }
 
-                /* ── RIGHT SIDEBAR CONTAINER ── */
+                /* ── RIGHT SIDEBAR ── */
                 .msn-right-sidebar {
                     position: absolute !important;
                     top: var(--header-height, 70px) !important;
@@ -355,8 +372,6 @@
                     z-index: 5 !important;
                     font-family: var(--font-mono, monospace) !important;
                 }
-
-                /* Sections */
                 .msn-right-sidebar .msn-rs-section {
                     display: flex;
                     flex-direction: column;
@@ -372,8 +387,6 @@
                     border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
                     text-shadow: 0 1px 0 rgba(0,0,0,0.3);
                 }
-
-                /* Vertical chat tabs */
                 .msn-right-sidebar .msn-rs-tabs .chat-tabs {
                     display: flex !important;
                     flex-direction: column !important;
@@ -409,8 +422,6 @@
                     border-bottom-color: var(--border-subtle, rgba(255,255,255,0.06)) !important;
                     text-shadow: 0 0 6px rgba(1, 225, 234, 0.4) !important;
                 }
-
-                /* Actions grid — 2-column */
                 .msn-right-sidebar .msn-rs-actions {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
@@ -446,24 +457,16 @@
                     width: 22px !important;
                     height: 22px !important;
                 }
-                /* Mod settings button — hide if not mod */
                 .msn-right-sidebar .msn-rs-actions .btn-icon.hidden {
                     display: none !important;
                 }
-
-                /* Right sidebar's own scrollbar */
-                .msn-right-sidebar::-webkit-scrollbar {
-                    width: 6px;
-                }
-                .msn-right-sidebar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
+                .msn-right-sidebar::-webkit-scrollbar { width: 6px; }
+                .msn-right-sidebar::-webkit-scrollbar-track { background: transparent; }
                 .msn-right-sidebar::-webkit-scrollbar-thumb {
                     background: var(--border-default, #1a3a5c);
                     border-radius: 3px;
                 }
 
-                /* Tighter rhythm for the chat content */
                 .messages-container {
                     padding: 12px 14px !important;
                     gap: 10px !important;
@@ -471,8 +474,6 @@
                 .input-area-bar {
                     padding: 8px 12px 10px !important;
                 }
-
-                /* Pinned announcement — fits narrower chat width */
                 .mod-message-box {
                     max-width: min(90%, 500px) !important;
                 }
@@ -1709,11 +1710,13 @@
         return wrapper;
     }
 
+    // ⚑ Loader lives INSIDE the messages container → centered in the chat area
     function showMsgLoader(container, label) {
-        const host = container.parentNode;
-        if (!host) return;
-        if (!host.style.position) host.style.position = 'relative';
-        let loader = host.querySelector('.msn-msg-loader');
+        if (!container) return;
+        if (getComputedStyle(container).position === 'static') {
+            container.style.position = 'relative';
+        }
+        let loader = container.querySelector('.msn-msg-loader');
         if (!loader) {
             loader = document.createElement('div');
             loader.className = 'msn-msg-loader';
@@ -1723,7 +1726,7 @@
                     <div class="msn-msg-loader-label">${escapeHtml(label || 'Loading')}</div>
                 </div>
             `;
-            host.appendChild(loader);
+            container.appendChild(loader);
         } else {
             const lbl = loader.querySelector('.msn-msg-loader-label');
             if (lbl) lbl.textContent = label || 'Loading';
@@ -1732,9 +1735,8 @@
     }
 
     function hideMsgLoader(container) {
-        const host = container.parentNode;
-        if (!host) return;
-        const loader = host.querySelector('.msn-msg-loader');
+        if (!container) return;
+        const loader = container.querySelector('.msn-msg-loader');
         if (loader) loader.classList.remove('msn-show');
     }
 
@@ -2037,8 +2039,7 @@
 
     async function loadPrivateMessages(partner) {
         if (!username || !partner) return;
-        privateContainer.classList.add('msn-loading');
-        privateContainer.classList.remove('msn-ready');
+        privateContainer.innerHTML = '';
         showMsgLoader(privateContainer, 'Loading conversation');
 
         try {
@@ -2050,9 +2051,6 @@
             ]);
             if (e1 || e2) {
                 console.warn('loadPrivateMessages error:', e1 || e2);
-                hideMsgLoader(privateContainer);
-                privateContainer.classList.remove('msn-loading');
-                privateContainer.classList.add('msn-ready');
                 privateContainer.innerHTML = '<div class="empty-chat-hint">Failed to load messages</div>';
                 return;
             }
@@ -2077,7 +2075,7 @@
             holder.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
 
             if (unique.length === 0) {
-                privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
+                holder.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
             } else {
                 const users = [...new Set(unique.flatMap(m => [m.from_user, m.to_user]).filter(Boolean))];
                 await fetchAvatars(users);
@@ -2085,24 +2083,19 @@
                     const node = await buildMessageNode(msg, true);
                     holder.appendChild(node);
                 }
-                privateContainer.innerHTML = '';
-                while (holder.firstChild) privateContainer.appendChild(holder.firstChild);
             }
+
+            privateContainer.innerHTML = '';
+            while (holder.firstChild) privateContainer.appendChild(holder.firstChild);
 
             privateContainer.scrollTop = privateContainer.scrollHeight;
             requestAnimationFrame(() => {
                 privateContainer.scrollTop = privateContainer.scrollHeight;
-                privateContainer.classList.remove('msn-loading');
-                privateContainer.classList.add('msn-ready');
-                hideMsgLoader(privateContainer);
             });
 
             loadReactions('private_message_reactions', true);
         } catch (err) {
             console.error('loadPrivateMessages failed:', err);
-            hideMsgLoader(privateContainer);
-            privateContainer.classList.remove('msn-loading');
-            privateContainer.classList.add('msn-ready');
             privateContainer.innerHTML = '<div class="empty-chat-hint">Error loading private messages</div>';
         }
     }
@@ -2281,8 +2274,8 @@
 
     async function loadMessages() {
         setConnection('connecting');
-        publicContainer.classList.add('msn-loading');
-        publicContainer.classList.remove('msn-ready');
+        // Clear container first so the loader is the only child, centered
+        publicContainer.innerHTML = '';
         showMsgLoader(publicContainer, 'Loading messages');
 
         try {
@@ -2303,32 +2296,29 @@
             holder.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
 
             if (data.length === 0) {
-                publicContainer.innerHTML = '<div class="empty-chat-hint">No messages yet. ⚡</div>';
+                holder.innerHTML = '<div class="empty-chat-hint">No messages yet. ⚡</div>';
             } else {
                 for (const msg of data) {
                     const node = await buildMessageNode(msg, false);
                     holder.appendChild(node);
                 }
-                publicContainer.innerHTML = '';
-                while (holder.firstChild) publicContainer.appendChild(holder.firstChild);
             }
+
+            // Remove loader + swap in content atomically
+            publicContainer.innerHTML = '';
+            while (holder.firstChild) publicContainer.appendChild(holder.firstChild);
 
             autoScroll = true;
             publicContainer.scrollTop = publicContainer.scrollHeight;
             requestAnimationFrame(() => {
                 publicContainer.scrollTop = publicContainer.scrollHeight;
-                publicContainer.classList.remove('msn-loading');
-                publicContainer.classList.add('msn-ready');
-                hideMsgLoader(publicContainer);
                 updateScrollButtonVisibility(publicContainer);
                 pinToBottom(publicContainer, 4000);
             });
 
             setConnection('connected');
         } catch (err) {
-            hideMsgLoader(publicContainer);
-            publicContainer.classList.remove('msn-loading');
-            publicContainer.classList.add('msn-ready');
+            publicContainer.innerHTML = '';
             showError('Load failed: ' + err.message);
             setConnection('disconnected');
         }
@@ -2523,7 +2513,7 @@
             { el: document.getElementById('headerThemeBtn'),      into: actionsWrap },
             { el: document.getElementById('rankingsBtn'),         into: actionsWrap },
             { el: document.getElementById('modSettingsBtn'),      into: actionsWrap },
-            { el: document.getElementById('refreshBtn'),          into: actionsWrap },
+            // ⚑ refreshBtn is intentionally NOT moved — stays in header right of Phantom
         ];
 
         moves.forEach(({ el, into }) => {
