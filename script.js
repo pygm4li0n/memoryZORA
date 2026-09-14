@@ -4,6 +4,159 @@
     const STORAGE_BUCKET = 'chat-images';
     const AVATAR_BUCKET = 'chat-avatars';
 
+    // ═══════════════════════════════════════════════════════════
+    //  ⚑ PHANTOM / MOBILE VISUAL FIXES — injected once
+    // ═══════════════════════════════════════════════════════════
+    (function injectPhantomFixes() {
+        if (document.querySelector('style[data-msn-phantom-fixes]')) return;
+        const css = `
+            /* ── Phantom connect button: bigger, nudged left, green when connected ── */
+            .btn-icon.phantom-btn,
+            #phantomConnectBtn {
+                width: 44px !important;
+                height: 44px !important;
+                margin-right: auto !important;
+                margin-left: -2px !important;
+                position: relative;
+                transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+            }
+            .btn-icon.phantom-btn img,
+            #phantomConnectBtn img {
+                width: 24px !important;
+                height: 24px !important;
+                filter: drop-shadow(0 0 4px rgba(153, 69, 255, 0.5));
+            }
+            .btn-icon.phantom-btn.connected,
+            #phantomConnectBtn.connected {
+                background: linear-gradient(180deg, #2ecc71 0%, #1a9e52 100%) !important;
+                border-color: #4ade80 !important;
+                box-shadow:
+                    0 0 14px rgba(46, 204, 113, 0.7),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+            }
+            .btn-icon.phantom-btn.connected img,
+            #phantomConnectBtn.connected img {
+                filter: brightness(1.2) drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+            }
+            .btn-icon.phantom-btn.connected::after,
+            #phantomConnectBtn.connected::after {
+                content: '';
+                position: absolute;
+                top: -3px;
+                right: -3px;
+                width: 11px;
+                height: 11px;
+                border-radius: 50%;
+                background: #4ade80;
+                border: 2px solid var(--bg-panel, #01091A);
+                box-shadow: 0 0 8px #4ade80;
+                animation: phantomDotPulse 2s ease-in-out infinite;
+                pointer-events: none;
+            }
+            @keyframes phantomDotPulse {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50%      { opacity: 0.55; transform: scale(0.82); }
+            }
+
+            /* ── Rankings trophy button — visible + bigger ── */
+            .rankings-btn,
+            #rankingsBtn {
+                width: 44px !important;
+                height: 44px !important;
+                font-size: 1.3rem !important;
+            }
+            @media (max-width: 768px) {
+                .rankings-btn,
+                #rankingsBtn {
+                    width: 46px !important;
+                    height: 46px !important;
+                    font-size: 1.45rem !important;
+                    display: flex !important;
+                }
+            }
+
+            /* ── Sidebar theme button — visible on mobile / Phantom ── */
+            .sidebar-theme-btn {
+                display: none;
+            }
+            @media (max-width: 768px) {
+                .sidebar-theme-btn {
+                    display: flex !important;
+                    width: 46px !important;
+                    height: 46px !important;
+                    margin: 10px 12px !important;
+                    font-size: 1.45rem !important;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(145deg, #7A4E2C 0%, #6B3F24 100%) !important;
+                    border: 1px solid #8A7548 !important;
+                    color: var(--cream, #E5D39A) !important;
+                    border-radius: 5px !important;
+                    box-shadow: 0 0 10px rgba(201, 168, 78, 0.25) !important;
+                    cursor: pointer;
+                    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+                    align-self: flex-start;
+                }
+                .sidebar-theme-btn:hover {
+                    border-color: var(--accent-cyan, #01E1EA) !important;
+                    box-shadow: 0 0 14px rgba(1, 225, 234, 0.45) !important;
+                    background: linear-gradient(145deg, #8A5A32 0%, #7A4E2C 100%) !important;
+                }
+            }
+
+            /* ── Sidebar rank badge (tier) — visible on mobile ── */
+            .big-rank {
+                display: inline-block !important;
+                font-size: 0.72rem !important;
+                padding: 3px 10px !important;
+                margin-top: 5px !important;
+                border-radius: 4px !important;
+                background: linear-gradient(135deg, #C9A84E 0%, #A88A3A 100%) !important;
+                color: #1a0f00 !important;
+                font-weight: 800 !important;
+                letter-spacing: 0.06em !important;
+                text-transform: uppercase !important;
+                box-shadow: 0 0 10px rgba(201, 168, 78, 0.4) !important;
+                border: none !important;
+            }
+            .big-rank.hidden { display: none !important; }
+
+            /* ── Sidebar XP level badge — visible on mobile ── */
+            .big-level {
+                display: inline-block !important;
+                font-size: 0.72rem !important;
+                padding: 3px 9px !important;
+                margin-top: 5px !important;
+                border-radius: 4px !important;
+                background: rgba(1, 225, 234, 0.12) !important;
+                color: #01E1EA !important;
+                border: 1px solid #01E1EA !important;
+                font-weight: 700 !important;
+                letter-spacing: 0.04em !important;
+                box-shadow: 0 0 8px rgba(1, 225, 234, 0.3) !important;
+                text-shadow: 0 0 6px rgba(1, 225, 234, 0.5) !important;
+            }
+            .big-level.hidden { display: none !important; }
+
+            /* ── Ensure header-right icons are all same size on mobile ── */
+            @media (max-width: 768px) {
+                .header-right .btn-icon {
+                    width: 40px !important;
+                    height: 40px !important;
+                    font-size: 1.15rem !important;
+                }
+                .header-right .btn-icon img {
+                    width: 22px !important;
+                    height: 22px !important;
+                }
+            }
+        `;
+        const tag = document.createElement('style');
+        tag.setAttribute('data-msn-phantom-fixes', '1');
+        tag.textContent = css;
+        document.head.appendChild(tag);
+    })();
+
     // State
     const STORAGE_KEY_NAME = 'msn_chat_username';
     const LAST_USERNAME_KEY = 'msn_last_username';
@@ -116,6 +269,12 @@
     const modAnnouncementSection = document.getElementById('modAnnouncementSection');
     const modAnnouncementInput = document.getElementById('modAnnouncementInput');
     const modPostAnnouncementBtn = document.getElementById('modPostAnnouncementBtn');
+
+    // ⚑ Warn if critical mobile elements are missing from index.html
+    if (!document.getElementById('sidebarBigLevel')) console.warn('[msn] sidebarBigLevel missing');
+    if (!document.getElementById('sidebarBigRank'))  console.warn('[msn] sidebarBigRank missing');
+    if (!document.getElementById('rankingsBtn'))      console.warn('[msn] rankingsBtn missing');
+    if (!document.getElementById('sidebarThemeBtn'))  console.warn('[msn] sidebarThemeBtn missing');
 
     let currentRequestData = null;
 
@@ -384,7 +543,25 @@
         if (bal === null || bal === undefined) return null;
         return getBadge(bal);
     }
-    function updateUserRank(balance) { return; }
+
+    // ⚑ Rank badge — shows the holder tier next to your name on the sidebar
+    function updateUserRank(balance) {
+        if (!sidebarBigRank) return;
+        const bal = Number(balance);
+        if (!isFinite(bal) || bal <= 0) {
+            sidebarBigRank.textContent = '';
+            sidebarBigRank.classList.add('hidden');
+            return;
+        }
+        const badge = getBadge(bal);
+        if (!badge) {
+            sidebarBigRank.textContent = '';
+            sidebarBigRank.classList.add('hidden');
+            return;
+        }
+        sidebarBigRank.textContent = `${badge.emoji} ${badge.name}`;
+        sidebarBigRank.classList.remove('hidden');
+    }
 
     async function upsertProfile({ username: uname, avatar_url, token_balance }) {
         const wallet = getWalletAddress();
@@ -430,7 +607,6 @@
                 hasTokenAccess = true;
             } else if (targetBalance > modTokenRequirement) {
                 hasTokenAccess = true;
-                // ⚑ positive → showSuccess (green in overlay)
                 showSuccess(`You hold ${targetBalance.toLocaleString()} tokens — access granted!`);
             } else {
                 hasTokenAccess = false;
@@ -464,15 +640,13 @@
         }
     }
 
-    // ⚑ connectPhantom — feedback shown inside overlay while connecting
     async function connectPhantom() {
         const provider = getPhantomProvider();
         if (!provider) {
             showError('Phantom wallet not installed. Please install it from phantom.app');
-            return;
+            return false;
         }
 
-        // ⚑ Show "Connecting…" state on the overlay button
         if (phantomConnectBtnOverlay) {
             phantomConnectBtnOverlay.disabled = true;
             phantomConnectBtnOverlay.innerHTML =
@@ -488,8 +662,8 @@
             fetchAndDisplayAllTokens();
             const addr = phantomWalletPublicKey.toBase58();
             showSuccess(`Phantom connected: ${addr.slice(0,4)}…${addr.slice(-4)}`);
-            return;
-        } catch (silentErr) { /* fall through to non-trusted connect */ }
+            return true;
+        } catch (silentErr) { /* fall through */ }
 
         try {
             const resp = await provider.connect({ onlyIfTrusted: false });
@@ -499,12 +673,12 @@
             const addr = phantomWalletPublicKey.toBase58();
             showSuccess(`Phantom connected: ${addr.slice(0,4)}…${addr.slice(-4)}`);
             await fetchAndDisplayAllTokens();
+            return true;
         } catch (err) {
             console.error('Phantom connection error:', err);
             if (phantomConnectBtnOverlay) phantomConnectBtnOverlay.disabled = false;
-            updatePhantomUI(); // resets button back to "Connect Phantom"
+            updatePhantomUI();
 
-            // ⚑ Friendly error mapping
             const raw = String((err && err.message) || err || '').trim();
             let friendly = raw;
             if (/user rejected|rejected by user|cancell?ed|declined/i.test(raw)) {
@@ -513,6 +687,7 @@
                 friendly = 'Could not connect Phantom';
             }
             showError(friendly);
+            return false;
         }
     }
 
@@ -527,7 +702,6 @@
         if (container) container.innerHTML = '';
         if (cooldownInterval) { clearInterval(cooldownInterval); cooldownInterval = null; }
         hideCooldown();
-        // ⚑ Notify overlay too
         showOverlayMessage('Phantom disconnected', 'info');
     }
     function togglePhantomConnection() {
@@ -904,7 +1078,6 @@
     function escapeHtml(t) { const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}; return String(t).replace(/[&<>"']/g, m=>map[m]); }
     function trunc(t, l=45) { return t && t.length>l ? t.substring(0,l)+'…' : t||''; }
 
-    // ⚑ showError — mirrors into overlay when open
     function showError(msg) {
         errorToast.textContent = '⚠️ ' + msg;
         errorToast.classList.add('visible');
@@ -915,7 +1088,6 @@
         }
     }
 
-    // ⚑ showSuccess — green, mirrors into overlay when open
     function showSuccess(msg) {
         const clean = String(msg).replace(/^✅\s*/, '').replace(/^⚠️\s*/, '');
         errorToast.textContent = '✅ ' + clean;
@@ -1984,7 +2156,7 @@
         username = '';
         inputAreaBar.classList.add('hidden');
         nameOverlay.classList.remove('hidden');
-        hideOverlayMessage(); // ⚑ clear stale overlay message
+        hideOverlayMessage();
         nameInput.value = prevName || '';
         nameInput.focus();
 
@@ -2135,7 +2307,7 @@
                 profilePicPreview.innerHTML = '<span>📷</span>';
             }
             nameOverlay.classList.remove('hidden');
-            hideOverlayMessage(); // ⚑ clear any stale message on fresh open
+            hideOverlayMessage();
             nameInput.focus();
             subscribeToRealtime();
         }
