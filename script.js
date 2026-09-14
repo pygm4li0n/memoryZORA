@@ -27,12 +27,14 @@
     let modAnnouncement = '';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // ⚑ Helper — current wallet string (or null)
     function getWalletAddress() {
         try {
             return phantomWalletPublicKey ? phantomWalletPublicKey.toBase58() : null;
         } catch (e) { return null; }
     }
 
+    // ── Real visible viewport height ──
     function updateAppHeight() {
         const vv = window.visualViewport;
         const h = vv ? vv.height : window.innerHeight;
@@ -47,6 +49,7 @@
     window.addEventListener('orientationchange', () => setTimeout(updateAppHeight, 100));
     [50, 200, 500, 1200, 2500].forEach(ms => setTimeout(updateAppHeight, ms));
 
+    // DOM elements
     const sidebarWalletAddress = document.getElementById('sidebarWalletAddress');
     const publicContainer = document.getElementById('publicMessagesContainer');
     const privateContainer = document.getElementById('privateMessagesContainer');
@@ -322,6 +325,7 @@
     }
     function updateUserRank(balance) { return; }
 
+    // ⚑ FIXED — wallet-only upsert. No more ghost rows.
     async function upsertProfile({ username: uname, avatar_url, token_balance }) {
         const wallet = getWalletAddress();
         if (!wallet) {
@@ -581,6 +585,7 @@
         showCooldown(seconds);
     }
 
+    // ============== REST OF ORIGINAL CODE ==============
     let replyingTo = null;
     let activePrivateChat = null;
     let currentTab = 'public';
@@ -596,6 +601,9 @@
     let profilePicFile = null;
     const typingUsers = new Map();
     let typingChannel = null;
+    // ⚑ Track which partner's messages are currently rendered so we don't
+    // reload unnecessarily when re-clicking the Private tab.
+    let lastLoadedPrivatePartner = null;
     let acceptedPrivateChats;
     try {
         acceptedPrivateChats = new Set(JSON.parse(localStorage.getItem('msn_accepted_chats') || '[]'));
@@ -654,6 +662,7 @@
     updateTokenInfo();
     setInterval(updateTokenInfo, 60000);
 
+    // ── Scroll helpers ──
     function scrollContainerToBottom(container) { if (container) container.scrollTop = container.scrollHeight; }
 
     let autoScroll = true;
@@ -730,13 +739,10 @@
 
     function saveAcceptedChats() { localStorage.setItem('msn_accepted_chats', JSON.stringify([...acceptedPrivateChats])); }
 
-    // ⚑ REWRITTEN — pulls from both accepted requests AND message history.
-    // Anyone you've privately messaged with counts as an accepted partner,
-    // even if the request row was cleaned up.
+    // ⚑ Pulls accepted partners from BOTH accepted requests AND message history.
     async function loadAcceptedChatsFromDB() {
         if (!username) return;
         try {
-            // Source 1: accepted request rows
             const { data: sent } = await supabase.from('private_chat_requests')
                 .select('to_user').eq('from_user', username).eq('status', 'accepted');
             const { data: received } = await supabase.from('private_chat_requests')
@@ -744,7 +750,6 @@
             (sent || []).forEach(r => r.to_user && acceptedPrivateChats.add(r.to_user));
             (received || []).forEach(r => r.from_user && acceptedPrivateChats.add(r.from_user));
 
-            // Source 2: message history — anyone you've exchanged messages with
             const { data: msgSent } = await supabase.from('private_messages')
                 .select('to_user').eq('from_user', username).limit(500);
             const { data: msgReceived } = await supabase.from('private_messages')
@@ -1337,14 +1342,38 @@
         updateTypingIndicator();
         if (messageInput.value.length > 0) startTyping();
     }
+
+    // ⚑ CHANGED — clicking Private restores the last partner and loads their convo.
+    // Public stays the default on load; this only fires when the user clicks the tab.
     chatTabs.addEventListener('click', (e) => {
         const tab = e.target.closest('.chat-tab');
-        if(!tab) return;
+        if (!tab) return;
         const tabName = tab.getAttribute('data-tab');
-        if(tabName === 'private' && !activePrivateChat) {
-            showError('Select a private chat partner from the sidebar first.');
+
+        if (tabName === 'private') {
+            // If no partner is set, restore from localStorage
+            if (!activePrivateChat) {
+                const saved = localStorage.getItem(ACTIVE_CHAT_KEY);
+                if (saved) {
+                    activePrivateChat = saved;
+                    acceptedPrivateChats.add(saved);
+                    saveAcceptedChats();
+                    privateIndicatorBar.classList.remove('hidden');
+                    privateChatUserDisp.textContent = saved;
+                    messageInput.placeholder = `Private message to ${saved}...`;
+                } else {
+                    showError('Select a private chat partner from the sidebar first.');
+                    return;
+                }
+            }
+            switchTab('private');
+            // Only reload if the DOM isn't already showing this partner
+            if (lastLoadedPrivatePartner !== activePrivateChat) {
+                loadPrivateMessages(activePrivateChat);
+            }
             return;
         }
+
         switchTab(tabName);
     });
 
@@ -1374,8 +1403,8 @@
     }
     cancelPrivateBtn.addEventListener('click', () => setActivePrivateChat(null));
 
-    // ⚑ REWRITTEN — two .eq() queries instead of .or() so usernames with special
-    // characters don't break the PostgREST filter. Dedupes and sorts by created_at.
+    // ⚑ Loads private messages. Tracks which partner is displayed so
+    // re-clicking the Private tab doesn't reload a fresh query.
     async function loadPrivateMessages(partner) {
         if (!username || !partner) return;
         privateContainer.innerHTML = '<div class="empty-chat-hint">Loading…</div>';
@@ -1398,13 +1427,13 @@
                 seen.add(m.id);
                 return true;
             });
-            // Sort by created_at (fallback to sort_order if present)
             unique.sort((x, y) => {
                 const tx = x.sort_order != null ? x.sort_order : new Date(x.created_at || 0).getTime();
                 const ty = y.sort_order != null ? y.sort_order : new Date(y.created_at || 0).getTime();
                 return tx - ty;
             });
 
+            lastLoadedPrivatePartner = partner;
             privateContainer.innerHTML = '';
             if (unique.length === 0) {
                 privateContainer.innerHTML = '<div class="empty-chat-hint">No private messages with this user.</div>';
@@ -1909,7 +1938,7 @@
         inputAreaBar.classList.add('hidden');
 
         if(username) {
-            // ⚑ STEP 1 — sync username from wallet row BEFORE loading accepted chats
+            // STEP 1 — sync username from wallet row FIRST
             let profile = null;
             const walletForRead = getWalletAddress();
             if (walletForRead) {
@@ -1930,15 +1959,8 @@
                 profile = data;
             }
 
-            // ⚑ STEP 2 — load accepted chats with the correct username
+            // STEP 2 — load accepted chats AFTER username sync
             await loadAcceptedChatsFromDB();
-
-            // ⚑ STEP 3 — trust the saved active chat even if requests were cleaned
-            const savedActiveChat = localStorage.getItem(ACTIVE_CHAT_KEY);
-            if (savedActiveChat) {
-                acceptedPrivateChats.add(savedActiveChat);
-                saveAcceptedChats();
-            }
 
             if(profile && profile.avatar_url) {
                 avatarCache[username] = profile.avatar_url;
@@ -1958,7 +1980,8 @@
             inputAreaBar.classList.remove('hidden');
             nameOverlay.classList.add('hidden');
             setReplyingTo(null);
-            setActivePrivateChat(null);
+
+            // ⚑ Public tab is the default landing — DO NOT call setActivePrivateChat here.
             switchTab('public');
             await updateSidebarUI();
 
@@ -1973,9 +1996,15 @@
             setupTypingChannel();
             updateChatAccessibility();
 
-            // ⚑ STEP 4 — reopen the last private chat at the very end
-            if (savedActiveChat) {
-                setActivePrivateChat(savedActiveChat);
+            // ⚑ Restore last private partner WITHOUT switching tabs.
+            // The partner is remembered so clicking the Private tab works,
+            // but Public remains visible on load.
+            const savedActiveChat = localStorage.getItem(ACTIVE_CHAT_KEY);
+            if (savedActiveChat && acceptedPrivateChats.has(savedActiveChat)) {
+                activePrivateChat = savedActiveChat;
+                privateIndicatorBar.classList.remove('hidden');
+                privateChatUserDisp.textContent = savedActiveChat;
+                messageInput.placeholder = 'Type a message...';
             }
         } else {
             const lastUsername = localStorage.getItem(LAST_USERNAME_KEY);
