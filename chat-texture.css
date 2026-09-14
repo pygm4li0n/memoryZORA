@@ -1,7 +1,8 @@
 /* =========================================================
    CHAT TEXTURE — soft alpha-mask blend
-   Single layer. No glow. Integrates the maze pattern
-   into the chat panel as a subtle background texture.
+   Renders ABOVE all chat content with soft-light blending
+   so it shows uniformly on every theme — no theme's opaque
+   backgrounds can hide it. Content stays crisp underneath.
    Applies on desktop + Phantom (mobile) automatically.
    ========================================================= */
 
@@ -12,7 +13,7 @@
     overflow: hidden !important;
 }
 
-/* ── Texture layer ── */
+/* ── Texture layer — sits above content, blended ── */
 .chat-panel::after {
     content: '' !important;
     position: absolute !important;
@@ -40,11 +41,5 @@
         rgba(0,0,0,0) 100%) !important;
 
     pointer-events: none !important;
-    z-index: 0 !important;
-}
-
-/* ── Push all chat content above the texture ── */
-.chat-panel > * {
-    position: relative !important;
-    z-index: 1 !important;
+    z-index: 2 !important;   /* ⚑ ABOVE all panel content — visible on every theme */
 }
