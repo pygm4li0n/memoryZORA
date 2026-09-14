@@ -121,7 +121,7 @@
                 }
             }
 
-            /* ── Sidebar theme button — mobile only ── */
+            /* ── Sidebar theme button — mobile only (theme-aware) ── */
             .sidebar-theme-btn { display: none; }
             @media (max-width: 768px) {
                 .sidebar-theme-btn {
@@ -132,19 +132,19 @@
                     font-size: 1.45rem !important;
                     align-items: center;
                     justify-content: center;
-                    background: linear-gradient(145deg, #7A4E2C 0%, #6B3F24 100%) !important;
-                    border: 1px solid #8A7548 !important;
-                    color: var(--cream, #E5D39A) !important;
-                    border-radius: 5px !important;
-                    box-shadow: 0 0 10px rgba(201, 168, 78, 0.25) !important;
+                    background: var(--bg-elevated, #1e2221) !important;
+                    border: 1px solid var(--border-default, #454B4B) !important;
+                    color: var(--text-primary, #fff) !important;
+                    border-radius: var(--radius-sm, 4px) !important;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25) !important;
                     cursor: pointer;
                     transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
                     align-self: flex-start;
                 }
                 .sidebar-theme-btn:hover {
                     border-color: var(--accent-cyan, #01E1EA) !important;
-                    box-shadow: 0 0 14px rgba(1, 225, 234, 0.45) !important;
-                    background: linear-gradient(145deg, #8A5A32 0%, #7A4E2C 100%) !important;
+                    box-shadow: 0 0 14px var(--border-glow, rgba(1, 225, 234, 0.45)) !important;
+                    background: var(--bg-hover, #2a2f2e) !important;
                 }
             }
 
@@ -241,7 +241,7 @@
                 50%      { opacity: 1;    transform: translateY(-4px) scale(1); }
             }
 
-            /* ── Pinned announcement as centered chat bubble ── */
+            /* ── Pinned announcement as centered chat bubble (theme-aware) ── */
             .mod-message-box {
                 display: flex !important;
                 flex-direction: row !important;
@@ -253,10 +253,8 @@
                 margin: 10px 16px !important;
                 padding: 8px 14px !important;
                 border-radius: 16px 16px 16px 4px;
-                background: linear-gradient(145deg,
-                    rgba(201, 168, 78, 0.16) 0%,
-                    rgba(201, 168, 78, 0.06) 100%);
-                border: 1px solid rgba(201, 168, 78, 0.5);
+                background: var(--bg-elevated, rgba(0, 0, 0, 0.4));
+                border: 1px solid var(--accent-yellow, rgba(234, 179, 8, 0.5));
                 box-shadow:
                     0 2px 12px rgba(0, 0, 0, 0.4),
                     inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -268,7 +266,7 @@
             }
             .mod-message-box.hidden { display: none !important; }
             .mod-message-box .mod-badge {
-                background: linear-gradient(180deg, #C9A84E 0%, #A88A3A 100%);
+                background: var(--accent-yellow, #eab308);
                 color: #1a0f00;
                 padding: 3px 8px;
                 border-radius: 4px;
@@ -278,12 +276,12 @@
                 text-transform: uppercase;
                 flex-shrink: 0;
                 border: none;
-                box-shadow: 0 0 8px rgba(201, 168, 78, 0.55);
+                box-shadow: 0 0 8px var(--glow-yellow, rgba(234, 179, 8, 0.55));
                 line-height: 1.2;
                 white-space: nowrap;
             }
             .mod-message-box .mod-message-text {
-                color: var(--cream, #F3E7B8);
+                color: var(--text-primary, #fff);
                 font-size: 0.82rem;
                 line-height: 1.45;
                 white-space: normal !important;
@@ -353,7 +351,7 @@
                     background-clip: padding-box;
                 }
 
-                /* ── RIGHT SIDEBAR ── */
+                /* ── RIGHT SIDEBAR — vertical stack of action cards ── */
                 .msn-right-sidebar {
                     position: absolute !important;
                     top: var(--header-height, 70px) !important;
@@ -375,7 +373,7 @@
                 .msn-right-sidebar .msn-rs-section {
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
+                    gap: 12px;
                     flex: 1 1 auto;
                     min-height: 0;
                 }
@@ -393,41 +391,72 @@
                 .msn-right-sidebar .msn-rs-actions {
                     display: grid;
                     grid-template-columns: 1fr;
-                    grid-auto-rows: 1fr;
-                    gap: 10px;
+                    grid-auto-rows: minmax(90px, 1fr);
+                    gap: 12px;
                     flex: 1 1 auto;
                     min-height: 0;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                }
+                .msn-right-sidebar .msn-rs-actions::-webkit-scrollbar { width: 6px; }
+                .msn-right-sidebar .msn-rs-actions::-webkit-scrollbar-track { background: transparent; }
+                .msn-right-sidebar .msn-rs-actions::-webkit-scrollbar-thumb {
+                    background: var(--border-default, #1a3a5c);
+                    border-radius: 3px;
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon,
                 .msn-right-sidebar .msn-rs-actions .header-theme-btn,
                 .msn-right-sidebar .msn-rs-actions .rankings-btn {
                     width: 100% !important;
                     height: 100% !important;
-                    min-height: 60px !important;
-                    font-size: 1.6rem !important;
-                    border-radius: 8px !important;
+                    min-height: 90px !important;
+                    padding: 14px 10px !important;
+                    font-size: 2rem !important;
+                    border-radius: 10px !important;
                     background: var(--bg-elevated, rgba(255,255,255,0.03)) !important;
                     border: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
                     color: var(--text-primary, #fff) !important;
                     display: flex !important;
+                    flex-direction: column !important;
                     align-items: center !important;
                     justify-content: center !important;
+                    gap: 8px !important;
+                    cursor: pointer !important;
                     transition: background 0.18s ease,
                                 border-color 0.18s ease,
                                 box-shadow 0.18s ease,
-                                color 0.18s ease !important;
+                                color 0.18s ease,
+                                transform 0.18s ease !important;
+                }
+                .msn-right-sidebar .msn-rs-actions .msn-rs-card-label {
+                    font-family: var(--font-mono, monospace);
+                    font-size: 0.72rem;
+                    font-weight: 800;
+                    letter-spacing: 0.22em;
+                    text-transform: uppercase;
+                    color: inherit;
+                    opacity: 0.75;
+                    line-height: 1;
+                    pointer-events: none;
+                    user-select: none;
+                    transition: opacity 0.18s ease;
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon:hover,
                 .msn-right-sidebar .msn-rs-actions .header-theme-btn:hover,
                 .msn-right-sidebar .msn-rs-actions .rankings-btn:hover {
                     border-color: var(--accent-cyan, #01E1EA) !important;
                     color: var(--accent-cyan, #01E1EA) !important;
-                    box-shadow: 0 0 14px var(--border-glow, rgba(1, 225, 234, 0.35)) !important;
+                    box-shadow: 0 0 16px var(--border-glow, rgba(1, 225, 234, 0.35)) !important;
                     background: var(--bg-hover, rgba(255,255,255,0.06)) !important;
+                    transform: translateY(-2px) !important;
+                }
+                .msn-right-sidebar .msn-rs-actions .btn-icon:hover .msn-rs-card-label {
+                    opacity: 1;
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon img {
-                    width: 26px !important;
-                    height: 26px !important;
+                    width: 36px !important;
+                    height: 36px !important;
+                    object-fit: contain !important;
                 }
                 .msn-right-sidebar .msn-rs-actions .btn-icon.hidden {
                     display: none !important;
@@ -2441,54 +2470,73 @@
 
     // ═══════════════════════════════════════════════════════════
     //  ⚑ RIGHT SIDEBAR — desktop-only utility column
-    //  Moves tabs + action buttons into a dedicated right panel
+    //  Vertical stack of action cards: SKINS / RANK / MOD
     // ═══════════════════════════════════════════════════════════
     const _rsMoved = [];
 
     function buildRightSidebar() {
-    if (document.getElementById('msnRightSidebar')) return;
-    const chatPanel = document.getElementById('chatPanel');
-    if (!chatPanel) return;
+        if (document.getElementById('msnRightSidebar')) return;
+        const chatPanel = document.getElementById('chatPanel');
+        if (!chatPanel) return;
 
-    const right = document.createElement('aside');
-    right.id = 'msnRightSidebar';
-    right.className = 'msn-right-sidebar';
+        const right = document.createElement('aside');
+        right.id = 'msnRightSidebar';
+        right.className = 'msn-right-sidebar';
 
-    // Single full-height section: Actions
-    const s2 = document.createElement('div');
-    s2.className = 'msn-rs-section';
-    s2.innerHTML = '<div class="msn-rs-label">Actions</div>';
-    const actionsWrap = document.createElement('div');
-    actionsWrap.className = 'msn-rs-actions';
-    s2.appendChild(actionsWrap);
-    right.appendChild(s2);
+        // Single full-height section
+        const s2 = document.createElement('div');
+        s2.className = 'msn-rs-section';
+        s2.innerHTML = '<div class="msn-rs-label">Options</div>';
+        const actionsWrap = document.createElement('div');
+        actionsWrap.className = 'msn-rs-actions';
+        s2.appendChild(actionsWrap);
+        right.appendChild(s2);
 
-    chatPanel.appendChild(right);
+        chatPanel.appendChild(right);
 
-    // ⚑ chatTabs is intentionally NOT moved — it stays in the chat panel.
-    const moves = [
-        { el: document.getElementById('headerThemeBtn'), into: actionsWrap },
-        { el: document.getElementById('rankingsBtn'),    into: actionsWrap },
-        { el: document.getElementById('modSettingsBtn'), into: actionsWrap },
-        // ⚑ refreshBtn is intentionally NOT moved — stays in header right of Phantom
-    ];
+        // ⚑ chatTabs stays in the chat panel — NOT moved here.
+        const moves = [
+            { el: document.getElementById('headerThemeBtn'), into: actionsWrap, label: 'SKINS' },
+            { el: document.getElementById('rankingsBtn'),    into: actionsWrap, label: 'RANK'  },
+            { el: document.getElementById('modSettingsBtn'), into: actionsWrap, label: 'MOD'   },
+        ];
 
-    moves.forEach(({ el, into }) => {
-        if (!el || !into) return;
-        _rsMoved.push({
-            el,
-            parent: el.parentNode,
-            next: el.nextSibling
+        moves.forEach(({ el, into, label }) => {
+            if (!el || !into) return;
+
+            _rsMoved.push({
+                el,
+                parent: el.parentNode,
+                next: el.nextSibling
+            });
+
+            // Inject the text label if it isn't already there
+            if (label && !el.querySelector('.msn-rs-card-label')) {
+                const lbl = document.createElement('span');
+                lbl.className = 'msn-rs-card-label';
+                lbl.textContent = label;
+                el.appendChild(lbl);
+            }
+
+            // Tag the button so we can style/cleanup consistently
+            el.classList.add('msn-rs-card');
+
+            into.appendChild(el);
         });
-        into.appendChild(el);
-    });
-}
+    }
 
     function destroyRightSidebar() {
         const right = document.getElementById('msnRightSidebar');
         if (!right) return;
+
         _rsMoved.forEach(({ el, parent, next }) => {
             if (!parent) return;
+
+            // Strip the sidebar-only label + card class before returning to header
+            const lbl = el.querySelector('.msn-rs-card-label');
+            if (lbl) lbl.remove();
+            el.classList.remove('msn-rs-card');
+
             try {
                 if (next && next.parentNode === parent) {
                     parent.insertBefore(el, next);
@@ -2499,6 +2547,7 @@
                 parent.appendChild(el);
             }
         });
+
         _rsMoved.length = 0;
         right.remove();
     }
