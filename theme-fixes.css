@@ -1391,3 +1391,130 @@ html body .mod-message-box .mod-badge {
         align-self: end !important;
     }
 }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ THEME SELECTOR — centered, 2× bigger, shows current
+   Desktop + mobile. Beats every theme via !important.
+   .theme-select is the dropdown; if a theme button opens
+   a picker overlay, its rules are here too.
+═════════════════════════════════════════════════════ */
+
+/* ── The <select> itself ── */
+.theme-select,
+select.theme-select,
+#themeSelect,
+#themeSelector {
+    text-align: center !important;
+    text-align-last: center !important;
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    padding: 8px 12px !important;
+    height: auto !important;
+    min-height: 44px !important;
+    line-height: 1.2 !important;
+}
+
+/* Center visible selected option in WebKit/Safari */
+.theme-select::-webkit-inner-spin-button,
+.theme-select::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+/* Options inside the popup list */
+.theme-select option {
+    font-size: 1.1rem !important;
+    text-align: center !important;
+    padding: 8px 10px !important;
+}
+
+/* ── If it's a button (opens a picker) ── */
+#headerThemeBtn:not(.msn-rs-card),
+.theme-btn,
+button.theme-select {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.2 !important;
+    gap: 8px !important;
+    white-space: nowrap !important;
+}
+
+/* ── Theme picker OVERLAY (if a theme opens a modal) ── */
+#themeOverlay,
+#themeModal,
+#themePickerOverlay,
+.theme-overlay,
+.theme-modal,
+.theme-picker-overlay {
+    text-align: center !important;
+}
+
+#themeOverlay .overlay-card,
+#themeModal .overlay-card,
+#themePickerOverlay .overlay-card,
+.theme-overlay .overlay-card,
+.theme-modal .overlay-card,
+.theme-picker-overlay .overlay-card {
+    text-align: center !important;
+}
+
+#themeOverlay h3,
+#themeModal h3,
+#themePickerOverlay h3,
+.theme-overlay h3,
+.theme-modal h3,
+.theme-picker-overlay h3 {
+    text-align: center !important;
+    font-size: 1.4rem !important;
+    letter-spacing: 0.12em !important;
+    margin-bottom: 18px !important;
+}
+
+#themeOverlay button,
+#themeModal button,
+#themePickerOverlay button,
+.theme-overlay button,
+.theme-modal button,
+.theme-picker-overlay button,
+#themeOverlay .theme-option,
+#themeModal .theme-option,
+#themePickerOverlay .theme-option,
+.theme-overlay .theme-option,
+.theme-modal .theme-option,
+.theme-picker-overlay .theme-option {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    padding: 12px 16px !important;
+    gap: 10px !important;
+    line-height: 1.3 !important;
+    width: 100% !important;
+    min-height: 52px !important;
+    white-space: normal !important;
+}
+
+#themeOverlay .theme-option span,
+#themeModal .theme-option span,
+.theme-picker-overlay .theme-option span,
+#themeOverlay .theme-option .emoji,
+.theme-modal .theme-option .emoji {
+    font-size: 1.6rem !important;
+    line-height: 1 !important;
+}
+
+/* Mobile — keep the emoji-only circle button small, but
+   the picker overlay itself still uses the bigger sizes. */
+@media (max-width: 768px) {
+    .header-right .theme-select {
+        font-size: 0 !important;
+    }
+}
