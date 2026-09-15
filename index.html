@@ -46,8 +46,8 @@
     </script>
 
     <!-- Separate fixes: Phantom toast + token contrast -->
-    <link rel="stylesheet" href="theme-fixes.css?v=69">
-    <link rel="stylesheet" href="chat-texture.css?v=1">
+    <link rel="stylesheet" href="theme-fixes.css?v=70">
+    <link rel="stylesheet" href="chat-texture.css?v=2">
 
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -249,7 +249,10 @@
             <div class="sidebar-section-label">
                 🔵 ACTIVE USERS <span class="active-users-count" id="sidebarActiveUsersCount">0</span>
             </div>
+            <!-- ⚑ Theme + Rank: both live in the sidebar as row buttons on mobile.
+                 Desktop script.js moves #rankingsBtn into the right sidebar. -->
             <button class="btn-icon sidebar-theme-btn" id="sidebarThemeBtn" title="Change theme">🎨</button>
+            <button class="btn-icon rankings-btn" id="rankingsBtn" title="Rankings">🏆</button>
             <div class="sidebar-users" id="sidebarUsers">
                 <div class="no-users-sidebar">No one else online</div>
             </div>
@@ -301,7 +304,6 @@
                     <span class="wallet-address" id="walletAddress"></span>
                     <button class="btn-icon hidden" id="modSettingsBtn" title="Mod Settings">⚙️</button>
                     <button class="btn-icon header-theme-btn" id="headerThemeBtn" title="Change theme">🎨</button>
-                    <button class="btn-icon rankings-btn" id="rankingsBtn" title="Rankings">🏆</button>
                     <button class="btn-icon" id="refreshBtn" title="Reconnect"><span class="spin-icon">↻</span></button>
                 </div>
             </div>
