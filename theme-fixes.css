@@ -17,9 +17,7 @@ html, body {
     padding: 0;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 .app-shell,
 .chat-panel,
@@ -32,18 +30,14 @@ html, body {
 }
 
 /* ── Phantom connected toast – centered, clean, auto‑vanish ── */
-.error-toast {
-    display: none !important;
-}
+.error-toast { display: none !important; }
 .error-toast.visible {
     display: block !important;
     position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
+    top: 50% !important; left: 50% !important;
     transform: translate(-50%, -50%) !important;
     z-index: 9999 !important;
     pointer-events: auto !important;
-
     background: var(--bg-panel, #111827) !important;
     color: var(--text-primary, #ffffff) !important;
     border: 1px solid var(--accent-cyan, #20FF62) !important;
@@ -55,7 +49,6 @@ html, body {
     max-width: 90vw !important;
     text-align: center !important;
     white-space: normal !important;
-
     animation: toastFadeOut 6.5s ease-in-out forwards !important;
 }
 @keyframes toastFadeOut {
@@ -63,10 +56,6 @@ html, body {
     88%  { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
 }
-
-/* Explicit desktop styling – larger, more visible.
-   No left offset — the 280px left sidebar + 280px right sidebar
-   balance, so left:50% IS the center of the visible chat area. */
 @media (min-width: 769px) {
     .error-toast.visible {
         padding: 14px 32px !important;
@@ -83,36 +72,22 @@ html, body {
     color: var(--text-secondary, #94a3b8) !important;
     white-space: nowrap !important;
 }
-
-/* Header wallet on desktop */
 @media (min-width: 769px) {
-    .header-right .wallet-address {
-        display: inline !important;
-    }
+    .header-right .wallet-address { display: inline !important; }
 }
-
-/* Hide header wallet on mobile, show in sidebar */
 @media (max-width: 768px) {
-    .header-right .wallet-address {
-        display: none !important;
-    }
+    .header-right .wallet-address { display: none !important; }
     .sidebar-footer .wallet-address {
         display: inline !important;
         font-size: 0.75rem !important;
     }
 }
-.sidebar-footer .wallet-address {
-    display: none;
-}
+.sidebar-footer .wallet-address { display: none; }
 
 /* ── Phantom Wallet perfect fit ── */
 html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+    height: 100%; margin: 0; padding: 0; overflow: hidden;
 }
-
 .app-shell {
     height: 100vh;
     height: 100dvh;
@@ -121,16 +96,12 @@ html, body {
     padding: 0 !important;
     box-sizing: border-box;
 }
-
-/* Chat panel fills shell */
 .chat-panel {
     display: flex;
     flex-direction: column;
     height: 100%;
     position: relative;
 }
-
-/* Messages area – scrollable, reduced bottom padding */
 .messages-container {
     flex: 1;
     overflow-y: auto;
@@ -142,16 +113,12 @@ html, body {
     max-width: 100%;
     min-height: 0;
 }
-
-/* ── Input bar – close to the bottom, safe-area aware ── */
 .input-area-bar {
     flex-shrink: 0;
     padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
     margin-bottom: 0 !important;
     box-sizing: border-box;
 }
-
-/* ── Desktop‑only compact input bar ── */
 @media (min-width: 769px) {
     .input-area-bar {
         padding-bottom: 8px !important;
@@ -159,36 +126,20 @@ html, body {
         padding-top: 6px !important;
         gap: 6px;
     }
-
-    #messageInput {
-        padding: 8px 12px !important;
-    }
-
-    button.send-btn-main {
-        padding: 8px 18px !important;
-    }
-
-    .btn-upload-img {
-        width: 40px !important;
-        height: 40px !important;
-    }
+    #messageInput { padding: 8px 12px !important; }
+    button.send-btn-main { padding: 8px 18px !important; }
+    .btn-upload-img { width: 40px !important; height: 40px !important; }
 }
 
-/* Scroll‑to‑bottom button – above input, raised */
 .scroll-bottom-btn {
     position: absolute !important;
     bottom: calc(160px + env(safe-area-inset-bottom)) !important;
     right: 16px !important;
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     z-index: 20;
     display: none;
 }
-.scroll-bottom-btn.visible {
-    display: flex !important;
-}
-
-/* Desktop: lower scroll-to-bottom button closer to input */
+.scroll-bottom-btn.visible { display: flex !important; }
 @media (min-width: 769px) {
     .scroll-bottom-btn {
         bottom: calc(80px + env(safe-area-inset-bottom)) !important;
@@ -199,7 +150,6 @@ html, body {
    MOBILE – force-fit to the REAL visible viewport
 ===================================================== */
 @media (max-width: 768px) {
-
     html, body {
         position: fixed !important;
         top: 0; left: 0; right: 0;
@@ -208,8 +158,6 @@ html, body {
         max-height: var(--app-height) !important;
         overflow: hidden !important;
     }
-
-    /* Shell = exact visible area */
     .app-shell {
         position: fixed !important;
         top: 0 !important; left: 0 !important; right: 0 !important;
@@ -219,8 +167,6 @@ html, body {
         display: flex !important;
         overflow: hidden !important;
     }
-
-    /* Chat panel = column, fills shell */
     .chat-panel {
         display: flex !important;
         flex-direction: column !important;
@@ -231,8 +177,6 @@ html, body {
         padding: 0 !important;
         margin: 0 !important;
     }
-
-    /* Messages = the scrollable middle region */
     .messages-container {
         flex: 1 1 auto !important;
         min-height: 0 !important;
@@ -240,8 +184,6 @@ html, body {
         padding: 0 14px 6px !important;
         margin: 0 !important;
     }
-
-    /* Input bar = pinned flush at the real bottom */
     .input-area-bar {
         flex: 0 0 auto !important;
         padding: 6px 12px 8px !important;
@@ -249,8 +191,6 @@ html, body {
         box-sizing: border-box !important;
         background: var(--bg-panel, #111827);
     }
-
-    /* Sidebar = fills the real visible viewport */
     .sidebar {
         position: fixed !important;
         top: 0 !important; left: 0 !important;
@@ -266,14 +206,11 @@ html, body {
         overflow: hidden !important;
         -webkit-overflow-scrolling: touch;
     }
-
     .sidebar-users {
         flex: 1 1 auto !important;
         min-height: 0 !important;
         overflow-y: auto !important;
     }
-
-    /* Sidebar footer = flush at the real bottom */
     .sidebar-footer {
         flex: 0 0 auto !important;
         padding: 6px 12px 8px !important;
@@ -283,8 +220,6 @@ html, body {
         align-items: center !important;
         gap: 6px !important;
     }
-
-    /* Theme button in sidebar */
     .sidebar-theme-btn {
         position: absolute;
         top: 33px;
@@ -292,14 +227,10 @@ html, body {
         display: flex;
         z-index: 30;
     }
-
-    /* Scroll-to-bottom arrow — sits just above the input bar */
     .scroll-bottom-btn {
         bottom: 60px !important;
         right: 16px !important;
     }
-
-    /* ── Mobile header ── */
     .header-right .badge-pill,
     .header-right .online-count-badge,
     .header-right .wallet-address,
@@ -316,24 +247,21 @@ html, body {
     }
     .header-right .phantom-btn {
         display: inline-flex !important;
-        width: 38px;
-        height: 38px;
+        width: 38px; height: 38px;
         padding: 0;
         justify-content: center;
         align-items: center;
         border-radius: 50%;
     }
     .header-right .phantom-btn img {
-        width: 24px;
-        height: 24px;
+        width: 24px; height: 24px;
         object-fit: contain;
     }
     .header-right .theme-select {
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
-        width: 34px;
-        height: 34px;
+        width: 34px; height: 34px;
         padding: 0;
         border-radius: 50%;
         border: 1px solid var(--border-default, #454B4B);
@@ -354,7 +282,7 @@ html, body {
     }
 }
 
-/* ── Center rank badge between name and status (both desktop & mobile) ── */
+/* ── Center rank badge ── */
 .big-rank {
     margin: 2px 0 !important;
     line-height: 1.2;
@@ -373,7 +301,6 @@ html, body {
 /* =====================================================
    MESSAGES + REACTIONS
 ===================================================== */
-
 .msg-wrapper {
     overflow: visible !important;
     max-width: 82% !important;
@@ -384,18 +311,10 @@ html, body {
     max-width: 82% !important;
     align-self: flex-end !important;
 }
-
 @media (max-width: 768px) {
-    .msg-wrapper {
-        max-width: 92% !important;
-        align-self: flex-start !important;
-    }
-    .msg-wrapper.own {
-        max-width: 92% !important;
-        align-self: flex-end !important;
-    }
+    .msg-wrapper { max-width: 92% !important; align-self: flex-start !important; }
+    .msg-wrapper.own { max-width: 92% !important; align-self: flex-end !important; }
 }
-
 .msg-bubble {
     display: flex;
     flex-direction: column;
@@ -406,14 +325,8 @@ html, body {
     overflow-wrap: break-word;
     word-break: break-word;
 }
-.msg-bubble > * {
-    max-width: 100%;
-}
-@media (max-width: 480px) {
-    .msg-bubble {
-        min-width: 160px;
-    }
-}
+.msg-bubble > * { max-width: 100%; }
+@media (max-width: 480px) { .msg-bubble { min-width: 160px; } }
 
 .msg-text,
 .msg-text a,
@@ -423,19 +336,11 @@ html, body {
     white-space: normal !important;
     max-width: 100% !important;
 }
-.msg-text a {
-    word-break: break-all !important;
-}
+.msg-text a { word-break: break-all !important; }
 
 .msg-image-wrap,
-.msg-image-wrap img {
-    max-width: 100% !important;
-    height: auto;
-}
-.msg-image-wrap img {
-    display: block;
-    object-fit: contain;
-}
+.msg-image-wrap img { max-width: 100% !important; height: auto; }
+.msg-image-wrap img { display: block; object-fit: contain; }
 
 .reactions-bar {
     display: flex !important;
@@ -449,24 +354,16 @@ html, body {
     flex-shrink: 0 !important;
     white-space: nowrap !important;
 }
-
 @media (min-width: 769px) {
-    .msg-bubble .reaction-btn {
-        padding: 3px 8px;
-        font-size: 0.68rem;
-    }
+    .msg-bubble .reaction-btn { padding: 3px 8px; font-size: 0.68rem; }
 }
 @media (max-width: 768px) {
-    .msg-bubble .reaction-btn {
-        padding: 3px 7px;
-        font-size: 0.65rem;
-    }
+    .msg-bubble .reaction-btn { padding: 3px 7px; font-size: 0.65rem; }
 }
 
 /* =====================================================
    X / TWITTER EMBEDS
 ===================================================== */
-
 .msg-bubble .twitter-tweet-rendered,
 .msg-bubble iframe[id^="twitter-widget"] {
     max-width: 100% !important;
@@ -477,7 +374,6 @@ html, body {
     border: 0 !important;
     box-shadow: none !important;
 }
-
 .msg-bubble blockquote.twitter-tweet {
     position: relative;
     display: block;
@@ -490,7 +386,6 @@ html, body {
     max-width: 100%;
     overflow: visible;
 }
-
 .msg-bubble blockquote.twitter-tweet a {
     position: absolute !important;
     width: 1px !important;
@@ -503,14 +398,11 @@ html, body {
     border: 0 !important;
     opacity: 0 !important;
 }
-
 .msg-bubble blockquote.twitter-tweet::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 30px;
-    height: 30px;
+    top: 50%; left: 50%;
+    width: 30px; height: 30px;
     margin: -15px 0 0 -15px;
     border: 3px solid rgba(0, 240, 255, 0.2);
     border-top-color: var(--accent-cyan, #00f0ff);
@@ -520,23 +412,18 @@ html, body {
     pointer-events: none;
     z-index: 2;
 }
-@keyframes tweetSpinner {
-    to { transform: rotate(360deg); }
-}
-
+@keyframes tweetSpinner { to { transform: rotate(360deg); } }
 .msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered::before,
 .msg-bubble blockquote.twitter-tweet:has(iframe[id^="twitter-widget"])::before {
     content: none !important;
     display: none !important;
     animation: none !important;
 }
-
 .msg-bubble blockquote.twitter-tweet.twitter-tweet-rendered,
 .msg-bubble blockquote.twitter-tweet:has(iframe[id^="twitter-widget"]) {
     min-height: 0 !important;
     padding: 0 !important;
 }
-
 @media (min-width: 769px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
@@ -545,13 +432,11 @@ html, body {
         max-width: 100%;
     }
 }
-
 @media (max-width: 768px) {
     .msg-wrapper:has(.twitter-tweet) .msg-bubble,
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
     .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble {
-        width: 100%;
-        min-width: 0;
+        width: 100%; min-width: 0;
     }
     .msg-bubble .twitter-tweet-rendered,
     .msg-bubble iframe[id^="twitter-widget"] {
@@ -572,12 +457,10 @@ html, body {
     line-height: 1.2;
     text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
 }
-.big-level.hidden {
-    display: none;
-}
+.big-level.hidden { display: none; }
 
 /* =====================================================
-   DAILY STREAK – 7 FIRE DISPLAY (desktop only)
+   DAILY STREAK
 ===================================================== */
 .sidebar-streak-display {
     display: flex;
@@ -585,65 +468,43 @@ html, body {
     justify-content: center;
     gap: 6px;
     padding: 10px 14px;
-    background: linear-gradient(
-        135deg,
+    background: linear-gradient(135deg,
         rgba(249, 115, 22, 0.08) 0%,
-        rgba(249, 115, 22, 0.02) 100%
-    );
+        rgba(249, 115, 22, 0.02) 100%);
     border-top: 1px solid var(--border-default, #233261);
     border-bottom: 1px solid var(--border-default, #233261);
     flex-shrink: 0;
     position: relative;
 }
-
 .sidebar-streak-display::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(249, 115, 22, 0.5),
-        transparent
-    );
+    background: linear-gradient(90deg,
+        transparent, rgba(249, 115, 22, 0.5), transparent);
 }
-
-.sidebar-streak-display.hidden {
-    display: none !important;
-}
-
-.streak-fires {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-}
-
+.sidebar-streak-display.hidden { display: none !important; }
+.streak-fires { display: flex; align-items: center; gap: 3px; }
 .fire-slot {
     font-size: 1.15rem;
     line-height: 1;
     display: inline-block;
     transition: all 0.3s;
 }
-
 .fire-slot.fire-filled {
     filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.9))
             drop-shadow(0 0 12px rgba(255, 165, 0, 0.4));
     animation: fireFlicker 1.8s ease-in-out infinite;
 }
-
 .fire-slot.fire-empty {
     filter: grayscale(100%) brightness(0.4);
     opacity: 0.25;
 }
-
 @keyframes fireFlicker {
     0%, 100% { transform: scale(1); }
     50%      { transform: scale(1.08); }
 }
-
 .streak-overflow {
     font-size: 0.82rem;
     font-weight: 800;
@@ -653,12 +514,6 @@ html, body {
     margin-left: 2px;
 }
 .streak-overflow.hidden { display: none; }
-
-@media (max-width: 768px) {
-    .sidebar-streak-display {
-        display: none !important;
-    }
-}
 
 /* =====================================================
    RESET LOGIN BUTTON
@@ -684,9 +539,7 @@ html, body {
     box-shadow: 0 0 10px rgba(255, 92, 124, 0.4);
     color: #fff;
 }
-.reset-login-btn:active {
-    transform: scale(0.98);
-}
+.reset-login-btn:active { transform: scale(0.98); }
 
 /* =====================================================
    STREAK TOAST
@@ -722,8 +575,6 @@ html, body {
     88%  { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
 }
-
-/* Desktop – larger text/padding. No left offset. */
 @media (min-width: 769px) {
     .streak-toast {
         padding: 14px 32px;
@@ -741,34 +592,28 @@ html, body {
     position: relative;
     transition: all 0.25s ease;
 }
-
 .phantom-btn.connected,
 .phantom-overlay-btn.connected {
     border-color: #22c55e !important;
     box-shadow: 0 0 10px rgba(34,197,94,0.5), inset 0 0 6px rgba(34,197,94,0.15) !important;
     background: rgba(34,197,94,0.12) !important;
 }
-
 .phantom-btn.connected::after,
 .phantom-overlay-btn.connected::after {
     content: '';
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 8px;
-    height: 8px;
+    bottom: 2px; right: 2px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: #22c55e !important;
     border: 1.5px solid var(--bg-panel, #111827);
     box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34,197,94,0.8) !important;
     animation: phantomPulse 2s ease-in-out infinite;
 }
-
 @keyframes phantomPulse {
     0%,100% { transform: scale(1); opacity: 1; }
     50%     { transform: scale(1.25); opacity: 0.75; }
 }
-
 .phantom-overlay-btn.connected {
     border-color: rgba(255,92,124,0.6) !important;
     background: rgba(255,92,124,0.12) !important;
@@ -778,32 +623,23 @@ html, body {
     background: #22c55e !important;
     box-shadow: 0 0 6px #22c55e, 0 0 12px rgba(34,197,94,0.8) !important;
 }
-.phantom-overlay-btn.connected span {
-    color: #ffb3c1;
-}
-
+.phantom-overlay-btn.connected span { color: #ffb3c1; }
 .phantom-btn.connected:hover {
     border-color: var(--accent-red, #ff5c7c) !important;
     box-shadow: 0 0 14px rgba(255,92,124,0.5) !important;
 }
-.phantom-overlay-btn.connected:hover {
-    background: rgba(255,92,124,0.25) !important;
-}
+.phantom-overlay-btn.connected:hover { background: rgba(255,92,124,0.25) !important; }
 
 /* ═════════════════════════════════════════════════════
    ⚑ TOASTS FORCED CENTERED ON EVERY THEME
-   Center = 50% (280px left sidebar + 280px right sidebar
-   balance out). No offset. Works on OG, Orange, all themes.
 ═════════════════════════════════════════════════════ */
 .error-toast.visible,
 body .error-toast.visible,
 html body .error-toast.visible {
     display: block !important;
     position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
+    top: 50% !important; left: 50% !important;
+    right: auto !important; bottom: auto !important;
     transform: translate(-50%, -50%) !important;
     margin: 0 !important;
     z-index: 99999 !important;
@@ -813,16 +649,13 @@ html body .error-toast.visible {
     max-width: 90vw !important;
     animation: toastFadeOut 6.5s ease-in-out forwards !important;
 }
-
 .streak-toast.visible,
 body .streak-toast.visible,
 html body .streak-toast.visible {
     display: block !important;
     position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    right: auto !important;
-    bottom: auto !important;
+    top: 50% !important; left: 50% !important;
+    right: auto !important; bottom: auto !important;
     transform: translate(-50%, -50%) !important;
     margin: 0 !important;
     z-index: 99999 !important;
@@ -842,36 +675,26 @@ html body .streak-toast.visible {
         isolation: isolate !important;
         overflow: hidden !important;
     }
-
     .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card::after {
         content: '' !important;
         position: absolute !important;
         inset: 0 !important;
-
         background-image: url('https://i.postimg.cc/85PqTLJq/Chat-GPT-Image-14-sept-2026-03-21-20-a-m-(1).png') !important;
         background-size: cover !important;
         background-position: center !important;
         background-repeat: no-repeat !important;
-
         opacity: 0.18 !important;
         mix-blend-mode: soft-light !important;
-
         -webkit-mask-image: radial-gradient(ellipse at center,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.85) 55%,
-            rgba(0,0,0,0.3) 85%,
-            rgba(0,0,0,0) 100%) !important;
+            rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%) !important;
         mask-image: radial-gradient(ellipse at center,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.85) 55%,
-            rgba(0,0,0,0.3) 85%,
-            rgba(0,0,0,0) 100%) !important;
-
+            rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%) !important;
         pointer-events: none !important;
         z-index: 0 !important;
         border-radius: inherit !important;
     }
-
     .msn-right-sidebar .msn-rs-actions #headerThemeBtn.msn-rs-card > * {
         position: relative !important;
         z-index: 1 !important;
@@ -880,7 +703,6 @@ html body .streak-toast.visible {
 
 /* ═════════════════════════════════════════════════════
    ⚑ RANK ICON CONTAINER — soft alpha blend (DESKTOP ONLY)
-   Same treatment as the theme icon container, its own image.
 ═════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
     .msn-right-sidebar .msn-rs-actions #rankingsBtn.msn-rs-card {
@@ -888,36 +710,26 @@ html body .streak-toast.visible {
         isolation: isolate !important;
         overflow: hidden !important;
     }
-
     .msn-right-sidebar .msn-rs-actions #rankingsBtn.msn-rs-card::after {
         content: '' !important;
         position: absolute !important;
         inset: 0 !important;
-
         background-image: url('https://i.postimg.cc/yxPGtPTx/Chat-GPT-Image-14-sept-2026-04-59-15.png') !important;
         background-size: cover !important;
         background-position: center !important;
         background-repeat: no-repeat !important;
-
         opacity: 0.18 !important;
         mix-blend-mode: soft-light !important;
-
         -webkit-mask-image: radial-gradient(ellipse at center,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.85) 55%,
-            rgba(0,0,0,0.3) 85%,
-            rgba(0,0,0,0) 100%) !important;
+            rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%) !important;
         mask-image: radial-gradient(ellipse at center,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.85) 55%,
-            rgba(0,0,0,0.3) 85%,
-            rgba(0,0,0,0) 100%) !important;
-
+            rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%) !important;
         pointer-events: none !important;
         z-index: 0 !important;
         border-radius: inherit !important;
     }
-
     .msn-right-sidebar .msn-rs-actions #rankingsBtn.msn-rs-card > * {
         position: relative !important;
         z-index: 1 !important;
@@ -926,7 +738,6 @@ html body .streak-toast.visible {
 
 /* ═════════════════════════════════════════════════════
    ⚑ MOD ICON CONTAINER — soft alpha blend (DESKTOP ONLY)
-   Same treatment as the SKINS + RANK cards, its own image.
 ═════════════════════════════════════════════════════ */
 @media (min-width: 769px) {
     .msn-right-sidebar .msn-rs-actions #modSettingsBtn.msn-rs-card {
@@ -934,36 +745,26 @@ html body .streak-toast.visible {
         isolation: isolate !important;
         overflow: hidden !important;
     }
-
     .msn-right-sidebar .msn-rs-actions #modSettingsBtn.msn-rs-card::after {
         content: '' !important;
         position: absolute !important;
         inset: 0 !important;
-
         background-image: url('https://i.postimg.cc/90GTkrdk/images-(33).png') !important;
         background-size: cover !important;
         background-position: center !important;
         background-repeat: no-repeat !important;
-
         opacity: 0.18 !important;
         mix-blend-mode: soft-light !important;
-
         -webkit-mask-image: radial-gradient(ellipse at center,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.85) 55%,
-            rgba(0,0,0,0.3) 85%,
-            rgba(0,0,0,0) 100%) !important;
+            rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%) !important;
         mask-image: radial-gradient(ellipse at center,
-            rgba(0,0,0,1) 0%,
-            rgba(0,0,0,0.85) 55%,
-            rgba(0,0,0,0.3) 85%,
-            rgba(0,0,0,0) 100%) !important;
-
+            rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 55%,
+            rgba(0,0,0,0.3) 85%, rgba(0,0,0,0) 100%) !important;
         pointer-events: none !important;
         z-index: 0 !important;
         border-radius: inherit !important;
     }
-
     .msn-right-sidebar .msn-rs-actions #modSettingsBtn.msn-rs-card > * {
         position: relative !important;
         z-index: 1 !important;
@@ -972,8 +773,6 @@ html body .streak-toast.visible {
 
 /* ═════════════════════════════════════════════════════
    ⚑ SIDEBAR OPTION LABELS — 2× bigger
-   SKINS / RANK / MOD text under each right-sidebar card.
-   Desktop only (the right sidebar only exists on desktop).
 ═════════════════════════════════════════════════════ */
 .msn-right-sidebar .msn-rs-actions .msn-rs-card-label {
     font-size: 1.44rem !important;
@@ -982,9 +781,7 @@ html body .streak-toast.visible {
 }
 
 /* ═════════════════════════════════════════════════════
-   ⚑ PINNED ANNOUNCEMENT — full width of chat container,
-   text centered. Applies on desktop + phantom (mobile).
-   `html body` prefix beats the injected script.js rules.
+   ⚑ PINNED ANNOUNCEMENT
 ═════════════════════════════════════════════════════ */
 html body .mod-message-box {
     align-self: stretch !important;
@@ -997,17 +794,11 @@ html body .mod-message-box {
     text-align: center !important;
     box-sizing: border-box !important;
 }
-
 html body .mod-message-box .mod-message-text {
     flex: 0 1 auto !important;
     text-align: center !important;
 }
-
-html body .mod-message-box .mod-badge {
-    flex-shrink: 0 !important;
-}
-
-/* Phantom — keep full width + centered */
+html body .mod-message-box .mod-badge { flex-shrink: 0 !important; }
 @media (max-width: 768px) {
     html body .mod-message-box {
         width: 100% !important;
@@ -1025,9 +816,6 @@ html body .mod-message-box .mod-badge {
 
 /* ═════════════════════════════════════════════════════
    ⚑ RANKINGS OVERLAY — BULLETPROOF
-   Now lives here (theme-fixes.css) so it always loads.
-   #rankingsOverlay prefix → (1,0,0) specificity, cannot
-   be overridden by any class-based rule from any theme.
 ═════════════════════════════════════════════════════ */
 #rankingsOverlay .rankings-card {
     max-width: 900px !important;
@@ -1053,15 +841,12 @@ html body .mod-message-box .mod-badge {
     top: 0; left: 0; right: 0;
     height: 2px !important;
     background: linear-gradient(90deg,
-        transparent 0%,
-        var(--accent-cyan) 30%,
-        var(--accent-magenta) 70%,
-        transparent 100%) !important;
+        transparent 0%, var(--accent-cyan) 30%,
+        var(--accent-magenta) 70%, transparent 100%) !important;
     opacity: 0.85 !important;
     pointer-events: none !important;
     z-index: 2 !important;
 }
-
 #rankingsOverlay .rankings-header {
     display: flex !important;
     align-items: center !important;
@@ -1083,10 +868,8 @@ html body .mod-message-box .mod-badge {
     line-height: 1 !important;
 }
 #rankingsOverlay .rankings-close-btn {
-    width: 30px !important;
-    height: 30px !important;
-    min-width: 30px !important;
-    max-width: 30px !important;
+    width: 30px !important; height: 30px !important;
+    min-width: 30px !important; max-width: 30px !important;
     border-radius: 5px !important;
     background: var(--bg-input) !important;
     border: 1px solid var(--border-default) !important;
@@ -1106,7 +889,6 @@ html body .mod-message-box .mod-badge {
     box-shadow: 0 0 12px rgba(255, 32, 42, 0.5) !important;
     transform: rotate(90deg) !important;
 }
-
 #rankingsOverlay .rankings-body {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
@@ -1136,16 +918,13 @@ html body .mod-message-box .mod-badge {
 #rankingsOverlay .rankings-column-title::after {
     content: '' !important;
     position: absolute !important;
-    bottom: -1px !important;
-    left: 0 !important;
-    width: 60px !important;
-    height: 2px !important;
+    bottom: -1px !important; left: 0 !important;
+    width: 60px !important; height: 2px !important;
     background: currentColor !important;
     box-shadow: 0 0 8px currentColor !important;
 }
 #rankingsOverlay .rankings-column:nth-child(1) .rankings-column-title { color: var(--accent-cyan) !important; }
 #rankingsOverlay .rankings-column:nth-child(2) .rankings-column-title { color: var(--accent-orange) !important; }
-
 #rankingsOverlay .rankings-list {
     display: flex !important;
     flex-direction: column !important;
@@ -1163,7 +942,6 @@ html body .mod-message-box .mod-badge {
     background: var(--border-default) !important;
     border-radius: 3px !important;
 }
-
 #rankingsOverlay .rankings-empty {
     display: flex !important;
     align-items: center !important;
@@ -1179,7 +957,6 @@ html body .mod-message-box .mod-badge {
     border-radius: 6px !important;
     font-weight: 700 !important;
 }
-
 #rankingsOverlay .rankings-list > .rank-row {
     counter-increment: rank !important;
     display: grid !important;
@@ -1228,13 +1005,10 @@ html body .mod-message-box .mod-badge {
     background: var(--accent-cyan) !important;
     box-shadow: 0 0 8px var(--accent-cyan) !important;
 }
-
 #rankingsOverlay .rank-avatar,
 #rankingsOverlay .rank-avatar-fallback {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
+    width: 32px !important; height: 32px !important;
+    min-width: 32px !important; min-height: 32px !important;
     border-radius: 50% !important;
     object-fit: cover !important;
     border: 1px solid var(--border-default) !important;
@@ -1248,7 +1022,6 @@ html body .mod-message-box .mod-badge {
     color: var(--accent-cyan) !important;
     flex-shrink: 0 !important;
 }
-
 #rankingsOverlay .rank-info,
 #rankingsOverlay .rank-meta-block {
     display: flex !important;
@@ -1296,7 +1069,6 @@ html body .mod-message-box .mod-badge {
     font-weight: 700 !important;
     white-space: nowrap !important;
 }
-
 #rankingsOverlay .rank-stats {
     display: flex !important;
     align-items: center !important;
@@ -1313,8 +1085,6 @@ html body .mod-message-box .mod-badge {
     white-space: nowrap !important;
     line-height: 1 !important;
 }
-
-/* Podium — gold / silver / bronze */
 #rankingsOverlay .rankings-list > .rank-row:nth-child(1) {
     background: linear-gradient(90deg, rgba(246, 187, 22, 0.14) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(255, 213, 74, 0.65) !important;
@@ -1326,7 +1096,6 @@ html body .mod-message-box .mod-badge {
 #rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-avatar-fallback { border-color: #FFD54A !important; }
 #rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-name,
 #rankingsOverlay .rankings-list > .rank-row:nth-child(1) .rank-score { color: #FFD54A !important; }
-
 #rankingsOverlay .rankings-list > .rank-row:nth-child(2) {
     background: linear-gradient(90deg, rgba(200, 220, 240, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(200, 220, 240, 0.5) !important;
@@ -1337,7 +1106,6 @@ html body .mod-message-box .mod-badge {
 #rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-avatar-fallback { border-color: #C8DCF0 !important; }
 #rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-name,
 #rankingsOverlay .rankings-list > .rank-row:nth-child(2) .rank-score { color: #E4EEFA !important; }
-
 #rankingsOverlay .rankings-list > .rank-row:nth-child(3) {
     background: linear-gradient(90deg, rgba(230, 140, 60, 0.10) 0%, rgba(0, 0, 0, 0.35) 100%) !important;
     border-color: rgba(230, 140, 60, 0.5) !important;
@@ -1348,8 +1116,6 @@ html body .mod-message-box .mod-badge {
 #rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-avatar-fallback { border-color: #E68C3C !important; }
 #rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-name,
 #rankingsOverlay .rankings-list > .rank-row:nth-child(3) .rank-score { color: #FFB073 !important; }
-
-/* Mobile — stacked cards */
 @media (max-width: 768px) {
     #rankingsOverlay .rankings-card {
         max-width: 96% !important;
@@ -1399,9 +1165,7 @@ html body .mod-message-box .mod-badge {
         background: var(--accent-orange) !important;
         box-shadow: 0 0 10px var(--accent-orange) !important;
     }
-    #rankingsOverlay .rankings-column-title {
-        padding-left: 8px !important;
-    }
+    #rankingsOverlay .rankings-column-title { padding-left: 8px !important; }
     #rankingsOverlay .rankings-column-title::after { display: none !important; }
     #rankingsOverlay .rankings-list > .rank-row {
         grid-template-columns: 20px 34px 1fr auto !important;
@@ -1440,13 +1204,7 @@ html body .mod-message-box .mod-badge {
 
 /* ═════════════════════════════════════════════════════
    ⚑ THEME SELECTOR — emoji LEFT, text CENTERED, 2× bigger
-   Each row is a 3-column grid:
-       [ emoji ]   [ centered label ]   [ invisible spacer ]
-   So the label sits at the TRUE center of the row, not
-   shifted by the emoji column.
 ═════════════════════════════════════════════════════ */
-
-/* ── The <select> itself (header dropdown) ── */
 .theme-select,
 select.theme-select,
 #themeSelect,
@@ -1461,19 +1219,13 @@ select.theme-select,
     min-height: 44px !important;
     line-height: 1.2 !important;
 }
-
 .theme-select::-webkit-inner-spin-button,
-.theme-select::-webkit-calendar-picker-indicator {
-    display: none;
-}
-
+.theme-select::-webkit-calendar-picker-indicator { display: none; }
 .theme-select option {
     font-size: 1.1rem !important;
     text-align: center !important;
     padding: 8px 10px !important;
 }
-
-/* ── If it's a button that opens a picker ── */
 #headerThemeBtn:not(.msn-rs-card),
 .theme-btn,
 button.theme-select {
@@ -1488,26 +1240,18 @@ button.theme-select {
     gap: 8px !important;
     white-space: nowrap !important;
 }
-
-/* ── Theme picker OVERLAY ── */
 #themeOverlay,
 #themeModal,
 #themePickerOverlay,
 .theme-overlay,
 .theme-modal,
-.theme-picker-overlay {
-    text-align: center !important;
-}
-
+.theme-picker-overlay { text-align: center !important; }
 #themeOverlay .overlay-card,
 #themeModal .overlay-card,
 #themePickerOverlay .overlay-card,
 .theme-overlay .overlay-card,
 .theme-modal .overlay-card,
-.theme-picker-overlay .overlay-card {
-    text-align: center !important;
-}
-
+.theme-picker-overlay .overlay-card { text-align: center !important; }
 #themeOverlay h3,
 #themeModal h3,
 #themePickerOverlay h3,
@@ -1519,8 +1263,6 @@ button.theme-select {
     letter-spacing: 0.12em !important;
     margin-bottom: 18px !important;
 }
-
-/* ── Each theme option row: emoji LEFT, label CENTERED ── */
 #themeOverlay .theme-option,
 #themeModal .theme-option,
 #themePickerOverlay .theme-option,
@@ -1544,8 +1286,6 @@ button.theme-select {
     min-height: 52px !important;
     white-space: normal !important;
 }
-
-/* Emoji — pinned to the left column */
 #themeOverlay .theme-option .emoji,
 #themeModal .theme-option .emoji,
 #themePickerOverlay .theme-option .emoji,
@@ -1568,8 +1308,6 @@ button.theme-select {
     flex-shrink: 0 !important;
     width: auto !important;
 }
-
-/* Label — centered in the middle column */
 #themeOverlay .theme-option .theme-name,
 #themeModal .theme-option .theme-name,
 #themePickerOverlay .theme-option .theme-name,
@@ -1594,9 +1332,6 @@ button.theme-select {
     text-overflow: ellipsis !important;
     max-width: 100% !important;
 }
-
-/* Invisible right spacer — balances the emoji column so the
-   label sits at the TRUE horizontal center of the row. */
 #themeOverlay .theme-option::after,
 #themeModal .theme-option::after,
 #themePickerOverlay .theme-option::after,
@@ -1609,8 +1344,6 @@ button.theme-select {
     height: 1px !important;
     visibility: hidden !important;
 }
-
-/* Active / selected — keep grid layout intact, just bolder */
 #themeOverlay .theme-option.active,
 #themeModal .theme-option.active,
 #themePickerOverlay .theme-option.active,
@@ -1622,32 +1355,18 @@ button.theme-select {
 .theme-picker-overlay .theme-option.selected {
     font-weight: 800 !important;
 }
-
-/* Mobile — keep the header circle button emoji-only, but
-   the picker overlay itself still uses the bigger layout. */
 @media (max-width: 768px) {
-    .header-right .theme-select {
-        font-size: 0 !important;
-    }
+    .header-right .theme-select { font-size: 0 !important; }
 }
 
 /* ═════════════════════════════════════════════════════
    ⚑ EPIC THEME SELECTOR — each button wears its own theme
-   Every option is styled with the palette of the theme
-   it represents. The active theme gets a subtle pulsing
-   dot + soft glow in its own color — no loud badges.
 ═════════════════════════════════════════════════════ */
-
-#themeOverlay .theme-options {
-    gap: 12px !important;
-}
-
+#themeOverlay .theme-options { gap: 12px !important; }
 #themeOverlay .theme-option {
     position: relative !important;
     transition: all 0.25s ease !important;
 }
-
-/* ── OG (original) — deep navy + cyan ── */
 #themeOverlay .theme-option[data-theme="original"] {
     background: linear-gradient(145deg, #0a1a2e 0%, #050914 100%) !important;
     border: 1px solid #1a3a5c !important;
@@ -1656,13 +1375,9 @@ button.theme-select {
 }
 #themeOverlay .theme-option[data-theme="original"]:hover {
     border-color: #01E1EA !important;
-    box-shadow:
-        0 0 22px rgba(1, 225, 234, 0.5),
-        inset 0 0 14px rgba(1, 225, 234, 0.15) !important;
+    box-shadow: 0 0 22px rgba(1, 225, 234, 0.5), inset 0 0 14px rgba(1, 225, 234, 0.15) !important;
     transform: translateY(-1px) !important;
 }
-
-/* ── Orange — dark amber + orange ── */
 #themeOverlay .theme-option[data-theme="orange"] {
     background: linear-gradient(145deg, #2a1405 0%, #1a0a02 100%) !important;
     border: 1px solid #8a4a1a !important;
@@ -1671,13 +1386,9 @@ button.theme-select {
 }
 #themeOverlay .theme-option[data-theme="orange"]:hover {
     border-color: #FF8C00 !important;
-    box-shadow:
-        0 0 22px rgba(255, 140, 0, 0.5),
-        inset 0 0 14px rgba(255, 140, 0, 0.15) !important;
+    box-shadow: 0 0 22px rgba(255, 140, 0, 0.5), inset 0 0 14px rgba(255, 140, 0, 0.15) !important;
     transform: translateY(-1px) !important;
 }
-
-/* ── Cherry — dark cherry + pink ── */
 #themeOverlay .theme-option[data-theme="cherry"] {
     background: linear-gradient(145deg, #2a0518 0%, #1a030f 100%) !important;
     border: 1px solid #7a1a3a !important;
@@ -1686,13 +1397,9 @@ button.theme-select {
 }
 #themeOverlay .theme-option[data-theme="cherry"]:hover {
     border-color: #FF5C7C !important;
-    box-shadow:
-        0 0 22px rgba(255, 92, 124, 0.5),
-        inset 0 0 14px rgba(255, 92, 124, 0.15) !important;
+    box-shadow: 0 0 22px rgba(255, 92, 124, 0.5), inset 0 0 14px rgba(255, 92, 124, 0.15) !important;
     transform: translateY(-1px) !important;
 }
-
-/* ── Gold Rush — dark bronze + gold ── */
 #themeOverlay .theme-option[data-theme="gold"] {
     background: linear-gradient(145deg, #2a2205 0%, #1a1402 100%) !important;
     border: 1px solid #8a7530 !important;
@@ -1701,13 +1408,9 @@ button.theme-select {
 }
 #themeOverlay .theme-option[data-theme="gold"]:hover {
     border-color: #FFD54A !important;
-    box-shadow:
-        0 0 22px rgba(255, 213, 74, 0.5),
-        inset 0 0 14px rgba(255, 213, 74, 0.15) !important;
+    box-shadow: 0 0 22px rgba(255, 213, 74, 0.5), inset 0 0 14px rgba(255, 213, 74, 0.15) !important;
     transform: translateY(-1px) !important;
 }
-
-/* ── Industrial — crushed black-green + phosphor ── */
 #themeOverlay .theme-option[data-theme="indu"] {
     background: linear-gradient(145deg, #02190A 0%, #000802 100%) !important;
     border: 1px solid #B25E22 !important;
@@ -1716,13 +1419,9 @@ button.theme-select {
 }
 #themeOverlay .theme-option[data-theme="indu"]:hover {
     border-color: #39FF14 !important;
-    box-shadow:
-        0 0 22px rgba(57, 255, 20, 0.5),
-        inset 0 0 14px rgba(57, 255, 20, 0.15) !important;
+    box-shadow: 0 0 22px rgba(57, 255, 20, 0.5), inset 0 0 14px rgba(57, 255, 20, 0.15) !important;
     transform: translateY(-1px) !important;
 }
-
-/* ── Science — deep space + electric blue ── */
 #themeOverlay .theme-option[data-theme="science"] {
     background: linear-gradient(145deg, #0a1a2a 0%, #050a14 100%) !important;
     border: 1px solid #1a5a8a !important;
@@ -1731,16 +1430,12 @@ button.theme-select {
 }
 #themeOverlay .theme-option[data-theme="science"]:hover {
     border-color: #00D4FF !important;
-    box-shadow:
-        0 0 22px rgba(0, 212, 255, 0.5),
-        inset 0 0 14px rgba(0, 212, 255, 0.15) !important;
+    box-shadow: 0 0 22px rgba(0, 212, 255, 0.5), inset 0 0 14px rgba(0, 212, 255, 0.15) !important;
     transform: translateY(-1px) !important;
 }
 
 /* ═════════════════════════════════════════════════════
    ⚑ ACTIVE — subtle indicator in the theme's own color
-   Border glows softly, a small pulsing dot sits on the
-   right, the label glows faintly. No loud badges.
 ═════════════════════════════════════════════════════ */
 #themeOverlay .theme-option.active {
     border-width: 2px !important;
@@ -1749,148 +1444,330 @@ button.theme-select {
         0 0 18px currentColor,
         inset 0 0 20px rgba(255, 255, 255, 0.04) !important;
 }
-
 #themeOverlay .theme-option.active .theme-name {
     font-weight: 900 !important;
     text-shadow: 0 0 10px currentColor !important;
 }
-
 #themeOverlay .theme-option.active .emoji {
     filter: drop-shadow(0 0 8px currentColor) !important;
     transform: scale(1.12);
     transition: transform 0.25s ease;
 }
-
-/* Pulsing dot on the right side */
 #themeOverlay .theme-option.active::before {
     content: '';
     position: absolute;
-    top: 50%;
-    right: 16px;
+    top: 50%; right: 16px;
     transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: currentColor;
-    box-shadow:
-        0 0 8px currentColor,
-        0 0 16px currentColor;
+    box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
     animation: activeThemePulse 1.8s ease-in-out infinite;
     z-index: 2;
     pointer-events: none;
 }
-
 @keyframes activeThemePulse {
-    0%, 100% {
-        opacity: 1;
-        transform: translateY(-50%) scale(1);
-    }
-    50% {
-        opacity: 0.55;
-        transform: translateY(-50%) scale(0.7);
-    }
+    0%, 100% { opacity: 1;   transform: translateY(-50%) scale(1); }
+    50%      { opacity: 0.55; transform: translateY(-50%) scale(0.7); }
 }
 
 /* ═════════════════════════════════════════════════════
-   ⚑ MOBILE SIDEBAR REDESIGN  (≤768px only)
-   – full-width sidebar
-   – copper accent line 3× bigger (9px)
-   – only Phantom button in header
-   – theme + rank as full-width row buttons in sidebar
-   – profile cleaned up, name 2× bigger
-   – bigger user rows
-   Desktop (≥769px) is untouched.
+   ⚑ MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
+   – Full-width CSS-grid layout (GPU composited → no flicker)
+   – Copper accent rail ALWAYS at right edge, never overlaps
+     content (sidebar reserves a right gutter on every row)
+   – Floating ☰/✕ toggle top-right (auto icon swap)
+   – Users list = primary focus; all data still visible
+   – Profile name 2× bigger; token/streak/footer compact
+   Desktop (≥769px) untouched.
 ═════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-    /* ── Full-width sidebar ── */
+    /* ── Sidebar shell: full-width grid, GPU composited ── */
     .sidebar {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: auto auto auto 1fr auto auto auto !important;
+        grid-template-areas:
+            "profile  profile"
+            "theme    rank"
+            "label    label"
+            "users    users"
+            "token    token"
+            "streak   streak"
+            "footer   footer" !important;
+        gap: 0 !important;
+
         width: 100% !important;
         max-width: 100% !important;
+        height: var(--app-height) !important;
+        max-height: var(--app-height) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+
         border-right: none !important;
         border-radius: 0 !important;
         box-shadow: none !important;
+        background: var(--bg-panel, #111827) !important;
+        overflow: hidden !important;
+
+        /* GPU compositing — kills theme-swap flicker */
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+        transform: translateZ(0) !important;
+        -webkit-transform: translateZ(0) !important;
+        will-change: transform !important;
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
     }
 
-    /* ── Copper accent line — 3× bigger (9px) ── */
+    /* ── Copper accent rail — right edge, non-interactive ── */
     .sidebar::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important; right: 0 !important;
+        bottom: 0 !important; left: auto !important;
         width: 9px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg,
+            transparent 0%,
+            #3A2118 15%,
+            #19D62B 30%,
+            #3A2118 45%,
+            #19D62B 60%,
+            #3A2118 75%,
+            transparent 100%) !important;
         box-shadow:
             0 0 20px rgba(25, 214, 43, 0.85),
             0 0 40px rgba(25, 214, 43, 0.4) !important;
+        z-index: 50 !important;
+        pointer-events: none !important;
+        transition: none !important;
     }
 
-    /* ── Profile section — bigger, cleaner ── */
+    /* Reserve right gutter so nothing sits under the rail */
+    .sidebar-user-profile-big,
+    .sidebar-section-label,
+    .sidebar-users,
+    .sidebar-footer,
+    .sidebar .token-tracker.mobile-only,
+    .sidebar .sidebar-streak-display {
+        padding-right: calc(22px + 9px) !important;
+        padding-left: 22px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ── PROFILE (top, full width) ── */
     .sidebar-user-profile-big {
-        padding: 30px 26px 22px !important;
-        gap: 18px !important;
+        grid-area: profile !important;
+        padding-top: 22px !important;
+        padding-bottom: 18px !important;
+        gap: 16px !important;
         align-items: center !important;
+        border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        flex-shrink: 0 !important;
     }
     .sidebar-user-profile-big .big-avatar {
-        width: 92px !important;
-        height: 92px !important;
-        font-size: 2.3rem !important;
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 2rem !important;
         border-width: 3px !important;
+        flex-shrink: 0 !important;
     }
     .sidebar-user-profile-big .big-info {
-        flex: 1 !important;
+        flex: 1 1 auto !important;
         min-width: 0 !important;
     }
     .sidebar-user-profile-big .big-name {
-        font-size: 2rem !important;          /* 2× bigger */
-        letter-spacing: 0.03em !important;
-        margin-bottom: 6px !important;
-        line-height: 1.1 !important;
-    }
-    .sidebar-user-profile-big .big-status {
-        font-size: 1rem !important;
-        gap: 6px !important;
+        font-size: 1.75rem !important;
+        line-height: 1.05 !important;
+        margin-bottom: 4px !important;
+        letter-spacing: 0.02em !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
     .sidebar-user-profile-big .big-rank,
     .sidebar-user-profile-big .big-level {
-        font-size: 0.92rem !important;
-        padding: 4px 14px !important;
-        margin-top: 6px !important;
+        display: inline-block !important;
+        font-size: 0.78rem !important;
+        padding: 3px 10px !important;
+        margin-top: 4px !important;
+        margin-right: 4px !important;
         letter-spacing: 0.06em !important;
+        line-height: 1 !important;
+        vertical-align: middle !important;
+    }
+    .sidebar-user-profile-big .big-status {
+        font-size: 0.85rem !important;
+        gap: 6px !important;
+        margin-top: 6px !important;
     }
     .sidebar-user-profile-big .edit-profile-btn {
-        width: 48px !important;
-        height: 48px !important;
-        font-size: 1.4rem !important;
+        width: 42px !important;
+        height: 42px !important;
+        font-size: 1.2rem !important;
         flex-shrink: 0 !important;
     }
 
-    /* ── Theme + Rank as full-width row buttons ── */
+    /* ── THEME + RANK: side by side (2-col grid) ── */
     .sidebar #sidebarThemeBtn,
     .sidebar #rankingsBtn {
         position: static !important;
         top: auto !important;
         right: auto !important;
-        display: flex !important;
-        width: calc(100% - 32px) !important;
-        height: 60px !important;
-        margin: 8px 16px !important;
-        padding: 0 22px !important;
-        font-size: 1.7rem !important;
-        border-radius: 8px !important;
+        display: inline-flex !important;
+        width: auto !important;
+        min-width: 0 !important;
+        height: 54px !important;
+        margin: 10px 0 !important;
+        padding: 0 14px !important;
+        font-size: 1.4rem !important;
+        font-weight: 700 !important;
+        border-radius: 10px !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 14px !important;
+        gap: 8px !important;
         box-sizing: border-box !important;
-        flex-shrink: 0 !important;
         z-index: auto !important;
-        background: var(--bg-elevated, rgba(255,255,255,0.05)) !important;
+        background: var(--bg-elevated, rgba(255,255,255,0.06)) !important;
         border: 1px solid var(--border-default, #454B4B) !important;
         color: var(--text-primary, #fff) !important;
-        transition: all 0.2s ease !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+    }
+    .sidebar #sidebarThemeBtn {
+        grid-area: theme !important;
+        margin-left: 22px !important;
+        margin-right: 6px !important;
+    }
+    .sidebar #rankingsBtn {
+        grid-area: rank !important;
+        margin-left: 6px !important;
+        margin-right: calc(22px + 9px) !important;
     }
     .sidebar #sidebarThemeBtn:hover,
     .sidebar #rankingsBtn:hover {
         border-color: var(--accent-cyan, #20FF62) !important;
-        box-shadow: 0 0 16px rgba(32,255,98,0.5) !important;
+        box-shadow: 0 0 14px rgba(32,255,98,0.45) !important;
+        background: var(--bg-hover, rgba(255,255,255,0.1)) !important;
     }
 
-    /* ── Header — Phantom button only ── */
+    /* ── SECTION LABEL (ACTIVE USERS + count) ── */
+    .sidebar-section-label {
+        grid-area: label !important;
+        font-size: 0.82rem !important;
+        padding-top: 6px !important;
+        padding-bottom: 6px !important;
+        letter-spacing: 0.14em !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar-section-label .active-users-count {
+        font-size: 0.8rem !important;
+        padding: 2px 10px !important;
+    }
+
+    /* ── USER LIST: primary focus, grows to fill ── */
+    .sidebar-users {
+        grid-area: users !important;
+        flex: 0 0 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-top: 4px !important;
+        padding-bottom: 12px !important;
+        scrollbar-width: thin !important;
+        overscroll-behavior: contain !important;
+    }
+    .sidebar-user-item {
+        padding: 12px 14px !important;
+        margin-bottom: 6px !important;
+        border-radius: 10px !important;
+    }
+    .sidebar-user-item .user-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1rem !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar-user-item .user-name {
+        font-size: 1rem !important;
+        line-height: 1.15 !important;
+    }
+    .sidebar-user-item .user-status-text { font-size: 0.78rem !important; }
+    .sidebar-user-item .private-btn {
+        padding: 8px 14px !important;
+        font-size: 0.78rem !important;
+    }
+    .no-users-sidebar {
+        padding: 40px 20px !important;
+        font-size: 0.9rem !important;
+        text-align: center !important;
+    }
+
+    /* ── TOKEN TRACKER (compact strip) ── */
+    .sidebar .token-tracker.mobile-only {
+        grid-area: token !important;
+        display: flex !important;
+        margin: 6px 0 !important;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        border-radius: 0 !important;
+        justify-content: center !important;
+        font-size: 0.75rem !important;
+        gap: 8px !important;
+        flex-shrink: 0 !important;
+        border: none !important;
+        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+        background: transparent !important;
+    }
+
+    /* ── STREAK (compact strip) ── */
+    .sidebar .sidebar-streak-display {
+        grid-area: streak !important;
+        display: flex !important;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        margin: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar .sidebar-streak-display.hidden { display: none !important; }
+    .sidebar .sidebar-streak-display::before { display: none !important; }
+    .sidebar .sidebar-streak-display .fire-slot { font-size: 1rem !important; }
+
+    /* ── FOOTER (status + wallet) ── */
+    .sidebar-footer {
+        grid-area: footer !important;
+        flex: 0 0 auto !important;
+        padding-top: 10px !important;
+        padding-bottom: 14px !important;
+        margin: 0 !important;
+        min-height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        font-size: 0.8rem !important;
+        transition: none !important;
+    }
+
+    /* ── Kill transitions on data regions (theme-swap flicker) ── */
+    .sidebar .sidebar-users,
+    .sidebar .sidebar-footer,
+    .sidebar .token-tracker.mobile-only,
+    .sidebar .sidebar-streak-display,
+    .sidebar-user-item,
+    .sidebar-user-item * {
+        transition: none !important;
+    }
+
+    /* ── HEADER: only Phantom button ── */
     .header-right #connectionPill,
     .header-right #onlineCountBadge,
     .header-right #walletAddress,
@@ -1901,10 +1778,7 @@ button.theme-select {
     .header-right #modSettingsBtn {
         display: none !important;
     }
-
-    .header-right {
-        gap: 0 !important;
-    }
+    .header-right { gap: 0 !important; }
     .header-right .phantom-btn {
         width: 48px !important;
         height: 48px !important;
@@ -1914,31 +1788,48 @@ button.theme-select {
         height: 30px !important;
     }
 
-    /* ── Active-users label — bigger ── */
-    .sidebar-section-label {
-        font-size: 0.9rem !important;
-        padding: 18px 22px 10px !important;
-        letter-spacing: 0.16em !important;
+    /* ── FLOATING SIDEBAR TOGGLE (☰ / ✕) top-right ── */
+    #sidebarToggle {
+        position: fixed !important;
+        top: 14px !important;
+        right: 26px !important;
+        left: auto !important;
+        width: 46px !important;
+        height: 46px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 99999 !important;
+        background: var(--bg-elevated, rgba(20,20,20,0.92)) !important;
+        border: 1px solid var(--border-default, #454B4B) !important;
+        color: var(--text-primary, #fff) !important;
+        box-shadow:
+            0 0 0 1px rgba(0,0,0,0.3),
+            0 4px 16px rgba(0,0,0,0.55) !important;
+        transition: none !important;
+        cursor: pointer !important;
+        font-size: 0 !important;
     }
-    .sidebar-section-label .active-users-count {
-        font-size: 0.85rem !important;
-        padding: 3px 12px !important;
+    #sidebarToggle::before {
+        content: '☰';
+        font-size: 1.4rem !important;
+        line-height: 1 !important;
+        display: block !important;
+        transition: none !important;
     }
-
-    /* ── User rows — more breathing room ── */
-    .sidebar-user-item {
-        padding: 12px 14px !important;
-        margin-bottom: 6px !important;
+    /* When sidebar is open → swap to ✕ + accent glow */
+    .sidebar.open ~ .chat-panel #sidebarToggle::before {
+        content: '✕';
+        font-size: 1.3rem !important;
     }
-    .sidebar-user-item .user-avatar {
-        width: 44px !important;
-        height: 44px !important;
-        font-size: 1rem !important;
-    }
-    .sidebar-user-item .user-name {
-        font-size: 0.95rem !important;
-    }
-    .sidebar-user-item .user-status-text {
-        font-size: 0.78rem !important;
+    .sidebar.open ~ .chat-panel #sidebarToggle {
+        border-color: var(--accent-cyan, #20FF62) !important;
+        color: var(--accent-cyan, #20FF62) !important;
+        box-shadow:
+            0 0 0 1px rgba(0,0,0,0.3),
+            0 0 18px rgba(32,255,98,0.55),
+            0 4px 16px rgba(0,0,0,0.55) !important;
     }
 }
