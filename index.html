@@ -354,12 +354,30 @@
         <div class="overlay-card theme-overlay-card">
             <h3>Select Theme</h3>
             <div class="theme-options">
-                <button class="theme-option" data-theme="original"> OG</button>
-                <button class="theme-option" data-theme="orange">🟠 Orange</button>
-                <button class="theme-option" data-theme="cherry">🍒 Cherry</button>
-                <button class="theme-option" data-theme="gold">👑 GoldRush</button>
-                <button class="theme-option" data-theme="indu">🔨​ Industrial</button>
-                <button class="theme-option" data-theme="science">🛰️​​ Science</button>
+                <button class="theme-option" data-theme="original">
+                    <span class="emoji">🎨</span>
+                    <span class="theme-name">OG</span>
+                </button>
+                <button class="theme-option" data-theme="orange">
+                    <span class="emoji">🟠</span>
+                    <span class="theme-name">Orange</span>
+                </button>
+                <button class="theme-option" data-theme="cherry">
+                    <span class="emoji">🍒</span>
+                    <span class="theme-name">Cherry</span>
+                </button>
+                <button class="theme-option" data-theme="gold">
+                    <span class="emoji">👑</span>
+                    <span class="theme-name">GoldRush</span>
+                </button>
+                <button class="theme-option" data-theme="indu">
+                    <span class="emoji">🔨</span>
+                    <span class="theme-name">Industrial</span>
+                </button>
+                <button class="theme-option" data-theme="science">
+                    <span class="emoji">🛰️</span>
+                    <span class="theme-name">Science</span>
+                </button>
             </div>
             <button id="themeOverlayCloseBtn">Close</button>
         </div>
@@ -423,6 +441,7 @@
                 if (!themes[themeId]) themeId = 'original';
                 themeLink.setAttribute('href', themes[themeId]);
                 localStorage.setItem(THEME_KEY, themeId);
+                highlightCurrentTheme();
             }
 
             // NOTE: initial theme is already applied by the <head> bootstrap.
@@ -435,11 +454,20 @@
             const themeOptionButtons = document.querySelectorAll('.theme-option');
 
             function openThemeOverlay() {
+                highlightCurrentTheme();
                 themeOverlay.classList.remove('hidden');
             }
 
             function closeThemeOverlay() {
                 themeOverlay.classList.add('hidden');
+            }
+
+            // ⚑ Mark the currently active theme in the picker
+            function highlightCurrentTheme() {
+                const current = localStorage.getItem(THEME_KEY) || 'original';
+                document.querySelectorAll('.theme-option').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-theme') === current);
+                });
             }
 
             if (headerThemeBtn) headerThemeBtn.addEventListener('click', openThemeOverlay);
@@ -453,6 +481,10 @@
                     closeThemeOverlay();
                 });
             });
+
+            // Run once on load so the active class is present even before
+            // the overlay is first opened.
+            highlightCurrentTheme();
 
             window.setTheme = setTheme;
             window.getCurrentTheme = () => localStorage.getItem(THEME_KEY) || 'original';
