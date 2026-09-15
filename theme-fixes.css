@@ -1393,13 +1393,14 @@ html body .mod-message-box .mod-badge {
 }
 
 /* ═════════════════════════════════════════════════════
-   ⚑ THEME SELECTOR — centered, 2× bigger, shows current
-   Desktop + mobile. Beats every theme via !important.
-   .theme-select is the dropdown; if a theme button opens
-   a picker overlay, its rules are here too.
+   ⚑ THEME SELECTOR — emoji LEFT, text CENTERED, 2× bigger
+   Each row is a 3-column grid:
+       [ emoji ]   [ centered label ]   [ invisible spacer ]
+   So the label sits at the TRUE center of the row, not
+   shifted by the emoji column.
 ═════════════════════════════════════════════════════ */
 
-/* ── The <select> itself ── */
+/* ── The <select> itself (header dropdown) ── */
 .theme-select,
 select.theme-select,
 #themeSelect,
@@ -1415,20 +1416,18 @@ select.theme-select,
     line-height: 1.2 !important;
 }
 
-/* Center visible selected option in WebKit/Safari */
 .theme-select::-webkit-inner-spin-button,
 .theme-select::-webkit-calendar-picker-indicator {
     display: none;
 }
 
-/* Options inside the popup list */
 .theme-select option {
     font-size: 1.1rem !important;
     text-align: center !important;
     padding: 8px 10px !important;
 }
 
-/* ── If it's a button (opens a picker) ── */
+/* ── If it's a button that opens a picker ── */
 #headerThemeBtn:not(.msn-rs-card),
 .theme-btn,
 button.theme-select {
@@ -1444,7 +1443,7 @@ button.theme-select {
     white-space: nowrap !important;
 }
 
-/* ── Theme picker OVERLAY (if a theme opens a modal) ── */
+/* ── Theme picker OVERLAY ── */
 #themeOverlay,
 #themeModal,
 #themePickerOverlay,
@@ -1475,44 +1474,111 @@ button.theme-select {
     margin-bottom: 18px !important;
 }
 
-#themeOverlay button,
-#themeModal button,
-#themePickerOverlay button,
-.theme-overlay button,
-.theme-modal button,
-.theme-picker-overlay button,
+/* ── Each theme option row: emoji LEFT, label CENTERED ── */
 #themeOverlay .theme-option,
 #themeModal .theme-option,
 #themePickerOverlay .theme-option,
 .theme-overlay .theme-option,
 .theme-modal .theme-option,
-.theme-picker-overlay .theme-option {
-    display: flex !important;
+.theme-picker-overlay .theme-option,
+#themeOverlay button.theme-option,
+.theme-modal button.theme-option,
+.theme-picker-overlay button.theme-option {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
     align-items: center !important;
-    justify-content: center !important;
+    column-gap: 12px !important;
     text-align: center !important;
     font-size: 1.3rem !important;
     font-weight: 700 !important;
     letter-spacing: 0.06em !important;
-    padding: 12px 16px !important;
-    gap: 10px !important;
+    padding: 12px 18px !important;
     line-height: 1.3 !important;
     width: 100% !important;
     min-height: 52px !important;
     white-space: normal !important;
 }
 
-#themeOverlay .theme-option span,
-#themeModal .theme-option span,
-.theme-picker-overlay .theme-option span,
+/* Emoji — pinned to the left column */
 #themeOverlay .theme-option .emoji,
-.theme-modal .theme-option .emoji {
+#themeModal .theme-option .emoji,
+#themePickerOverlay .theme-option .emoji,
+.theme-overlay .theme-option .emoji,
+.theme-modal .theme-option .emoji,
+.theme-picker-overlay .theme-option .emoji,
+#themeOverlay .theme-option .theme-emoji,
+#themeModal .theme-option .theme-emoji,
+.theme-picker-overlay .theme-option .theme-emoji,
+#themeOverlay .theme-option > span:first-child:not(.theme-name):not(.label),
+#themeModal .theme-option > span:first-child:not(.theme-name):not(.label),
+.theme-picker-overlay .theme-option > span:first-child:not(.theme-name):not(.label),
+#themeOverlay .theme-option > img:first-child,
+#themeModal .theme-option > img:first-child,
+.theme-picker-overlay .theme-option > img:first-child {
+    grid-column: 1 !important;
+    justify-self: start !important;
     font-size: 1.6rem !important;
     line-height: 1 !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
 }
 
-/* Mobile — keep the emoji-only circle button small, but
-   the picker overlay itself still uses the bigger sizes. */
+/* Label — centered in the middle column */
+#themeOverlay .theme-option .theme-name,
+#themeModal .theme-option .theme-name,
+#themePickerOverlay .theme-option .theme-name,
+.theme-overlay .theme-option .theme-name,
+.theme-modal .theme-option .theme-name,
+.theme-picker-overlay .theme-option .theme-name,
+#themeOverlay .theme-option .label,
+#themeModal .theme-option .label,
+.theme-picker-overlay .theme-option .label,
+#themeOverlay .theme-option > span:last-child,
+#themeModal .theme-option > span:last-child,
+.theme-picker-overlay .theme-option > span:last-child {
+    grid-column: 2 !important;
+    text-align: center !important;
+    justify-self: center !important;
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+}
+
+/* Invisible right spacer — balances the emoji column so the
+   label sits at the TRUE horizontal center of the row. */
+#themeOverlay .theme-option::after,
+#themeModal .theme-option::after,
+#themePickerOverlay .theme-option::after,
+.theme-overlay .theme-option::after,
+.theme-modal .theme-option::after,
+.theme-picker-overlay .theme-option::after {
+    content: '' !important;
+    grid-column: 3 !important;
+    width: 1.6rem !important;
+    height: 1px !important;
+    visibility: hidden !important;
+}
+
+/* Active / selected — keep grid layout intact, just bolder */
+#themeOverlay .theme-option.active,
+#themeModal .theme-option.active,
+#themePickerOverlay .theme-option.active,
+.theme-overlay .theme-option.active,
+.theme-modal .theme-option.active,
+.theme-picker-overlay .theme-option.active,
+#themeOverlay .theme-option.selected,
+#themeModal .theme-option.selected,
+.theme-picker-overlay .theme-option.selected {
+    font-weight: 800 !important;
+}
+
+/* Mobile — keep the header circle button emoji-only, but
+   the picker overlay itself still uses the bigger layout. */
 @media (max-width: 768px) {
     .header-right .theme-select {
         font-size: 0 !important;
