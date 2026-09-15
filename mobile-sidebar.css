@@ -1,0 +1,504 @@
+/* ═════════════════════════════════════════════════════
+   ⚑ MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
+   – Header: ☰ at far LEFT, Phantom at far RIGHT
+   – Profile: avatar | name + ✎ | 2×2 function grid
+   – Functions: 🎨 RANK on top row, 2 placeholders below
+   – Users grow to fill (1fr), bottom items pinned tight
+   – Token tracker: centered, 2× bigger
+   – Token balances: only verified token + amount
+   – Footer: ● Connected left, wallet short right
+   Desktop (≥769px) untouched.
+═════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* ── HEADER: flex, hamburger left / Phantom right ── */
+    .chat-header-bar {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+    }
+    .header-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        flex: 0 0 auto !important;
+        order: 1 !important;
+    }
+    .header-center { display: none !important; }
+    .header-logo-mobile,
+    .header-left .header-logo { display: none !important; }
+    .header-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        position: static !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
+        flex: 0 0 auto !important;
+        margin-left: auto !important;
+        order: 2 !important;
+    }
+
+    /* ── Hamburger — clean, at far left ── */
+    #sidebarToggle {
+        position: static !important;
+        top: auto !important; right: auto !important; left: auto !important;
+        width: 42px !important;
+        height: 42px !important;
+        min-width: 42px !important;
+        padding: 0 !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: var(--bg-elevated, rgba(20,20,20,0.92)) !important;
+        border: 1px solid var(--border-default, #454B4B) !important;
+        color: var(--text-primary) !important;
+        font-size: 1.3rem !important;
+        line-height: 1 !important;
+        box-shadow: none !important;
+        z-index: auto !important;
+        flex-shrink: 0 !important;
+        cursor: pointer !important;
+        margin: 0 !important;
+    }
+    #sidebarToggle::before { content: none !important; }
+    .sidebar.open ~ .chat-panel #sidebarToggle {
+        border-color: var(--accent-cyan, #20FF62) !important;
+        color: var(--accent-cyan, #20FF62) !important;
+        box-shadow: 0 0 14px rgba(32,255,98,0.5) !important;
+    }
+
+    /* ── Header right: only Phantom ── */
+    .header-right #connectionPill,
+    .header-right #onlineCountBadge,
+    .header-right #walletAddress,
+    .header-right #refreshBtn,
+    .header-right #mobileEditBtn,
+    .header-right #headerThemeBtn,
+    .header-right #rankingsBtn,
+    .header-right #modSettingsBtn {
+        display: none !important;
+    }
+    .header-right .phantom-btn {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    .header-right .phantom-btn img {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    /* ── SIDEBAR shell ── */
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important; left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: var(--app-height, 100vh) !important;
+        height: var(--app-height, 100dvh) !important;
+        max-height: var(--app-height, 100vh) !important;
+        max-height: var(--app-height, 100dvh) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        border-right: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: var(--bg-panel, #111827) !important;
+        overflow: hidden !important;
+
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows:
+            auto               /* profile */
+            auto               /* label */
+            1fr                /* users — grows */
+            auto               /* token tracker */
+            auto               /* streak */
+            auto               /* token balances */
+            auto               /* footer */
+            !important;
+        grid-template-areas:
+            "profile"
+            "label"
+            "users"
+            "tracker"
+            "streak"
+            "tokens"
+            "footer" !important;
+        gap: 0 !important;
+
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+        will-change: transform !important;
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: translate3d(-100%, 0, 0) !important;
+        z-index: 9000 !important;
+    }
+    .sidebar.open {
+        transform: translate3d(0, 0, 0) !important;
+    }
+
+    /* ── Copper rail — 9px right edge ── */
+    .sidebar::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important; right: 0 !important;
+        bottom: 0 !important; left: auto !important;
+        width: 9px !important;
+        height: 100% !important;
+        background: linear-gradient(180deg,
+            transparent 0%,
+            #3A2118 15%, #19D62B 30%,
+            #3A2118 45%, #19D62B 60%,
+            #3A2118 75%, transparent 100%) !important;
+        box-shadow:
+            0 0 20px rgba(25, 214, 43, 0.85),
+            0 0 40px rgba(25, 214, 43, 0.4) !important;
+        z-index: 50 !important;
+        pointer-events: none !important;
+        transition: none !important;
+    }
+
+    /* ── PROFILE — avatar | info | 2×2 grid (absolute right) ── */
+    .sidebar-user-profile-big {
+        grid-area: profile !important;
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+
+        /* right reserve: 2 columns of 48px + 8px gap + rail + padding */
+        padding: 14px calc(22px + 9px + 48px + 8px + 48px + 14px) 14px 22px !important;
+        min-height: 124px !important;
+        box-sizing: border-box !important;
+        border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+    }
+
+    .sidebar-user-profile-big .big-avatar {
+        width: 64px !important;
+        height: 64px !important;
+        font-size: 1.6rem !important;
+        border-width: 2px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .sidebar-user-profile-big .big-info {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3px !important;
+        text-align: left !important;
+    }
+
+    .sidebar-user-profile-big .big-name {
+        font-size: 1.4rem !important;
+        line-height: 1.1 !important;
+        letter-spacing: 0.02em !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .sidebar-user-profile-big .big-rank,
+    .sidebar-user-profile-big .big-level {
+        display: inline-block !important;
+        font-size: 0.68rem !important;
+        padding: 2px 8px !important;
+        margin: 2px 4px 0 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0.05em !important;
+        vertical-align: middle !important;
+        align-self: flex-start !important;
+    }
+
+    .sidebar-user-profile-big .big-status {
+        font-size: 0.78rem !important;
+        gap: 5px !important;
+        margin-top: 2px !important;
+        color: var(--text-secondary) !important;
+    }
+
+    /* Pencil — top-right of the info block, inline with the name */
+    .sidebar-user-profile-big .edit-profile-btn {
+        position: absolute !important;
+        top: 14px !important;
+        right: calc(22px + 9px + 48px + 8px + 48px + 14px) !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 0.8rem !important;
+        border-radius: 6px !important;
+        background: transparent !important;
+        border: 1px solid var(--border-subtle, rgba(255,255,255,0.15)) !important;
+        color: var(--text-secondary) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 6 !important;
+    }
+
+    /* ── 2×2 FUNCTION GRID — absolute, right of profile ── */
+    .sidebar #sidebarThemeBtn,
+    .sidebar #rankingsBtn {
+        position: absolute !important;
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 1.2rem !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 5 !important;
+        background: var(--bg-elevated, rgba(255,255,255,0.06)) !important;
+        border: 1px solid var(--border-default, #454B4B) !important;
+        color: var(--text-primary, #fff) !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    }
+    /* Top row: 🎨 theme (left cell), 🏆 rank (right cell) */
+    .sidebar #sidebarThemeBtn {
+        top: 14px !important;
+        right: calc(22px + 9px + 48px + 8px) !important;
+    }
+    .sidebar #rankingsBtn {
+        top: 14px !important;
+        right: calc(22px + 9px) !important;
+    }
+    .sidebar #sidebarThemeBtn:hover,
+    .sidebar #rankingsBtn:hover {
+        border-color: var(--accent-cyan, #20FF62) !important;
+        box-shadow: 0 0 14px rgba(32,255,98,0.45) !important;
+    }
+
+    /* Bottom row: 2 placeholders for future functions */
+    .sidebar-user-profile-big::before,
+    .sidebar-user-profile-big::after {
+        content: '+' !important;
+        position: absolute !important;
+        top: calc(14px + 48px + 8px) !important;
+        width: 48px !important;
+        height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        color: var(--text-muted, rgba(255,255,255,0.25)) !important;
+        background: transparent !important;
+        border: 1px dashed var(--border-subtle, rgba(255,255,255,0.15)) !important;
+        border-radius: 10px !important;
+        pointer-events: none !important;
+        opacity: 0.5 !important;
+        z-index: 4 !important;
+    }
+    .sidebar-user-profile-big::before {
+        right: calc(22px + 9px + 48px + 8px) !important;
+    }
+    .sidebar-user-profile-big::after {
+        right: calc(22px + 9px) !important;
+    }
+
+    /* ── ACTIVE USERS label ── */
+    .sidebar-section-label {
+        grid-area: label !important;
+        font-size: 0.8rem !important;
+        padding: 8px 22px 6px !important;
+        padding-right: calc(22px + 9px) !important;
+        letter-spacing: 0.14em !important;
+    }
+    .sidebar-section-label .active-users-count {
+        font-size: 0.78rem !important;
+        padding: 2px 10px !important;
+    }
+
+    /* ── USERS list — grows to fill ── */
+    .sidebar-users {
+        grid-area: users !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 4px 22px 8px !important;
+        padding-right: calc(22px + 9px) !important;
+        scrollbar-width: thin !important;
+        overscroll-behavior: contain !important;
+    }
+    .sidebar-user-item {
+        padding: 12px 14px !important;
+        margin-bottom: 6px !important;
+        border-radius: 10px !important;
+    }
+    .sidebar-user-item .user-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1rem !important;
+    }
+    .sidebar-user-item .user-name { font-size: 1rem !important; }
+    .sidebar-user-item .user-status-text { font-size: 0.78rem !important; }
+    .sidebar-user-item .private-btn {
+        padding: 8px 14px !important;
+        font-size: 0.78rem !important;
+    }
+    .no-users-sidebar {
+        padding: 40px 20px !important;
+        font-size: 0.9rem !important;
+        text-align: center !important;
+    }
+
+    /* ── TOKEN TRACKER — centered, 2× bigger ── */
+    .sidebar .token-tracker.mobile-only {
+        grid-area: tracker !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding: 14px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        gap: 12px !important;
+        font-size: 1.35rem !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        background: transparent !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar .token-tracker.mobile-only.hidden { display: none !important; }
+    .sidebar .token-tracker.mobile-only .token-logo {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    .sidebar .token-tracker.mobile-only .token-name { font-size: 1.3rem !important; }
+    .sidebar .token-tracker.mobile-only .token-price { font-size: 1.3rem !important; }
+    .sidebar .token-tracker.mobile-only .token-change { font-size: 1.2rem !important; }
+
+    /* ── STREAK strip ── */
+    .sidebar .sidebar-streak-display {
+        grid-area: streak !important;
+        display: flex !important;
+        padding: 8px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        margin: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar .sidebar-streak-display.hidden { display: none !important; }
+    .sidebar .sidebar-streak-display::before { display: none !important; }
+    .sidebar .sidebar-streak-display .fire-slot { font-size: 1.2rem !important; }
+
+    /* ── TOKEN BALANCES — only verified token + amount ── */
+    .sidebar #walletTokenList {
+        grid-area: tokens !important;
+        background: transparent !important;
+        color: var(--text-secondary) !important;
+        border: none !important;
+        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        padding: 10px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
+        max-height: 56px !important;
+        overflow: hidden !important;
+        flex-shrink: 0 !important;
+    }
+    /* Hide the "Token Balances:" header row */
+    .sidebar #walletTokenList > div:first-child { display: none !important; }
+    /* Hide any row that has neither ✅ nor ❌ (i.e. not the verified token) */
+    .sidebar #walletTokenList > div:not(:has(✅)):not(:has(❌)) {
+        display: none !important;
+    }
+    /* Show the verified token as a clean one-line row */
+    .sidebar #walletTokenList > div:has(✅),
+    .sidebar #walletTokenList > div:has(❌) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        padding: 0 !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+    }
+    .sidebar #walletTokenList > div:has(✅) > span:first-child,
+    .sidebar #walletTokenList > div:has(❌) > span:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        color: var(--text-primary) !important;
+    }
+    .sidebar #walletTokenList > div:has(✅) > span:last-child,
+    .sidebar #walletTokenList > div:has(❌) > span:last-child {
+        flex-shrink: 0 !important;
+        font-weight: 800 !important;
+        color: var(--accent-cyan, #20FF62) !important;
+        font-variant-numeric: tabular-nums !important;
+        font-size: 1rem !important;
+    }
+
+    /* ── FOOTER — Connected left, wallet short right ── */
+    .sidebar-footer {
+        grid-area: footer !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        padding: 12px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        font-size: 0.85rem !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar-footer .status-dot-sm {
+        width: 8px !important;
+        height: 8px !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar-footer #sidebarStatusText {
+        flex-shrink: 0 !important;
+        font-weight: 700 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.85rem !important;
+    }
+    .sidebar-footer .wallet-address {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        display: inline !important;
+        margin-left: auto !important;
+        text-align: right !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 0.82rem !important;
+        color: var(--text-secondary) !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    /* ── No color transitions (theme-swap flicker) ── */
+    .sidebar .sidebar-users,
+    .sidebar .sidebar-footer,
+    .sidebar .token-tracker.mobile-only,
+    .sidebar .sidebar-streak-display,
+    .sidebar #walletTokenList,
+    .sidebar-user-item,
+    .sidebar-user-item * { transition: none !important; }
+}
