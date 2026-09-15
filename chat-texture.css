@@ -1,20 +1,25 @@
 /* =========================================================
    CHAT TEXTURE — soft alpha-mask blend
-   Renders ABOVE all chat content with soft-light blending
+   Renders above all chat content with soft-light blending
    so it shows uniformly on every theme — no theme's opaque
    backgrounds can hide it. Content stays crisp underneath.
+
+   Uses ::before (not ::after) so it never collides with
+   each theme's own ::after (scanlines, CRT effects, etc.).
+
+   Loads last in <head> so it beats every theme file.
    Applies on desktop + Phantom (mobile) automatically.
    ========================================================= */
 
-/* ── Anchor the pseudo-element + create stacking context ── */
+/* ── Anchor + stacking context + compositing ── */
 .chat-panel {
     position: relative !important;
     isolation: isolate !important;
     overflow: hidden !important;
 }
 
-/* ── Texture layer — sits above content, blended ── */
-.chat-panel::after {
+/* ── Texture layer — above content, blended ── */
+.chat-panel::before {
     content: '' !important;
     position: absolute !important;
     inset: 0 !important;
@@ -25,7 +30,7 @@
     background-repeat: no-repeat !important;
 
     /* Soft blend — reads as part of the surface, not a sticker */
-    opacity: 0.12 !important;
+    opacity: 0.16 !important;
     mix-blend-mode: soft-light !important;
 
     /* Radial fade so the pattern melts toward the edges */
@@ -41,5 +46,17 @@
         rgba(0,0,0,0) 100%) !important;
 
     pointer-events: none !important;
-    z-index: 2 !important;   /* ⚑ ABOVE all panel content — visible on every theme */
+    z-index: 2 !important;   /* ⚑ Above content — shows on every theme */
+}
+
+/* ═════════════════════════════════════════════════════
+   ⚑ SCROLL-TO-BOTTOM BUTTON — desktop offset
+   Shifts the button left by the 280px right sidebar so it
+   sits inside the visible chat column, not over the sidebar.
+   Mobile unchanged. Beats every theme via !important.
+═════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+    .scroll-bottom-btn {
+        right: calc(280px + 22px) !important;
+    }
 }
