@@ -30,7 +30,7 @@
     background-repeat: no-repeat !important;
 
     /* Soft blend — reads as part of the surface, not a sticker */
-    opacity: 0.16 !important;
+    opacity: 0.08 !important;
     mix-blend-mode: soft-light !important;
 
     /* Radial fade so the pattern melts toward the edges */
