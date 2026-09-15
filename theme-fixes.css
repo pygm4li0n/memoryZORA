@@ -1584,3 +1584,163 @@ button.theme-select {
         font-size: 0 !important;
     }
 }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ EPIC THEME SELECTOR — each button wears its own theme
+   Every option is styled with the palette of the theme
+   it represents. The active theme gets a subtle pulsing
+   dot + soft glow in its own color — no loud badges.
+═════════════════════════════════════════════════════ */
+
+#themeOverlay .theme-options {
+    gap: 12px !important;
+}
+
+#themeOverlay .theme-option {
+    position: relative !important;
+    transition: all 0.25s ease !important;
+}
+
+/* ── OG (original) — deep navy + cyan ── */
+#themeOverlay .theme-option[data-theme="original"] {
+    background: linear-gradient(145deg, #0a1a2e 0%, #050914 100%) !important;
+    border: 1px solid #1a3a5c !important;
+    color: #01E1EA !important;
+    box-shadow: inset 0 0 12px rgba(1, 225, 234, 0.08) !important;
+}
+#themeOverlay .theme-option[data-theme="original"]:hover {
+    border-color: #01E1EA !important;
+    box-shadow:
+        0 0 22px rgba(1, 225, 234, 0.5),
+        inset 0 0 14px rgba(1, 225, 234, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Orange — dark amber + orange ── */
+#themeOverlay .theme-option[data-theme="orange"] {
+    background: linear-gradient(145deg, #2a1405 0%, #1a0a02 100%) !important;
+    border: 1px solid #8a4a1a !important;
+    color: #FF8C00 !important;
+    box-shadow: inset 0 0 12px rgba(255, 140, 0, 0.08) !important;
+}
+#themeOverlay .theme-option[data-theme="orange"]:hover {
+    border-color: #FF8C00 !important;
+    box-shadow:
+        0 0 22px rgba(255, 140, 0, 0.5),
+        inset 0 0 14px rgba(255, 140, 0, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Cherry — dark cherry + pink ── */
+#themeOverlay .theme-option[data-theme="cherry"] {
+    background: linear-gradient(145deg, #2a0518 0%, #1a030f 100%) !important;
+    border: 1px solid #7a1a3a !important;
+    color: #FF5C7C !important;
+    box-shadow: inset 0 0 12px rgba(255, 92, 124, 0.08) !important;
+}
+#themeOverlay .theme-option[data-theme="cherry"]:hover {
+    border-color: #FF5C7C !important;
+    box-shadow:
+        0 0 22px rgba(255, 92, 124, 0.5),
+        inset 0 0 14px rgba(255, 92, 124, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Gold Rush — dark bronze + gold ── */
+#themeOverlay .theme-option[data-theme="gold"] {
+    background: linear-gradient(145deg, #2a2205 0%, #1a1402 100%) !important;
+    border: 1px solid #8a7530 !important;
+    color: #FFD54A !important;
+    box-shadow: inset 0 0 12px rgba(255, 213, 74, 0.08) !important;
+}
+#themeOverlay .theme-option[data-theme="gold"]:hover {
+    border-color: #FFD54A !important;
+    box-shadow:
+        0 0 22px rgba(255, 213, 74, 0.5),
+        inset 0 0 14px rgba(255, 213, 74, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Industrial — crushed black-green + phosphor ── */
+#themeOverlay .theme-option[data-theme="indu"] {
+    background: linear-gradient(145deg, #02190A 0%, #000802 100%) !important;
+    border: 1px solid #B25E22 !important;
+    color: #B6FF1A !important;
+    box-shadow: inset 0 0 12px rgba(57, 255, 20, 0.08) !important;
+}
+#themeOverlay .theme-option[data-theme="indu"]:hover {
+    border-color: #39FF14 !important;
+    box-shadow:
+        0 0 22px rgba(57, 255, 20, 0.5),
+        inset 0 0 14px rgba(57, 255, 20, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Science — deep space + electric blue ── */
+#themeOverlay .theme-option[data-theme="science"] {
+    background: linear-gradient(145deg, #0a1a2a 0%, #050a14 100%) !important;
+    border: 1px solid #1a5a8a !important;
+    color: #00D4FF !important;
+    box-shadow: inset 0 0 12px rgba(0, 212, 255, 0.08) !important;
+}
+#themeOverlay .theme-option[data-theme="science"]:hover {
+    border-color: #00D4FF !important;
+    box-shadow:
+        0 0 22px rgba(0, 212, 255, 0.5),
+        inset 0 0 14px rgba(0, 212, 255, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ═════════════════════════════════════════════════════
+   ⚑ ACTIVE — subtle indicator in the theme's own color
+   Border glows softly, a small pulsing dot sits on the
+   right, the label glows faintly. No loud badges.
+═════════════════════════════════════════════════════ */
+#themeOverlay .theme-option.active {
+    border-width: 2px !important;
+    font-weight: 800 !important;
+    box-shadow:
+        0 0 18px currentColor,
+        inset 0 0 20px rgba(255, 255, 255, 0.04) !important;
+}
+
+#themeOverlay .theme-option.active .theme-name {
+    font-weight: 900 !important;
+    text-shadow: 0 0 10px currentColor !important;
+}
+
+#themeOverlay .theme-option.active .emoji {
+    filter: drop-shadow(0 0 8px currentColor) !important;
+    transform: scale(1.12);
+    transition: transform 0.25s ease;
+}
+
+/* Pulsing dot on the right side */
+#themeOverlay .theme-option.active::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow:
+        0 0 8px currentColor,
+        0 0 16px currentColor;
+    animation: activeThemePulse 1.8s ease-in-out infinite;
+    z-index: 2;
+    pointer-events: none;
+}
+
+@keyframes activeThemePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+    50% {
+        opacity: 0.55;
+        transform: translateY(-50%) scale(0.7);
+    }
+}
