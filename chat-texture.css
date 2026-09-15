@@ -1,7 +1,7 @@
 /* =========================================================
    CHAT TEXTURE — soft alpha-mask blend
-   Renders above all chat content with soft-light blending
-   so it shows uniformly on every theme — no theme's opaque
+   Renders above all chat content with overlay blending so
+   it shows uniformly on every theme — no theme's opaque
    backgrounds can hide it. Content stays crisp underneath.
 
    Uses ::before (not ::after) so it never collides with
@@ -29,9 +29,11 @@
     background-position: center !important;
     background-repeat: no-repeat !important;
 
-    /* Soft blend — reads as part of the surface, not a sticker */
+    /* ⚑ Overlay blend — responds clearly to opacity changes.
+       (soft-light was crushing small opacity shifts on dark
+       green backgrounds so the texture looked frozen.) */
     opacity: 0.08 !important;
-    mix-blend-mode: soft-light !important;
+    mix-blend-mode: overlay !important;
 
     /* Radial fade so the pattern melts toward the edges */
     -webkit-mask-image: radial-gradient(ellipse at center,
