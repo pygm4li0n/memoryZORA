@@ -1790,3 +1790,155 @@ button.theme-select {
         transform: translateY(-50%) scale(0.7);
     }
 }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ MOBILE SIDEBAR REDESIGN  (≤768px only)
+   – full-width sidebar
+   – copper accent line 3× bigger (9px)
+   – only Phantom button in header
+   – theme + rank as full-width row buttons in sidebar
+   – profile cleaned up, name 2× bigger
+   – bigger user rows
+   Desktop (≥769px) is untouched.
+═════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* ── Full-width sidebar ── */
+    .sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-right: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* ── Copper accent line — 3× bigger (9px) ── */
+    .sidebar::before {
+        width: 9px !important;
+        box-shadow:
+            0 0 20px rgba(25, 214, 43, 0.85),
+            0 0 40px rgba(25, 214, 43, 0.4) !important;
+    }
+
+    /* ── Profile section — bigger, cleaner ── */
+    .sidebar-user-profile-big {
+        padding: 30px 26px 22px !important;
+        gap: 18px !important;
+        align-items: center !important;
+    }
+    .sidebar-user-profile-big .big-avatar {
+        width: 92px !important;
+        height: 92px !important;
+        font-size: 2.3rem !important;
+        border-width: 3px !important;
+    }
+    .sidebar-user-profile-big .big-info {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+    .sidebar-user-profile-big .big-name {
+        font-size: 2rem !important;          /* 2× bigger */
+        letter-spacing: 0.03em !important;
+        margin-bottom: 6px !important;
+        line-height: 1.1 !important;
+    }
+    .sidebar-user-profile-big .big-status {
+        font-size: 1rem !important;
+        gap: 6px !important;
+    }
+    .sidebar-user-profile-big .big-rank,
+    .sidebar-user-profile-big .big-level {
+        font-size: 0.92rem !important;
+        padding: 4px 14px !important;
+        margin-top: 6px !important;
+        letter-spacing: 0.06em !important;
+    }
+    .sidebar-user-profile-big .edit-profile-btn {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.4rem !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* ── Theme + Rank as full-width row buttons ── */
+    .sidebar #sidebarThemeBtn,
+    .sidebar #rankingsBtn {
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
+        display: flex !important;
+        width: calc(100% - 32px) !important;
+        height: 60px !important;
+        margin: 8px 16px !important;
+        padding: 0 22px !important;
+        font-size: 1.7rem !important;
+        border-radius: 8px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 14px !important;
+        box-sizing: border-box !important;
+        flex-shrink: 0 !important;
+        z-index: auto !important;
+        background: var(--bg-elevated, rgba(255,255,255,0.05)) !important;
+        border: 1px solid var(--border-default, #454B4B) !important;
+        color: var(--text-primary, #fff) !important;
+        transition: all 0.2s ease !important;
+    }
+    .sidebar #sidebarThemeBtn:hover,
+    .sidebar #rankingsBtn:hover {
+        border-color: var(--accent-cyan, #20FF62) !important;
+        box-shadow: 0 0 16px rgba(32,255,98,0.5) !important;
+    }
+
+    /* ── Header — Phantom button only ── */
+    .header-right #connectionPill,
+    .header-right #onlineCountBadge,
+    .header-right #walletAddress,
+    .header-right #refreshBtn,
+    .header-right #mobileEditBtn,
+    .header-right #headerThemeBtn,
+    .header-right #rankingsBtn,
+    .header-right #modSettingsBtn {
+        display: none !important;
+    }
+
+    .header-right {
+        gap: 0 !important;
+    }
+    .header-right .phantom-btn {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    .header-right .phantom-btn img {
+        width: 30px !important;
+        height: 30px !important;
+    }
+
+    /* ── Active-users label — bigger ── */
+    .sidebar-section-label {
+        font-size: 0.9rem !important;
+        padding: 18px 22px 10px !important;
+        letter-spacing: 0.16em !important;
+    }
+    .sidebar-section-label .active-users-count {
+        font-size: 0.85rem !important;
+        padding: 3px 12px !important;
+    }
+
+    /* ── User rows — more breathing room ── */
+    .sidebar-user-item {
+        padding: 12px 14px !important;
+        margin-bottom: 6px !important;
+    }
+    .sidebar-user-item .user-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1rem !important;
+    }
+    .sidebar-user-item .user-name {
+        font-size: 0.95rem !important;
+    }
+    .sidebar-user-item .user-status-text {
+        font-size: 0.78rem !important;
+    }
+}
