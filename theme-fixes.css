@@ -1474,30 +1474,21 @@ button.theme-select {
 /* ═════════════════════════════════════════════════════
    ⚑ MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
    – Full-width CSS-grid layout (GPU composited → no flicker)
-   – Copper accent rail ALWAYS at right edge, never overlaps
-     content (sidebar reserves a right gutter on every row)
-   – Floating ☰/✕ toggle top-right (auto icon swap)
-   – Users list = primary focus; all data still visible
-   – Profile name 2× bigger; token/streak/footer compact
+   – Copper rail 9px on right edge; content reserved
+   – Profile: avatar + name/pencil + badges/status on left,
+     2×2 function grid on right (theme, rank, + 2 slots)
+   – Users list grows to fill (primary focus)
+   – Token strip → streak → token balances → footer
+   – Floating ☰/✕ toggle top-right (clean way back)
    Desktop (≥769px) untouched.
 ═════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-    /* ── Sidebar shell: full-width grid, GPU composited ── */
+    /* ── Sidebar shell: full-width, GPU composited, slide-in ── */
     .sidebar {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        grid-template-rows: auto auto auto 1fr auto auto auto !important;
-        grid-template-areas:
-            "profile  profile"
-            "theme    rank"
-            "label    label"
-            "users    users"
-            "token    token"
-            "streak   streak"
-            "footer   footer" !important;
-        gap: 0 !important;
-
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
         height: var(--app-height) !important;
@@ -1512,20 +1503,32 @@ button.theme-select {
         background: var(--bg-panel, #111827) !important;
         overflow: hidden !important;
 
-        /* GPU compositing — kills theme-swap flicker */
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto 1fr auto auto auto auto !important;
+        grid-template-areas:
+            "profile"
+            "label"
+            "users"
+            "tracker"
+            "streak"
+            "tokens"
+            "footer" !important;
+        gap: 0 !important;
+
         backface-visibility: hidden !important;
         -webkit-backface-visibility: hidden !important;
-        transform: translateZ(0) !important;
-        -webkit-transform: translateZ(0) !important;
         will-change: transform !important;
         transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
 
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
+        /* Closed by default; .open slides in */
+        transform: translate3d(-100%, 0, 0) !important;
+    }
+    .sidebar.open {
+        transform: translate3d(0, 0, 0) !important;
     }
 
-    /* ── Copper accent rail — right edge, non-interactive ── */
+    /* ── Copper rail — 9px at right edge, non-interactive ── */
     .sidebar::before {
         content: '' !important;
         position: absolute !important;
@@ -1549,43 +1552,47 @@ button.theme-select {
         transition: none !important;
     }
 
-    /* Reserve right gutter so nothing sits under the rail */
-    .sidebar-user-profile-big,
-    .sidebar-section-label,
-    .sidebar-users,
-    .sidebar-footer,
-    .sidebar .token-tracker.mobile-only,
-    .sidebar .sidebar-streak-display {
-        padding-right: calc(22px + 9px) !important;
-        padding-left: 22px !important;
-        box-sizing: border-box !important;
-    }
-
-    /* ── PROFILE (top, full width) ── */
+    /* ── PROFILE: avatar | info (name+pencil / badges / status) | 2×2 grid ── */
     .sidebar-user-profile-big {
         grid-area: profile !important;
-        padding-top: 22px !important;
-        padding-bottom: 18px !important;
-        gap: 16px !important;
+        position: relative !important;
+
+        display: grid !important;
+        grid-template-columns: auto 1fr auto !important;
+        grid-template-areas: "avatar info pencil" !important;
+        column-gap: 12px !important;
         align-items: center !important;
+
+        /* right padding reserves the 2×2 grid area + rail */
+        padding: 16px 151px 16px 20px !important;
+        min-height: 152px !important;
+        box-sizing: border-box !important;
         border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
-        flex-shrink: 0 !important;
     }
+
     .sidebar-user-profile-big .big-avatar {
-        width: 80px !important;
-        height: 80px !important;
-        font-size: 2rem !important;
+        grid-area: avatar !important;
+        align-self: center !important;
+        width: 72px !important;
+        height: 72px !important;
+        font-size: 1.8rem !important;
         border-width: 3px !important;
         flex-shrink: 0 !important;
     }
+
     .sidebar-user-profile-big .big-info {
-        flex: 1 1 auto !important;
+        grid-area: info !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
         min-width: 0 !important;
+        align-self: center !important;
     }
+
     .sidebar-user-profile-big .big-name {
-        font-size: 1.75rem !important;
-        line-height: 1.05 !important;
-        margin-bottom: 4px !important;
+        font-size: 1.5rem !important;
+        line-height: 1.1 !important;
+        margin: 0 !important;
         letter-spacing: 0.02em !important;
         white-space: nowrap !important;
         overflow: hidden !important;
@@ -1594,60 +1601,68 @@ button.theme-select {
     .sidebar-user-profile-big .big-rank,
     .sidebar-user-profile-big .big-level {
         display: inline-block !important;
-        font-size: 0.78rem !important;
-        padding: 3px 10px !important;
-        margin-top: 4px !important;
-        margin-right: 4px !important;
+        font-size: 0.72rem !important;
+        padding: 2px 9px !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
         letter-spacing: 0.06em !important;
-        line-height: 1 !important;
-        vertical-align: middle !important;
+        align-self: flex-start !important;
     }
+    .sidebar-user-profile-big .big-level { margin-left: 4px !important; }
     .sidebar-user-profile-big .big-status {
-        font-size: 0.85rem !important;
+        font-size: 0.82rem !important;
         gap: 6px !important;
-        margin-top: 6px !important;
-    }
-    .sidebar-user-profile-big .edit-profile-btn {
-        width: 42px !important;
-        height: 42px !important;
-        font-size: 1.2rem !important;
-        flex-shrink: 0 !important;
+        margin: 0 !important;
     }
 
-    /* ── THEME + RANK: side by side (2-col grid) ── */
-    .sidebar #sidebarThemeBtn,
-    .sidebar #rankingsBtn {
-        position: static !important;
-        top: auto !important;
-        right: auto !important;
+    /* Pencil — top-right of the info block, on the name row */
+    .sidebar-user-profile-big .edit-profile-btn {
+        grid-area: pencil !important;
+        align-self: start !important;
+        justify-self: end !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 0.9rem !important;
+        border-radius: 6px !important;
+        background: transparent !important;
+        border: 1px solid var(--border-subtle, rgba(255,255,255,0.15)) !important;
+        color: var(--text-secondary) !important;
         display: inline-flex !important;
-        width: auto !important;
-        min-width: 0 !important;
-        height: 54px !important;
-        margin: 10px 0 !important;
-        padding: 0 14px !important;
-        font-size: 1.4rem !important;
-        font-weight: 700 !important;
-        border-radius: 10px !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 8px !important;
-        box-sizing: border-box !important;
-        z-index: auto !important;
+    }
+
+    /* ── 2×2 FUNCTION GRID (right of profile) ── */
+    .sidebar #sidebarThemeBtn,
+    .sidebar #rankingsBtn {
+        position: absolute !important;
+        width: 52px !important;
+        height: 52px !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 1.3rem !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 5 !important;
         background: var(--bg-elevated, rgba(255,255,255,0.06)) !important;
         border: 1px solid var(--border-default, #454B4B) !important;
         color: var(--text-primary, #fff) !important;
         transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
     }
+    /* Top row: theme (left slot), rank (right slot) */
     .sidebar #sidebarThemeBtn {
-        grid-area: theme !important;
-        margin-left: 22px !important;
-        margin-right: 6px !important;
+        top: 16px !important;
+        right: calc(9px + 16px + 52px + 8px) !important;   /* 85px */
     }
     .sidebar #rankingsBtn {
-        grid-area: rank !important;
-        margin-left: 6px !important;
-        margin-right: calc(22px + 9px) !important;
+        top: 16px !important;
+        right: calc(9px + 16px) !important;               /* 25px */
     }
     .sidebar #sidebarThemeBtn:hover,
     .sidebar #rankingsBtn:hover {
@@ -1656,12 +1671,40 @@ button.theme-select {
         background: var(--bg-hover, rgba(255,255,255,0.1)) !important;
     }
 
-    /* ── SECTION LABEL (ACTIVE USERS + count) ── */
+    /* Bottom row: 2 placeholders for future functions */
+    .sidebar-user-profile-big::before,
+    .sidebar-user-profile-big::after {
+        content: '+' !important;
+        position: absolute !important;
+        top: calc(16px + 52px + 8px) !important;          /* 76px */
+        width: 52px !important;
+        height: 52px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
+        color: var(--text-muted, rgba(255,255,255,0.25)) !important;
+        background: transparent !important;
+        border: 1px dashed var(--border-subtle, rgba(255,255,255,0.15)) !important;
+        border-radius: 10px !important;
+        pointer-events: none !important;
+        opacity: 0.5 !important;
+        z-index: 4 !important;
+    }
+    .sidebar-user-profile-big::before {
+        right: calc(9px + 16px + 52px + 8px) !important;  /* 85px */
+    }
+    .sidebar-user-profile-big::after {
+        right: calc(9px + 16px) !important;               /* 25px */
+    }
+
+    /* ── ACTIVE USERS label ── */
     .sidebar-section-label {
         grid-area: label !important;
         font-size: 0.82rem !important;
-        padding-top: 6px !important;
-        padding-bottom: 6px !important;
+        padding: 10px 22px 8px !important;
+        padding-right: calc(22px + 9px) !important;
         letter-spacing: 0.14em !important;
         flex-shrink: 0 !important;
     }
@@ -1670,15 +1713,14 @@ button.theme-select {
         padding: 2px 10px !important;
     }
 
-    /* ── USER LIST: primary focus, grows to fill ── */
+    /* ── USERS list — primary focus, grows to fill ── */
     .sidebar-users {
         grid-area: users !important;
-        flex: 0 0 auto !important;
         min-height: 0 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        padding-top: 4px !important;
-        padding-bottom: 12px !important;
+        padding: 4px 22px 10px !important;
+        padding-right: calc(22px + 9px) !important;
         scrollbar-width: thin !important;
         overscroll-behavior: contain !important;
     }
@@ -1691,12 +1733,8 @@ button.theme-select {
         width: 44px !important;
         height: 44px !important;
         font-size: 1rem !important;
-        flex-shrink: 0 !important;
     }
-    .sidebar-user-item .user-name {
-        font-size: 1rem !important;
-        line-height: 1.15 !important;
-    }
+    .sidebar-user-item .user-name { font-size: 1rem !important; }
     .sidebar-user-item .user-status-text { font-size: 0.78rem !important; }
     .sidebar-user-item .private-btn {
         padding: 8px 14px !important;
@@ -1708,14 +1746,13 @@ button.theme-select {
         text-align: center !important;
     }
 
-    /* ── TOKEN TRACKER (compact strip) ── */
+    /* ── TOKEN tracker (compact strip) ── */
     .sidebar .token-tracker.mobile-only {
-        grid-area: token !important;
+        grid-area: tracker !important;
         display: flex !important;
-        margin: 6px 0 !important;
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
-        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 8px 22px !important;
+        padding-right: calc(22px + 9px) !important;
         justify-content: center !important;
         font-size: 0.75rem !important;
         gap: 8px !important;
@@ -1724,13 +1761,14 @@ button.theme-select {
         border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
         background: transparent !important;
     }
+    .sidebar .token-tracker.mobile-only.hidden { display: none !important; }
 
     /* ── STREAK (compact strip) ── */
     .sidebar .sidebar-streak-display {
         grid-area: streak !important;
         display: flex !important;
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
+        padding: 8px 22px !important;
+        padding-right: calc(22px + 9px) !important;
         margin: 0 !important;
         border: none !important;
         background: transparent !important;
@@ -1741,20 +1779,92 @@ button.theme-select {
     .sidebar .sidebar-streak-display::before { display: none !important; }
     .sidebar .sidebar-streak-display .fire-slot { font-size: 1rem !important; }
 
-    /* ── FOOTER (status + wallet) ── */
+    /* ── WALLET TOKEN BALANCES — above footer, one line each ── */
+    .sidebar #walletTokenList {
+        grid-area: tokens !important;
+        background: transparent !important;
+        color: var(--text-secondary) !important;
+        border: none !important;
+        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+        padding: 8px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4 !important;
+        max-height: 90px !important;
+        overflow-y: auto !important;
+        flex-shrink: 0 !important;
+    }
+    /* Each token = one row: [name + status]  ......  [amount] */
+    .sidebar #walletTokenList > div {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        padding: 3px 0 !important;
+        white-space: nowrap !important;
+    }
+    .sidebar #walletTokenList > div:first-child {
+        font-size: 0.68rem !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.1em !important;
+        color: var(--text-muted) !important;
+        padding-bottom: 6px !important;
+        margin-bottom: 2px !important;
+        border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+    }
+    .sidebar #walletTokenList > div > span:first-child {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .sidebar #walletTokenList > div > span:last-child {
+        flex-shrink: 0 !important;
+        font-weight: 700 !important;
+        color: var(--text-primary) !important;
+        font-variant-numeric: tabular-nums !important;
+    }
+
+    /* ── FOOTER: status + wallet (short) in one line ── */
     .sidebar-footer {
         grid-area: footer !important;
-        flex: 0 0 auto !important;
-        padding-top: 10px !important;
-        padding-bottom: 14px !important;
-        margin: 0 !important;
-        min-height: 40px !important;
         display: flex !important;
         align-items: center !important;
         gap: 8px !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        padding: 12px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        margin: 0 !important;
+        min-height: 0 !important;
         border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
         font-size: 0.8rem !important;
-        transition: none !important;
+    }
+    .sidebar-footer .status-dot-sm {
+        width: 8px !important;
+        height: 8px !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar-footer #sidebarStatusText {
+        flex-shrink: 0 !important;
+        font-weight: 600 !important;
+        color: var(--text-primary) !important;
+        font-size: 0.8rem !important;
+    }
+    .sidebar-footer .wallet-address {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        display: inline !important;
+        margin-left: auto !important;
+        text-align: right !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 0.78rem !important;
+        color: var(--text-secondary) !important;
+        white-space: nowrap !important;
     }
 
     /* ── Kill transitions on data regions (theme-swap flicker) ── */
@@ -1788,7 +1898,7 @@ button.theme-select {
         height: 30px !important;
     }
 
-    /* ── FLOATING SIDEBAR TOGGLE (☰ / ✕) top-right ── */
+    /* ── FLOATING TOGGLE (☰ / ✕) — clean way back to chat ── */
     #sidebarToggle {
         position: fixed !important;
         top: 14px !important;
@@ -1798,7 +1908,7 @@ button.theme-select {
         height: 46px !important;
         padding: 0 !important;
         border-radius: 50% !important;
-        display: flex !important;
+        display: flex !important;   /* overrides .hidden */
         align-items: center !important;
         justify-content: center !important;
         z-index: 99999 !important;
@@ -1817,9 +1927,8 @@ button.theme-select {
         font-size: 1.4rem !important;
         line-height: 1 !important;
         display: block !important;
-        transition: none !important;
     }
-    /* When sidebar is open → swap to ✕ + accent glow */
+    /* When sidebar open → swaps to ✕ with green glow */
     .sidebar.open ~ .chat-panel #sidebarToggle::before {
         content: '✕';
         font-size: 1.3rem !important;
