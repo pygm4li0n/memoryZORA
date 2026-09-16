@@ -47,7 +47,7 @@
 
     <!-- Separate fixes: Phantom toast + token contrast -->
     <link rel="stylesheet" href="theme-fixes.css?v=70">
-    <link rel="stylesheet" href="mobile-sidebar.css?v=2">
+    <link rel="stylesheet" href="mobile-sidebar.css?v=3">
     <link rel="stylesheet" href="chat-texture.css?v=2">
 
     <!-- Twitter Widgets for X/Twitter embeds -->
@@ -494,36 +494,48 @@
         })();
     </script>
 
-    <!-- ⚑ MOBILE: inject "BACK TO CHAT" bar at top of the sidebar.
+    <!-- ⚑ MOBILE ONLY: inject "BACK TO CHAT" bar at top of the sidebar.
+         Never appears on desktop. Removes itself if the viewport grows.
          Runs after script.js so the sidebar exists and isn't rebuilt. -->
     <script>
         (function () {
-            function addBackBtn() {
+            var MQ = window.matchMedia('(max-width: 768px)');
+
+            function sync() {
                 var sidebar = document.getElementById('sidebar');
-                if (!sidebar || document.getElementById('sidebarBackBtn')) return;
+                if (!sidebar) return;
 
-                var btn = document.createElement('button');
-                btn.id = 'sidebarBackBtn';
-                btn.className = 'sidebar-back-btn';
-                btn.type = 'button';
-                btn.setAttribute('aria-label', 'Back to chat');
-                btn.innerHTML = '<span class="arrow">←</span><span class="label">BACK TO CHAT</span>';
+                var existing = document.getElementById('sidebarBackBtn');
 
-                btn.addEventListener('click', function () {
-                    sidebar.classList.remove('open');
-                });
+                if (MQ.matches && !existing) {
+                    var btn = document.createElement('button');
+                    btn.id = 'sidebarBackBtn';
+                    btn.className = 'sidebar-back-btn';
+                    btn.type = 'button';
+                    btn.setAttribute('aria-label', 'Back to chat');
+                    btn.innerHTML = '<span class="arrow">←</span><span class="label">BACK TO CHAT</span>';
 
-                // Place as the first child so it lands in the "back" grid row
-                sidebar.insertBefore(btn, sidebar.firstChild);
+                    btn.addEventListener('click', function () {
+                        sidebar.classList.remove('open');
+                    });
+
+                    // Place as the first child so it lands in the "back" grid row
+                    sidebar.insertBefore(btn, sidebar.firstChild);
+                } else if (!MQ.matches && existing) {
+                    // Desktop: never show the back button
+                    existing.remove();
+                }
             }
 
-            addBackBtn();
-            document.addEventListener('DOMContentLoaded', addBackBtn);
-            window.addEventListener('load', addBackBtn);
+            sync();
+            if (MQ.addEventListener) MQ.addEventListener('change', sync);
+            else MQ.addListener(sync);
+            document.addEventListener('DOMContentLoaded', sync);
+            window.addEventListener('load', sync);
 
-            // Safety net: re-add if something removes it
+            // Safety net: re-inject if script.js rebuilds the sidebar on mobile
             var mo = new MutationObserver(function () {
-                if (!document.getElementById('sidebarBackBtn')) addBackBtn();
+                if (MQ.matches && !document.getElementById('sidebarBackBtn')) sync();
             });
             document.addEventListener('DOMContentLoaded', function () {
                 var sidebar = document.getElementById('sidebar');
