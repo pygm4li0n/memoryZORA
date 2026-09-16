@@ -1,0 +1,1218 @@
+/* ============================================================
+   WINAMP '99 — INDUSTRIAL AUDIO PLAYER SKIN
+   Visual-only reskin. Overrides colors, textures, typography.
+   Does NOT change layout, structure, or behavior.
+   Load AFTER the active theme stylesheet.
+   ============================================================ */
+
+/* ═══════════════════════════════════════════════════════════
+   1) COLOR VARIABLE OVERRIDES
+═══════════════════════════════════════════════════════════ */
+:root {
+    /* Base surfaces */
+    --bg-deep:         #171914;
+    --bg-panel:        #252820;
+    --bg-elevated:     #34372D;
+    --bg-input:        #0f1109;
+    --bg-hover:        #46483A;
+    --bg-secondary:    #2c2f26;
+
+    /* Neon CRT green — active states, readouts, meters */
+    --accent-cyan:     #39FF14;
+    --accent-green:    #00FF20;
+    --accent-lime:     #39FF14;
+    --accent-blue:     #39FF14;
+    --accent-purple:   #39FF14;
+    --accent-pink:     #39FF14;
+    --accent-magenta:  #39FF14;
+
+    /* Amber gold — headings, secondary labels */
+    --accent-yellow:   #D5A72A;
+    --accent-orange:   #E0B83C;
+    --accent-cherry-dark:  #3a2f10;
+    --accent-cherry-mid:   #8a7020;
+    --accent-cherry-light: #E0B83C;
+    --accent-cherry-pale:  #D5A72A;
+
+    /* Red — tiny status indicators only */
+    --accent-red:      #C52C1F;
+
+    /* Glows — restrained, hardware-like */
+    --glow-cyan:  0 0 4px rgba(57, 255, 20, 0.55), 0 0 12px rgba(57, 255, 20, 0.25);
+    --glow-green: var(--glow-cyan);
+    --glow-yellow: 0 0 4px rgba(213, 167, 42, 0.55), 0 0 12px rgba(213, 167, 42, 0.25);
+    --glow-cherry-strong: 0 0 6px rgba(57, 255, 20, 0.7), 0 0 20px rgba(57, 255, 20, 0.35);
+
+    /* Text */
+    --text-primary:    #C8F5C0;
+    --text-secondary:  #8FA080;
+    --text-muted:      #5F6B55;
+    --text-lcd:        #39FF14;
+    --text-lcd-dim:    #6f9a68;
+
+    /* Borders — brushed metal */
+    --border-subtle:   #2a2d24;
+    --border-default:  #46483A;
+    --border-strong:   #5A5A47;
+    --border-glow:     #00FF20;
+
+    /* Radii — squared, industrial */
+    --radius-sm: 1px;
+    --radius-md: 2px;
+    --radius-lg: 3px;
+    --radius-xl: 4px;
+
+    /* Fonts — terminal, compact */
+    --font-main: 'Share Tech Mono', 'Courier New', 'Lucida Console', monospace;
+    --font-mono: 'Share Tech Mono', 'Courier New', 'Lucida Console', monospace;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   2) GLOBAL SURFACES
+═══════════════════════════════════════════════════════════ */
+html body {
+    background: #10120d !important;
+    background-image:
+        radial-gradient(circle at 20% 15%, rgba(0, 255, 32, 0.025) 0%, transparent 60%),
+        radial-gradient(circle at 80% 85%, rgba(213, 167, 42, 0.02) 0%, transparent 60%),
+        repeating-linear-gradient(0deg,
+            rgba(255, 255, 255, 0.008) 0px,
+            rgba(255, 255, 255, 0.008) 1px,
+            transparent 1px,
+            transparent 3px) !important;
+    color: var(--text-primary) !important;
+    font-family: var(--font-main) !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   3) APP SHELL — player chassis (brushed metal frame)
+═══════════════════════════════════════════════════════════ */
+html body .app-shell {
+    background:
+        repeating-linear-gradient(0deg,
+            rgba(255, 255, 255, 0.012) 0px,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px,
+            transparent 2px),
+        repeating-linear-gradient(90deg,
+            rgba(0, 0, 0, 0.06) 0px,
+            rgba(0, 0, 0, 0.06) 2px,
+            transparent 2px,
+            transparent 6px),
+        linear-gradient(180deg, #34372D 0%, #252820 60%, #1c1e18 100%) !important;
+    border: 2px solid #46483A !important;
+    border-top-color: #5A5A47 !important;
+    border-bottom-color: #1a1c15 !important;
+    border-radius: 4px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.10),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.65),
+        inset 2px 0 0 rgba(255, 255, 255, 0.04),
+        inset -2px 0 0 rgba(0, 0, 0, 0.4),
+        0 4px 24px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(0, 255, 32, 0.06) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   4) SIDEBAR — playlist panel (dark LCD slot)
+═══════════════════════════════════════════════════════════ */
+html body .sidebar {
+    background:
+        repeating-linear-gradient(0deg,
+            rgba(255, 255, 255, 0.012) 0px,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px,
+            transparent 3px),
+        linear-gradient(180deg, #1d2018 0%, #161811 40%, #10120d 100%) !important;
+    border-right: 2px solid #46483A !important;
+    box-shadow:
+        inset 2px 0 0 rgba(255, 255, 255, 0.04),
+        inset -2px 0 0 rgba(0, 0, 0, 0.6),
+        inset 0 2px 6px rgba(0, 0, 0, 0.7),
+        2px 0 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Copper rail → neon green edge line */
+html body .sidebar::before {
+    background: linear-gradient(180deg,
+        transparent 0%,
+        #00FF20 20%,
+        #39FF14 40%,
+        #D5A72A 60%,
+        #39FF14 80%,
+        transparent 100%) !important;
+    box-shadow:
+        0 0 6px rgba(0, 255, 32, 0.6),
+        inset 0 0 4px rgba(0, 255, 32, 0.4) !important;
+    opacity: 0.7 !important;
+}
+
+/* Profile block — top of playlist */
+html body .sidebar-user-profile-big {
+    background:
+        linear-gradient(180deg, #2c2f26 0%, #252820 60%, #1a1c15 100%) !important;
+    border-bottom: 2px solid #46483A !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.7) !important;
+}
+
+html body .sidebar-user-profile-big .big-avatar {
+    background: #0f1109 !important;
+    border: 2px solid #5A5A47 !important;
+    box-shadow:
+        inset 0 0 8px rgba(0, 0, 0, 0.9),
+        inset 0 0 2px rgba(0, 255, 32, 0.3),
+        0 0 6px rgba(0, 255, 32, 0.3) !important;
+    color: #39FF14 !important;
+    font-weight: 700 !important;
+}
+
+html body .sidebar-user-profile-big .big-name {
+    color: #D5A72A !important;
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.9),
+        0 0 8px rgba(213, 167, 42, 0.25) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+}
+
+html body .sidebar-user-profile-big .big-rank,
+html body .sidebar-user-profile-big .big-level {
+    background: #0f1109 !important;
+    color: #39FF14 !important;
+    border: 1px solid #46483A !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.8) !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.5) !important;
+    font-weight: 700 !important;
+}
+
+/* Section label — like a display header */
+html body .sidebar-section-label {
+    color: #D5A72A !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    border-bottom: 1px solid #46483A !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+}
+
+html body .sidebar-section-label .active-users-count {
+    background: #0f1109 !important;
+    color: #39FF14 !important;
+    border: 1px solid #5A5A47 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 0 6px rgba(0, 0, 0, 0.9),
+        0 0 4px rgba(0, 255, 32, 0.35) !important;
+    text-shadow: 0 0 5px rgba(57, 255, 20, 0.6) !important;
+}
+
+/* User rows — playlist tracks */
+html body .sidebar-user-item {
+    background:
+        linear-gradient(180deg, #252820 0%, #1d2018 100%) !important;
+    border: 1px solid #34372D !important;
+    border-top-color: #46483A !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+html body .sidebar-user-item:hover {
+    background:
+        linear-gradient(180deg, #2f3229 0%, #252820 100%) !important;
+    border-color: #5A5A47 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 0 8px rgba(0, 255, 32, 0.15) !important;
+}
+
+html body .sidebar-user-item .user-avatar {
+    background: #0f1109 !important;
+    border: 1px solid #46483A !important;
+    color: #39FF14 !important;
+    box-shadow:
+        inset 0 0 4px rgba(0, 0, 0, 0.9),
+        0 0 3px rgba(0, 255, 32, 0.3) !important;
+}
+
+html body .sidebar-user-item .user-name {
+    color: #C8F5C0 !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8) !important;
+    font-weight: 600 !important;
+}
+
+html body .sidebar-user-item .user-status-text {
+    color: #8FA080 !important;
+}
+
+/* Online indicator — small green LED */
+html body .online-indicator {
+    background: #00FF20 !important;
+    border: 1px solid #171914 !important;
+    box-shadow:
+        0 0 4px rgba(0, 255, 32, 0.9),
+        0 0 8px rgba(0, 255, 32, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Private request button — small mechanical switch */
+html body .sidebar-user-item .private-btn {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    color: #D5A72A !important;
+    border: 1px solid #5A5A47 !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 1px 2px rgba(0, 0, 0, 0.6) !important;
+    font-weight: 700 !important;
+}
+
+html body .sidebar-user-item .private-btn:hover {
+    background:
+        linear-gradient(180deg, #5A5A47 0%, #46483A 50%, #34372D 100%) !important;
+    color: #E0B83C !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+        0 0 6px rgba(213, 167, 42, 0.4) !important;
+}
+
+html body .sidebar-user-item .private-btn.accepted {
+    background:
+        linear-gradient(180deg, #39FF14 0%, #00c412 100%) !important;
+    color: #0f1109 !important;
+    border-color: #00FF20 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(0, 255, 32, 0.55) !important;
+    text-shadow: none !important;
+}
+
+/* Sidebar footer — status tray */
+html body .sidebar-footer {
+    background:
+        linear-gradient(180deg, #252820 0%, #1a1c15 100%) !important;
+    border-top: 2px solid #46483A !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    color: #8FA080 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   5) CHAT PANEL — CRT display screen
+═══════════════════════════════════════════════════════════ */
+html body .chat-panel {
+    background:
+        radial-gradient(ellipse at 50% 40%,
+            rgba(0, 255, 32, 0.03) 0%,
+            transparent 70%),
+        linear-gradient(180deg, #0a0c07 0%, #0f1109 40%, #0a0c07 100%) !important;
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, 0.98),
+        inset 0 0 100px rgba(0, 255, 32, 0.03),
+        inset 0 2px 0 rgba(255, 255, 255, 0.02) !important;
+}
+
+/* CRTs scanlines — subtle */
+html body .chat-panel::after {
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.22) 2px,
+        rgba(0, 0, 0, 0.22) 3px
+    ) !important;
+    opacity: 0.4 !important;
+}
+
+/* Messages container — display area */
+html body .messages-container {
+    background:
+        repeating-linear-gradient(0deg,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.15) 2px,
+            rgba(0, 0, 0, 0.15) 3px),
+        radial-gradient(ellipse at 30% 20%, rgba(0, 255, 32, 0.02) 0%, transparent 60%),
+        #0a0c07 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   6) HEADER BAR — top toolbar strip
+═══════════════════════════════════════════════════════════ */
+html body .chat-header-bar {
+    background:
+        repeating-linear-gradient(90deg,
+            rgba(0, 0, 0, 0.04) 0px,
+            rgba(0, 0, 0, 0.04) 2px,
+            transparent 2px,
+            transparent 6px),
+        linear-gradient(180deg, #3a3d33 0%, #2a2d24 50%, #1a1c15 100%) !important;
+    border-bottom: 2px solid #171914 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 2px 6px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Kill the shimmer sweep animation for a hardware feel */
+html body .chat-header-bar::after {
+    display: none !important;
+}
+
+html body .header-logo,
+html body .header-logo-mobile {
+    filter:
+        drop-shadow(0 1px 1px rgba(0, 0, 0, 0.9))
+        drop-shadow(0 0 6px rgba(0, 255, 32, 0.25)) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   7) CHAT TABS — transport controls
+═══════════════════════════════════════════════════════════ */
+html body .chat-tabs {
+    background:
+        linear-gradient(180deg, #1d2018 0%, #171914 100%) !important;
+    border-bottom: 2px solid #46483A !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+html body .chat-tab {
+    background:
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 100%) !important;
+    color: #8FA080 !important;
+    border: 1px solid #34372D !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 2px 2px 0 0 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    transition: none !important;
+}
+
+html body .chat-tab:hover {
+    background:
+        linear-gradient(180deg, #34372D 0%, #252820 100%) !important;
+    color: #C8F5C0 !important;
+}
+
+html body .chat-tab.active {
+    background:
+        linear-gradient(180deg, #2a2d24 0%, #171914 100%) !important;
+    color: #39FF14 !important;
+    border-bottom-color: #00FF20 !important;
+    text-shadow:
+        0 0 4px rgba(57, 255, 20, 0.7),
+        0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.15),
+        inset 0 -2px 0 rgba(0, 255, 32, 0.3),
+        0 0 8px rgba(0, 255, 32, 0.25) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   8) MESSAGE BUBBLES — digital terminal blocks
+═══════════════════════════════════════════════════════════ */
+html body .msg-bubble {
+    background:
+        linear-gradient(180deg, #1d2018 0%, #141610 100%) !important;
+    border: 1px solid #34372D !important;
+    border-top-color: #46483A !important;
+    border-bottom-color: #0a0c07 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+        0 1px 3px rgba(0, 0, 0, 0.6) !important;
+    color: #C8F5C0 !important;
+}
+
+html body .msg-wrapper.own .msg-bubble {
+    background:
+        linear-gradient(180deg, #1f2618 0%, #141a0f 100%) !important;
+    border-color: #39FF14 !important;
+    border-top-color: #5AFF3A !important;
+    border-bottom-color: #1a5210 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(57, 255, 20, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+        0 0 8px rgba(57, 255, 20, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+html body .msg-bubble:hover {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.7),
+        0 0 10px rgba(0, 255, 32, 0.2),
+        0 1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Username — amber heading */
+html body .msg-username {
+    color: #D5A72A !important;
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.9),
+        0 0 6px rgba(213, 167, 42, 0.25) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Message text — greenish LCD */
+html body .msg-text {
+    color: #B8E5B0 !important;
+    text-shadow: 0 0 3px rgba(0, 255, 32, 0.12) !important;
+}
+
+html body .msg-text.deleted {
+    color: #5F6B55 !important;
+    font-style: italic !important;
+}
+
+html body .msg-time,
+html body .msg-edited {
+    color: #5F6B55 !important;
+    text-shadow: none !important;
+}
+
+/* Message avatars — small LCD windows */
+html body .msg-avatar {
+    background: #0f1109 !important;
+    border: 1px solid #46483A !important;
+    color: #39FF14 !important;
+    box-shadow:
+        inset 0 0 4px rgba(0, 0, 0, 0.9),
+        0 0 3px rgba(0, 255, 32, 0.25) !important;
+}
+
+/* Reply-ref block */
+html body .reply-ref-block {
+    background: rgba(0, 255, 32, 0.05) !important;
+    border-left: 2px solid #39FF14 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.1),
+        0 0 4px rgba(0, 255, 32, 0.15) !important;
+}
+
+html body .reply-ref-block .r-user {
+    color: #39FF14 !important;
+    text-shadow: 0 0 4px rgba(0, 255, 32, 0.4) !important;
+}
+
+html body .reply-ref-block .r-text {
+    color: #8FA080 !important;
+}
+
+/* Reaction buttons — small switches */
+html body .reaction-btn {
+    background:
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 100%) !important;
+    border: 1px solid #46483A !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    color: #C8F5C0 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+html body .reaction-btn:hover {
+    background:
+        linear-gradient(180deg, #34372D 0%, #252820 100%) !important;
+    border-color: #5A5A47 !important;
+}
+
+html body .reaction-btn.active {
+    background:
+        linear-gradient(180deg, #39FF14 0%, #00c412 100%) !important;
+    color: #0f1109 !important;
+    border-color: #00FF20 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 0 6px rgba(0, 255, 32, 0.55) !important;
+    text-shadow: none !important;
+}
+
+/* Message action buttons */
+html body .msg-action-btn {
+    background:
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 100%) !important;
+    border: 1px solid #46483A !important;
+    color: #D5A72A !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.5) !important;
+    font-weight: 700 !important;
+}
+
+html body .msg-action-btn:hover {
+    background:
+        linear-gradient(180deg, #34372D 0%, #252820 100%) !important;
+    color: #E0B83C !important;
+    border-color: #5A5A47 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   9) INPUT AREA — bottom control strip
+═══════════════════════════════════════════════════════════ */
+html body .input-area-bar {
+    background:
+        repeating-linear-gradient(90deg,
+            rgba(0, 0, 0, 0.03) 0px,
+            rgba(0, 0, 0, 0.03) 2px,
+            transparent 2px,
+            transparent 6px),
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 50%, #171914 100%) !important;
+    border-top: 2px solid #46483A !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 -2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+html body #messageInput {
+    background:
+        linear-gradient(180deg, #0a0c07 0%, #0f1109 100%) !important;
+    color: #39FF14 !important;
+    border: 2px solid #34372D !important;
+    border-top-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.95),
+        inset 0 0 4px rgba(0, 255, 32, 0.08) !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.3) !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.02em !important;
+}
+
+html body #messageInput:focus {
+    border-color: #39FF14 !important;
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.95),
+        inset 0 0 8px rgba(0, 255, 32, 0.15),
+        0 0 6px rgba(0, 255, 32, 0.35) !important;
+}
+
+html body #messageInput::placeholder {
+    color: #5F6B55 !important;
+    text-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   10) BUTTONS — mechanical switches
+═══════════════════════════════════════════════════════════ */
+html body .btn-icon,
+html body .sidebar-toggle {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    color: #D5A72A !important;
+    border: 1px solid #5A5A47 !important;
+    border-top-color: #6b6b56 !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 1px 2px rgba(0, 0, 0, 0.6) !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    transition: none !important;
+}
+
+html body .btn-icon:hover,
+html body .sidebar-toggle:hover {
+    background:
+        linear-gradient(180deg, #5A5A47 0%, #46483A 50%, #34372D 100%) !important;
+    color: #E0B83C !important;
+    border-color: #6b6b56 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 0 6px rgba(213, 167, 42, 0.35) !important;
+    transform: none !important;
+}
+
+html body .btn-icon:active,
+html body .sidebar-toggle:active {
+    background:
+        linear-gradient(180deg, #171914 0%, #1d2018 100%) !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.8),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Send button — big red/green transport */
+html body button.send-btn-main {
+    background:
+        linear-gradient(180deg, #39FF14 0%, #00c412 50%, #009a0d 100%) !important;
+    color: #0a0c07 !important;
+    border: 1px solid #00FF20 !important;
+    border-top-color: #5AFF3A !important;
+    border-bottom-color: #006408 !important;
+    border-radius: 2px !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.7),
+        0 0 8px rgba(0, 255, 32, 0.35) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    transition: none !important;
+}
+
+html body button.send-btn-main:hover {
+    background:
+        linear-gradient(180deg, #5AFF3A 0%, #39FF14 50%, #00c412 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.7),
+        0 0 12px rgba(0, 255, 32, 0.55) !important;
+}
+
+html body button.send-btn-main::before {
+    display: none !important;
+}
+
+html body button.send-btn-main:active {
+    background:
+        linear-gradient(180deg, #009a0d 0%, #00c412 100%) !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    transform: none !important;
+}
+
+html body button.send-btn-main:disabled {
+    background:
+        linear-gradient(180deg, #34372D 0%, #252820 100%) !important;
+    color: #5F6B55 !important;
+    border-color: #34372D !important;
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.5) !important;
+    text-shadow: none !important;
+}
+
+/* Upload button — small mechanical */
+html body .btn-upload-img {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    color: #D5A72A !important;
+    border: 1px solid #5A5A47 !important;
+    border-top-color: #6b6b56 !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6) !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+}
+
+html body .btn-upload-img:hover {
+    background:
+        linear-gradient(180deg, #5A5A47 0%, #46483A 100%) !important;
+    color: #E0B83C !important;
+}
+
+/* Theme / Rankings buttons — small square mechanical */
+html body #headerThemeBtn,
+html body #rankingsBtn,
+html body #sidebarThemeBtn,
+html body #refreshBtn,
+html body .phantom-btn {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    border: 1px solid #5A5A47 !important;
+    border-top-color: #6b6b56 !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Phantom connected — pulse-free green LED state */
+html body .phantom-btn.connected {
+    background:
+        linear-gradient(180deg, #39FF14 0%, #00c412 100%) !important;
+    border-color: #00FF20 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(0, 255, 32, 0.55) !important;
+}
+
+/* Kill phantom dot permanently */
+html body .phantom-btn.connected::after,
+html body .phantom-overlay-btn.connected::after {
+    display: none !important;
+    content: none !important;
+    animation: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   11) STATUS INDICATORS — small LEDs
+═══════════════════════════════════════════════════════════ */
+html body .status-dot,
+html body .status-dot-sm,
+html body #connDot,
+html body .online-count-badge .dot,
+html body .big-status .status-dot {
+    background: #00FF20 !important;
+    border: 1px solid rgba(0, 0, 0, 0.5) !important;
+    box-shadow:
+        0 0 3px rgba(0, 255, 32, 0.9),
+        0 0 6px rgba(0, 255, 32, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    animation: none !important;
+}
+
+/* Connection badge pill */
+html body .badge-pill {
+    background:
+        linear-gradient(180deg, #1d2018 0%, #141610 100%) !important;
+    color: #D5A72A !important;
+    border: 1px solid #46483A !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6) !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+}
+
+html body .badge-pill.connected-pill {
+    color: #39FF14 !important;
+    border-color: #00FF20 !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.6) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 0 6px rgba(0, 255, 32, 0.3) !important;
+}
+
+html body .badge-pill.disconnected-pill {
+    color: #C52C1F !important;
+    border-color: #C52C1F !important;
+    text-shadow: 0 0 4px rgba(197, 44, 31, 0.6) !important;
+}
+
+html body .online-count-badge {
+    background:
+        linear-gradient(180deg, #1d2018 0%, #141610 100%) !important;
+    color: #39FF14 !important;
+    border: 1px solid #46483A !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6) !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.5) !important;
+}
+
+/* Token tracker — digital readout */
+html body .token-tracker {
+    background:
+        linear-gradient(180deg, #0f1109 0%, #0a0c07 100%) !important;
+    border: 1px solid #46483A !important;
+    border-top-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.9),
+        inset 0 0 4px rgba(0, 255, 32, 0.08) !important;
+}
+
+html body .token-name { color: #D5A72A !important; text-shadow: 0 1px 0 rgba(0,0,0,0.9) !important; }
+html body .token-price { color: #39FF14 !important; text-shadow: 0 0 4px rgba(57, 255, 20, 0.5) !important; }
+html body .token-change.positive { color: #00FF20 !important; text-shadow: 0 0 4px rgba(0, 255, 32, 0.5) !important; }
+html body .token-change.negative { color: #C52C1F !important; text-shadow: 0 0 4px rgba(197, 44, 31, 0.5) !important; }
+
+html body .token-logo {
+    border: 1px solid #46483A !important;
+    box-shadow: 0 0 3px rgba(0, 255, 32, 0.25) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   12) OVERLAYS — recessed panels
+═══════════════════════════════════════════════════════════ */
+html body .overlay-full,
+html body .request-overlay {
+    background: rgba(10, 12, 7, 0.92) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+html body .overlay-card,
+html body .request-card {
+    background:
+        repeating-linear-gradient(90deg,
+            rgba(0, 0, 0, 0.03) 0px,
+            rgba(0, 0, 0, 0.03) 2px,
+            transparent 2px,
+            transparent 6px),
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 50%, #171914 100%) !important;
+    border: 2px solid #46483A !important;
+    border-top-color: #5A5A47 !important;
+    border-bottom-color: #0a0c07 !important;
+    border-radius: 3px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 8px 32px rgba(0, 0, 0, 0.9),
+        0 0 30px rgba(0, 255, 32, 0.06) !important;
+    color: #C8F5C0 !important;
+}
+
+html body .overlay-card::before,
+html body .request-card::before {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        #D5A72A 30%,
+        #00FF20 70%,
+        transparent 100%) !important;
+    box-shadow: 0 0 6px rgba(0, 255, 32, 0.35) !important;
+}
+
+html body .overlay-card h3,
+html body .request-card h3 {
+    color: #D5A72A !important;
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.9),
+        0 0 8px rgba(213, 167, 42, 0.25) !important;
+    letter-spacing: 0.1em !important;
+    font-weight: 700 !important;
+}
+
+html body .overlay-card input[type="text"],
+html body .overlay-card input[type="number"],
+html body .overlay-card select,
+html body .overlay-card textarea {
+    background:
+        linear-gradient(180deg, #0a0c07 0%, #0f1109 100%) !important;
+    color: #39FF14 !important;
+    border: 2px solid #34372D !important;
+    border-top-color: #171914 !important;
+    border-radius: 2px !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95) !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.3) !important;
+    font-family: var(--font-mono) !important;
+}
+
+html body .overlay-card input:focus,
+html body .overlay-card select:focus,
+html body .overlay-card textarea:focus {
+    border-color: #39FF14 !important;
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.95),
+        0 0 6px rgba(0, 255, 32, 0.35) !important;
+}
+
+html body .overlay-card button {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    color: #D5A72A !important;
+    border: 1px solid #5A5A47 !important;
+    border-top-color: #6b6b56 !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    transition: none !important;
+}
+
+html body .overlay-card button:hover {
+    background:
+        linear-gradient(180deg, #5A5A47 0%, #46483A 50%, #34372D 100%) !important;
+    color: #E0B83C !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 0 8px rgba(213, 167, 42, 0.35) !important;
+}
+
+/* Request buttons — Accept green, Decline red-tinted */
+html body .btn-accept {
+    background:
+        linear-gradient(180deg, #39FF14 0%, #00c412 100%) !important;
+    color: #0a0c07 !important;
+    border: 1px solid #00FF20 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(0, 255, 32, 0.35) !important;
+}
+
+html body .btn-decline {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 100%) !important;
+    color: #C52C1F !important;
+    border: 1px solid #5A5A47 !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Theme picker options — bank of switches */
+html body #themeOverlay .theme-option {
+    background:
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 100%) !important;
+    border: 1px solid #46483A !important;
+    border-top-color: #5A5A47 !important;
+    border-bottom-color: #171914 !important;
+    border-radius: 2px !important;
+    color: #C8F5C0 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6) !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+    transition: none !important;
+}
+
+html body #themeOverlay .theme-option:hover {
+    background:
+        linear-gradient(180deg, #34372D 0%, #252820 100%) !important;
+    border-color: #5A5A47 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 0 6px rgba(213, 167, 42, 0.25) !important;
+    transform: none !important;
+}
+
+html body #themeOverlay .theme-option.active {
+    border-color: #00FF20 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(0, 255, 32, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 0 8px rgba(0, 255, 32, 0.35) !important;
+}
+
+html body #themeOverlay .theme-option.active .theme-name {
+    color: #39FF14 !important;
+    text-shadow: 0 0 6px rgba(57, 255, 20, 0.6) !important;
+}
+
+html body #themeOverlay .theme-option.active::before {
+    background: #00FF20 !important;
+    box-shadow:
+        0 0 4px #00FF20,
+        0 0 8px #00FF20 !important;
+    animation: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   13) SCROLLBARS — narrow metal tracks
+═══════════════════════════════════════════════════════════ */
+html body .messages-container::-webkit-scrollbar,
+html body .sidebar-users::-webkit-scrollbar,
+html body #walletTokenList::-webkit-scrollbar,
+html body .rankings-list::-webkit-scrollbar,
+html body .msn-right-sidebar .msn-rs-actions::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+html body .messages-container::-webkit-scrollbar-track,
+html body .sidebar-users::-webkit-scrollbar-track,
+html body #walletTokenList::-webkit-scrollbar-track,
+html body .rankings-list::-webkit-scrollbar-track {
+    background: #0f1109 !important;
+    border-left: 1px solid #1d2018 !important;
+}
+
+html body .messages-container::-webkit-scrollbar-thumb,
+html body .sidebar-users::-webkit-scrollbar-thumb,
+html body #walletTokenList::-webkit-scrollbar-thumb,
+html body .rankings-list::-webkit-scrollbar-thumb {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    border: 1px solid #5A5A47 !important;
+    border-radius: 2px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+html body .messages-container::-webkit-scrollbar-thumb:hover,
+html body .sidebar-users::-webkit-scrollbar-thumb:hover {
+    background:
+        linear-gradient(180deg, #5A5A47 0%, #46483A 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 4px rgba(213, 167, 42, 0.3) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   14) TYPOGRAPHY — terminal / digital device
+═══════════════════════════════════════════════════════════ */
+html body,
+html body * {
+    font-family: var(--font-main) !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: geometricPrecision !important;
+}
+
+html body .empty-chat-hint {
+    color: #5F6B55 !important;
+    text-shadow: 0 0 6px rgba(0, 255, 32, 0.1) !important;
+    font-style: normal !important;
+    letter-spacing: 0.1em !important;
+}
+
+html body .typing-indicator {
+    background: #0f1109 !important;
+    color: #39FF14 !important;
+    border-bottom: 1px solid #1d2018 !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.4) !important;
+    font-style: normal !important;
+    letter-spacing: 0.05em !important;
+}
+
+html body .typing-dots span {
+    background: #39FF14 !important;
+    box-shadow:
+        0 0 4px rgba(57, 255, 20, 0.9),
+        0 0 8px rgba(57, 255, 20, 0.5) !important;
+}
+
+html body .cooldown-indicator {
+    background: #0f1109 !important;
+    color: #D5A72A !important;
+    border: 1px solid #46483A !important;
+    border-radius: 2px !important;
+    text-shadow: 0 0 4px rgba(213, 167, 42, 0.5) !important;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   15) MOD MESSAGE — pinned system display
+═══════════════════════════════════════════════════════════ */
+html body .mod-message-box {
+    background:
+        linear-gradient(180deg, #1d2018 0%, #141610 100%) !important;
+    border: 1px solid #46483A !important;
+    border-left: 3px solid #D5A72A !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6) !important;
+    color: #D5A72A !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.9) !important;
+}
+
+html body .mod-badge {
+    background:
+        linear-gradient(180deg, #D5A72A 0%, #a87f1f 100%) !important;
+    color: #0a0c07 !important;
+    border: 1px solid #E0B83C !important;
+    border-radius: 2px !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 0 6px rgba(213, 167, 42, 0.4) !important;
+    font-weight: 700 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   16) TOASTS — status alerts
+═══════════════════════════════════════════════════════════ */
+html body .error-toast.visible,
+html body .streak-toast.visible {
+    background:
+        linear-gradient(180deg, #2a2d24 0%, #1d2018 100%) !important;
+    color: #39FF14 !important;
+    border: 2px solid #46483A !important;
+    border-top-color: #5A5A47 !important;
+    border-radius: 2px !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.5) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 6px 24px rgba(0, 0, 0, 0.9),
+        0 0 20px rgba(0, 255, 32, 0.15) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   17) MICRO DETAILS — mechanical touches
+═══════════════════════════════════════════════════════════ */
+
+/* Selection */
+html body ::selection {
+    background: rgba(0, 255, 32, 0.35) !important;
+    color: #fff !important;
+}
+
+/* Focus rings — thin green line */
+html body button:focus-visible,
+html body input:focus-visible,
+html body textarea:focus-visible,
+html body select:focus-visible {
+    outline: 1px solid #39FF14 !important;
+    outline-offset: 1px !important;
+}
+
+/* Kill all unneeded pulse / shimmer animations */
+html body .status-dot,
+html body .status-dot-sm,
+html body .online-indicator,
+html body #connDot,
+html body .online-count-badge .dot,
+html body .fire-slot.fire-filled {
+    animation: none !important;
+}
+
+/* Kill text-shadows that leak from theme */
+html body .big-rank,
+html body .big-level,
+html body .sidebar-section-label {
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.9),
+        0 0 4px rgba(57, 255, 20, 0.2) !important;
+}
+
+/* User badge emoji */
+html body .user-badge {
+    filter: saturate(0.85) brightness(1.05) !important;
+}
+
+/* Scroll-to-bottom button — transport style */
+html body .scroll-bottom-btn {
+    background:
+        linear-gradient(180deg, #46483A 0%, #34372D 50%, #252820 100%) !important;
+    color: #39FF14 !important;
+    border: 2px solid #5A5A47 !important;
+    border-top-color: #6b6b56 !important;
+    border-bottom-color: #171914 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 2px 8px rgba(0, 0, 0, 0.7),
+        0 0 6px rgba(0, 255, 32, 0.3) !important;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.6) !important;
+}
+
+html body .scroll-bottom-btn:hover {
+    background:
+        linear-gradient(180deg, #5A5A47 0%, #46483A 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 2px 8px rgba(0, 0, 0, 0.7),
+        0 0 10px rgba(0, 255, 32, 0.5) !important;
+    transform: none !important;
+}
