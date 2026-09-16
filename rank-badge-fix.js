@@ -18,12 +18,29 @@
     /* All rank-related emojis — used to strip old ones */
     var RANK_EMOJI = /[🐋🐬🦀🦐]/g;
 
-    /* Parse a number out of a score cell ("1,234.5" → 1234.5) */
+    /* Parse a number out of a score cell, handling K/M/B suffixes
+       Examples:  "123" → 123,  "1,234" → 1234,
+                  "123K" → 123000,  "1.2M" → 1200000,  "2B" → 2000000000 */
     function parseBalance(text) {
         if (!text) return 0;
-        var clean = String(text).replace(/[^0-9.]/g, '');
-        var n = parseFloat(clean);
-        return isFinite(n) ? n : 0;
+        var s = String(text).trim().toUpperCase();
+
+        // Keep only digits, dot, comma, K, M, B
+        s = s.replace(/[^0-9.,KMB]/g, '');
+        // Strip thousands separators
+        s = s.replace(/,/g, '');
+
+        var multiplier = 1;
+        if (s.endsWith('B')) {
+            multiplier = 1e9; s = s.slice(0, -1);
+        } else if (s.endsWith('M')) {
+            multiplier = 1e6; s = s.slice(0, -1);
+        } else if (s.endsWith('K')) {
+            multiplier = 1e3; s = s.slice(0, -1);
+        }
+
+        var n = parseFloat(s);
+        return isFinite(n) ? n * multiplier : 0;
     }
 
     /* Fix every row inside the rankings overlay */
