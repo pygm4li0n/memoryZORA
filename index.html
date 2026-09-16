@@ -29,7 +29,7 @@
     <link rel="prefetch" href="gold-theme.css" as="style">
     <link rel="prefetch" href="indu-theme.css" as="style">
     <link rel="prefetch" href="science-theme.css" as="style">
-    <link rel="prefetch" href="theme-winamp.css" as="style">
+    <link rel="prefetch" href="winamp-theme.css" as="style">
 
     <!-- ⚑ FIX: Theme bootstrap MUST run before the stylesheet link.
          Injects the correct <link> synchronously during parse so the
@@ -47,7 +47,7 @@
                 gold:     'gold-theme.css',
                 indu:     'indu-theme.css',
                 science:  'science-theme.css',
-                winamp:   'theme-winamp.css'
+                winamp:   'winamp-theme.css'
             };
             var saved = localStorage.getItem(THEME_KEY) || 'original';
             var href = themes[saved] || themes.original;
@@ -58,7 +58,7 @@
     <!-- Separate fixes: Phantom toast + token contrast -->
     <link rel="stylesheet" href="theme-fixes.css?v=70">
     <link rel="stylesheet" href="theme-revamp.css?v=1">
-    <link rel="stylesheet" href="theme-winamp.css?v=1"> 
+    <link rel="stylesheet" href="winamp-theme.css?v=1"> 
     <link rel="stylesheet" href="mobile-sidebar.css?v=3">
     <link rel="stylesheet" href="chat-texture.css?v=2">
 
@@ -465,7 +465,7 @@
                 gold:     'gold-theme.css',
                 indu:     'indu-theme.css',
                 science:  'science-theme.css',
-                winamp:   'theme-winamp.css'
+                winamp:   'winamp-theme.css'
             };
 
             let pendingTheme = null;
