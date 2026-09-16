@@ -1,11 +1,11 @@
 /* ═════════════════════════════════════════════════════
    MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
-   – Header: ☰ LEFT + centered BIG LOGO + Phantom RIGHT
-   – Sidebar fills whole scene
+   – Header: ☰ LEFT + centered BIG LOGO (75px) + Phantom RIGHT
+   – Sidebar fills viewport edge-to-edge
    – Profile: avatar | info | 2×2 function grid
    – Tracker follows the icons grid
    – Streak fires removed
-   – Footer bar pinned to bottom of sidebar
+   – Footer bar pinned to bottom, matches chat input bar
    Desktop (≥769px) untouched.
 ═════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
@@ -34,7 +34,7 @@
     }
     .header-center { display: none !important; }
 
-    /* LOGO — desktop hidden, mobile CENTERED + bigger */
+    /* LOGO — desktop hidden, mobile CENTERED + 25% bigger */
     .header-left .header-logo { display: none !important; }
     .header-logo-mobile {
         display: block !important;
@@ -42,9 +42,9 @@
         left: 50% !important;
         top: 50% !important;
         transform: translate(-50%, -50%) !important;
-        height: 60px !important;             /* bigger than default */
+        height: 75px !important;             /* 60px × 1.25 */
         width: auto !important;
-        max-width: 200px !important;
+        max-width: 250px !important;
         object-fit: contain !important;
         margin: 0 !important;
         opacity: 1 !important;
@@ -120,16 +120,19 @@
         height: 26px !important;
     }
 
-    /* ── SIDEBAR shell — fills the whole scene ── */
+    /* ── SIDEBAR shell — fills viewport edge to edge ── */
     .sidebar {
         position: fixed !important;
-        top: 0 !important; left: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: var(--app-height, 100vh) !important;
-        height: var(--app-height, 100dvh) !important;
-        max-height: var(--app-height, 100vh) !important;
-        max-height: var(--app-height, 100dvh) !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100vh !important;
+        max-height: 100dvh !important;
         padding: 0 !important;
         margin: 0 !important;
         box-sizing: border-box !important;
@@ -146,9 +149,9 @@
             auto               /* profile + 2×2 grid */
             auto               /* tracker */
             auto               /* ACTIVE USERS label */
-            1fr                /* users — grows */
+            1fr                /* users — grows to fill all slack */
             auto               /* token balances */
-            auto               /* footer — pinned bottom */
+            auto               /* footer — pinned to bottom */
             !important;
         grid-template-areas:
             "back"
@@ -159,6 +162,7 @@
             "tokens"
             "footer" !important;
         gap: 0 !important;
+        align-content: stretch !important;
 
         backface-visibility: hidden !important;
         -webkit-backface-visibility: hidden !important;
@@ -528,7 +532,7 @@
         font-size: 1rem !important;
     }
 
-    /* ── FOOTER — full-width bar pinned to the bottom edge ── */
+    /* ── FOOTER — full-width bar, pinned to bottom of grid ── */
     .sidebar-footer {
         grid-area: footer !important;
         justify-self: stretch !important;
