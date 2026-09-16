@@ -1,35 +1,37 @@
 /* ============================================================
-   RANK BADGE FIX — makes the emoji match the row's text label
+   RANK BADGE FIX — swaps wrong emoji for the row's correct one
    ------------------------------------------------------------
-   If a row says "Crab" but shows a shrimp (or any wrong emoji),
-   this forces the emoji to match the NAME. Bulletproof:
-     • reads the text label first (Crab / Shrimp / Whale / Dolphin)
-     • falls back to balance parsing only if no label found
-     • fixes wrong emoji in text nodes, <img>, and CSS content
-     • also kills any pseudo-element that paints a rank emoji
+   If a row says "Crab" but shows a shrimp, this replaces the
+   shrimp with 🦀.
+     • Reads the text label first (Crab / Shrimp / Whale / Dolphin)
+     • Falls back to the balance score only if no label is found
+     • ONLY edits existing emoji runs inside text nodes
+     • Never prepends, never appends, never removes text
+     • Never touches child elements, images, or pseudo-elements
    Only touches the rankings overlay.
 ============================================================ */
 (function () {
     'use strict';
 
-    /* ── Canonical badge map ── */
+    /* name → emoji (longest keys first — avoids "whale" matching inside another word) */
     var NAME_TO_EMOJI = [
-        { key: 'whale',   emoji: '🐋' },
         { key: 'dolphin', emoji: '🐬' },
-        { key: 'crab',    emoji: '🦀' },
-        { key: 'shrimp',  emoji: '🦐' }
+        { key: 'shrimp',  emoji: '🦐' },
+        { key: 'whale',   emoji: '🐋' },
+        { key: 'crab',    emoji: '🦀' }
     ];
-    var RANK_EMOJI_RE = /[🐋🐬🦀🦐]/g;
 
-    /* ── Balance → badge (fallback when no text label found) ── */
+    /* A run of one or more rank emojis, plus any whitespace around them */
+    var EMOJI_RUN_RE = /(?:[🐋🐬🦀🦐]\s*)+/g;
+
+    /* ── Balance → emoji (fallback) ── */
     function getBadge(balance) {
-        if (balance >= 1000000) return { emoji: '🐋', name: 'Whale' };
-        if (balance >= 250000)  return { emoji: '🐬', name: 'Dolphin' };
-        if (balance >= 100000)  return { emoji: '🦀', name: 'Crab' };
-        return { emoji: '🦐', name: 'Shrimp' };
+        if (balance >= 1000000) return '🐋';
+        if (balance >= 250000)  return '🐬';
+        if (balance >= 100000)  return '🦀';
+        return '🦐';
     }
 
-    /* ── Parse a score cell, handling K / M / B suffixes ── */
     function parseBalance(text) {
         if (!text) return 0;
         var s = String(text).trim().toUpperCase();
@@ -55,91 +57,35 @@
         return null;
     }
 
-    /* ── Force-hide any pseudo-element that might paint a rank emoji ── */
-    function installPseudoKiller() {
-        if (document.getElementById('rankEmojiKiller')) return;
-        var style = document.createElement('style');
-        style.id = 'rankEmojiKiller';
-        style.textContent =
-            '#rankingsOverlay .rank-row::before,' +
-            '#rankingsOverlay .rank-row::after,' +
-            '#rankingsOverlay .rank-name::before,' +
-            '#rankingsOverlay .rank-name::after,' +
-            '#rankingsOverlay .rank-avatar::before,' +
-            '#rankingsOverlay .rank-avatar::after,' +
-            '#rankingsOverlay .rank-info::before,' +
-            '#rankingsOverlay .rank-info::after,' +
-            '#rankingsOverlay .rank-meta::before,' +
-            '#rankingsOverlay .rank-meta::after{' +
-                'content: none !important;' +
-            '}';
-        document.head.appendChild(style);
+    /* ── Determine the correct emoji for a row ── */
+    function correctEmojiForRow(row) {
+        /* 1) Prefer the text label */
+        var fromLabel = emojiFromText(row.textContent || '');
+        if (fromLabel) return fromLabel;
+
+        /* 2) Fall back to the balance score */
+        var scoreEl = row.querySelector('.rank-score');
+        if (scoreEl) return getBadge(parseBalance(scoreEl.textContent));
+
+        return null;
     }
 
-    /* ── Fix a single row ── */
+    /* ── Fix a single row: replace wrong emoji runs IN PLACE ── */
     function fixRow(row) {
-        /* 1) Decide the correct emoji: prefer the text label */
-        var rowText = row.textContent || '';
-        var correctEmoji = emojiFromText(rowText);
+        var correct = correctEmojiForRow(row);
+        if (!correct) return;
 
-        /* 2) Fall back to balance if no label found */
-        if (!correctEmoji) {
-            var scoreEl = row.querySelector('.rank-score');
-            if (scoreEl) {
-                correctEmoji = getBadge(parseBalance(scoreEl.textContent)).emoji;
-            }
-        }
-        if (!correctEmoji) return;
-
-        /* 3) Fix every text node in the row */
         var walker = document.createTreeWalker(row, NodeFilter.SHOW_TEXT, null, false);
-        var n;
-        while ((n = walker.nextNode())) {
-            var t = n.nodeValue || '';
-            RANK_EMOJI_RE.lastIndex = 0;
-            if (RANK_EMOJI_RE.test(t)) {
-                RANK_EMOJI_RE.lastIndex = 0;
-                var fixed = t.replace(RANK_EMOJI_RE, correctEmoji);
-                if (fixed !== t) n.nodeValue = fixed;
-            }
+        var node;
+        while ((node = walker.nextNode())) {
+            var t = node.nodeValue || '';
+            if (!/[🐋🐬🦀🦐]/.test(t)) continue;         /* nothing to fix here */
+            var fixed = t.replace(EMOJI_RUN_RE, correct + ' ');
+            if (fixed !== t) node.nodeValue = fixed;
         }
-
-        /* 4) Fix any <img> that carries a rank emoji as an image */
-        row.querySelectorAll('img').forEach(function (img) {
-            var alt = (img.getAttribute('alt') || '').toLowerCase();
-            var src = (img.getAttribute('src') || '').toLowerCase();
-            if (/whale|dolphin|crab|shrimp/.test(alt + ' ' + src)) {
-                var span = document.createElement('span');
-                span.className = 'rank-emoji';
-                span.textContent = correctEmoji;
-                img.parentNode.replaceChild(span, img);
-            }
-        });
-
-        /* 5) Ensure the name cell starts with the correct emoji */
-        var nameEl = row.querySelector('.rank-name');
-        if (nameEl) {
-            var txt = (nameEl.textContent || '').trim();
-            if (!/^[🐋🐬🦀🦐]/.test(txt)) {
-                nameEl.textContent = correctEmoji + ' ' + txt;
-            }
-        }
-
-        /* 6) Fix any standalone emoji span */
-        row.querySelectorAll('.rank-badge, .rank-emoji, .rank-icon, .user-badge')
-            .forEach(function (el) {
-                var t = (el.textContent || '').trim();
-                if (!t || RANK_EMOJI_RE.test(t)) {
-                    RANK_EMOJI_RE.lastIndex = 0;
-                    el.textContent = correctEmoji;
-                }
-                RANK_EMOJI_RE.lastIndex = 0;
-            });
     }
 
-    /* ── Fix every row in the overlay ── */
-    function fixRankRows() {
-        installPseudoKiller();
+    function fixAll() {
         document
             .querySelectorAll(
                 '#rankingsOverlay .rank-row, ' +
@@ -149,56 +95,42 @@
             .forEach(fixRow);
     }
 
-    /* ── Watch the overlay for changes ── */
+    /* ── Watch the overlay ── */
     function attachObserver() {
         var overlay = document.getElementById('rankingsOverlay');
         if (!overlay) return;
 
         var observer = new MutationObserver(function (mutations) {
-            var shouldFix = false;
-            mutations.forEach(function (m) {
-                if (m.type === 'attributes' && m.attributeName === 'class') {
-                    if (!overlay.classList.contains('hidden')) shouldFix = true;
-                }
-                if (m.type === 'childList' && m.addedNodes.length) {
-                    shouldFix = true;
-                }
+            /* Only react to real DOM changes (rows added), not our own edits */
+            var meaningful = mutations.some(function (m) {
+                return m.type === 'childList' && m.addedNodes.length > 0;
             });
-            if (shouldFix) {
-                fixRankRows();
-                requestAnimationFrame(fixRankRows);
-                setTimeout(fixRankRows, 100);
-                setTimeout(fixRankRows, 300);
-                setTimeout(fixRankRows, 800);
+            if (meaningful) {
+                fixAll();
+                requestAnimationFrame(fixAll);
+                setTimeout(fixAll, 150);
+                setTimeout(fixAll, 500);
             }
         });
 
-        observer.observe(overlay, {
-            attributes: true,
-            attributeFilter: ['class'],
-            childList: true,
-            subtree: true
-        });
+        observer.observe(overlay, { childList: true, subtree: true });
 
-        if (!overlay.classList.contains('hidden')) fixRankRows();
+        if (!overlay.classList.contains('hidden')) fixAll();
     }
 
-    /* ── Boot ── */
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', attachObserver);
     } else {
         attachObserver();
     }
 
-    /* ── Safety net — every 1s while the overlay is open ── */
+    /* ── Slow safety net ── */
     setInterval(function () {
-        var overlay = document.getElementById('rankingsOverlay');
-        if (overlay && !overlay.classList.contains('hidden')) {
-            fixRankRows();
-        }
-    }, 1000);
+        var o = document.getElementById('rankingsOverlay');
+        if (o && !o.classList.contains('hidden')) fixAll();
+    }, 1200);
 
     /* Expose for manual debugging */
-    window.fixRankBadges = fixRankRows;
+    window.fixRankBadges = fixAll;
     console.log('[rank-badge-fix] loaded — call window.fixRankBadges() to force a pass');
 })();
