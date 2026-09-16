@@ -1,17 +1,18 @@
 /* ═════════════════════════════════════════════════════
-   ⚑ MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
-   – Header: ☰ LEFT + LOGO + Phantom RIGHT
-   – Back to chat bar at top of sidebar
-   – Profile: avatar | name + ✎ | 2×2 function grid
-   – Theme-adaptive rail (matches each theme's accent)
-   – Users grow to fill, bottom items pinned tight
-   – Token tracker centered 2×, balances verified-only
+   MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
+   – Header: ☰ LEFT + centered big LOGO + Phantom RIGHT
+   – Sidebar fills whole scene, footer matches chat bottom
+   – Profile: avatar | info | 2×2 function grid
+   – Streak fires removed
+   – Active users: larger, cleaner
+   – Theme-adaptive rail on right edge
    Desktop (≥769px) untouched.
 ═════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-    /* ── HEADER: flex, hamburger + logo LEFT, Phantom RIGHT ── */
+    /* ── HEADER ── */
     .chat-header-bar {
+        position: relative !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
@@ -23,36 +24,37 @@
         align-items: center !important;
         gap: 10px !important;
         position: static !important;
-        left: auto !important;
-        top: auto !important;
+        left: auto !important; top: auto !important;
         transform: none !important;
-        flex: 1 1 auto !important;
+        flex: 0 0 auto !important;
         min-width: 0 !important;
         overflow: visible !important;
         order: 1 !important;
+        z-index: 3 !important;
     }
     .header-center { display: none !important; }
 
-    /* ⚑ LOGO — desktop hidden, mobile shown */
+    /* LOGO — desktop hidden, mobile CENTERED + bigger */
     .header-left .header-logo { display: none !important; }
     .header-logo-mobile {
         display: block !important;
-        position: static !important;
-        height: 40px !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        height: 54px !important;
         width: auto !important;
-        max-width: 130px !important;
+        max-width: 160px !important;
         object-fit: contain !important;
-        transform: none !important;
-        left: auto !important;
-        top: auto !important;
-        margin: 0 0 0 6px !important;
+        margin: 0 !important;
         opacity: 1 !important;
         visibility: visible !important;
         filter:
             drop-shadow(0 2px 4px rgba(0,0,0,0.6))
-            drop-shadow(0 0 10px rgba(32,255,98,0.35)) !important;
-        z-index: 1 !important;
+            drop-shadow(0 0 12px rgba(32,255,98,0.4)) !important;
+        z-index: 2 !important;
         flex-shrink: 0 !important;
+        pointer-events: none !important;
     }
 
     .header-right {
@@ -60,15 +62,15 @@
         align-items: center !important;
         gap: 6px !important;
         position: static !important;
-        right: auto !important;
-        top: auto !important;
+        right: auto !important; top: auto !important;
         transform: none !important;
         flex: 0 0 auto !important;
         margin-left: auto !important;
         order: 2 !important;
+        z-index: 3 !important;
     }
 
-    /* ── Hamburger — clean, at far left ── */
+    /* Hamburger — clean, left edge */
     #sidebarToggle {
         position: static !important;
         top: auto !important; right: auto !important; left: auto !important;
@@ -98,7 +100,7 @@
         box-shadow: 0 0 14px rgba(32,255,98,0.5) !important;
     }
 
-    /* ── Header right: only Phantom ── */
+    /* Header right: only Phantom */
     .header-right #connectionPill,
     .header-right #onlineCountBadge,
     .header-right #walletAddress,
@@ -118,7 +120,7 @@
         height: 26px !important;
     }
 
-    /* ── SIDEBAR shell ── */
+    /* ── SIDEBAR shell — fills the whole scene ── */
     .sidebar {
         position: fixed !important;
         top: 0 !important; left: 0 !important;
@@ -145,7 +147,6 @@
             auto               /* label */
             1fr                /* users — grows */
             auto               /* tracker */
-            auto               /* streak */
             auto               /* tokens */
             auto               /* footer */
             !important;
@@ -155,7 +156,6 @@
             "label"
             "users"
             "tracker"
-            "streak"
             "tokens"
             "footer" !important;
         gap: 0 !important;
@@ -171,7 +171,7 @@
         transform: translate3d(0, 0, 0) !important;
     }
 
-    /* ⚑ Copper rail — theme-adaptive gradient + glow + shimmer */
+    /* Copper rail — theme-adaptive */
     .sidebar::before {
         content: '' !important;
         position: absolute !important;
@@ -179,7 +179,6 @@
         bottom: 0 !important; left: auto !important;
         width: 9px !important;
         height: 100% !important;
-
         background: linear-gradient(180deg,
             transparent 0%,
             var(--border-default, #3A2118) 15%,
@@ -188,22 +187,17 @@
             var(--accent-cyan, #19D62B) 60%,
             var(--border-default, #3A2118) 75%,
             transparent 100%) !important;
-
         box-shadow:
             0 0 20px var(--accent-cyan, rgba(25, 214, 43, 0.85)),
             0 0 40px var(--accent-cyan, rgba(25, 214, 43, 0.4)) !important;
-
         background-size: 100% 200% !important;
         animation: railShimmer 4s ease-in-out infinite !important;
-
         z-index: 50 !important;
         pointer-events: none !important;
         will-change: background-position !important;
     }
 
-    /* ═══════════════════════════════════════════════
-       ⚑ BACK TO CHAT — full-width bar at top
-    ═══════════════════════════════════════════════ */
+    /* ── BACK TO CHAT ── */
     .sidebar-back-btn {
         grid-area: back !important;
         display: flex !important;
@@ -256,15 +250,16 @@
         color: var(--accent-cyan, #20FF62) !important;
     }
 
-    /* ── PROFILE — avatar | info | 2×2 grid (absolute right) ── */
+    /* ── PROFILE — avatar | info | 2×2 grid ── */
     .sidebar-user-profile-big {
         grid-area: profile !important;
         position: relative !important;
         display: flex !important;
         align-items: center !important;
         gap: 12px !important;
-        padding: 14px calc(22px + 9px + 48px + 8px + 48px + 14px) 14px 22px !important;
-        min-height: 124px !important;
+        /* right reserve = 22 + 9 + 44 + 8 + 44 + 12 = 139px */
+        padding: 14px 139px 14px 20px !important;
+        min-height: 132px !important;
         box-sizing: border-box !important;
         border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
     }
@@ -287,7 +282,7 @@
     }
 
     .sidebar-user-profile-big .big-name {
-        font-size: 1.4rem !important;
+        font-size: 1.35rem !important;
         line-height: 1.1 !important;
         letter-spacing: 0.02em !important;
         margin: 0 !important;
@@ -299,7 +294,7 @@
     .sidebar-user-profile-big .big-rank,
     .sidebar-user-profile-big .big-level {
         display: inline-block !important;
-        font-size: 0.68rem !important;
+        font-size: 0.66rem !important;
         padding: 2px 8px !important;
         margin: 2px 4px 0 0 !important;
         line-height: 1.2 !important;
@@ -315,11 +310,11 @@
         color: var(--text-secondary) !important;
     }
 
-    /* Pencil — top-right of the info block, inline with the name */
+    /* Pencil — top-right of the info block */
     .sidebar-user-profile-big .edit-profile-btn {
         position: absolute !important;
         top: 14px !important;
-        right: calc(22px + 9px + 48px + 8px + 48px + 14px) !important;
+        right: 139px !important;
         width: 28px !important;
         height: 28px !important;
         min-width: 28px !important;
@@ -336,16 +331,16 @@
         z-index: 6 !important;
     }
 
-    /* ── 2×2 FUNCTION GRID — absolute, right of profile ── */
+    /* ── 2×2 FUNCTION GRID — 44×44 buttons ── */
     .sidebar #sidebarThemeBtn,
     .sidebar #rankingsBtn {
         position: absolute !important;
-        width: 48px !important;
-        height: 48px !important;
+        width: 44px !important;
+        height: 44px !important;
         min-width: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-size: 1.2rem !important;
+        font-size: 1.15rem !important;
         border-radius: 10px !important;
         display: flex !important;
         align-items: center !important;
@@ -356,14 +351,14 @@
         color: var(--text-primary, #fff) !important;
         transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
     }
-    /* Top row: 🎨 theme (left cell), 🏆 rank (right cell) */
+    /* Top row: theme (left cell) + rank (right cell) */
     .sidebar #sidebarThemeBtn {
         top: 14px !important;
-        right: calc(22px + 9px + 48px + 8px) !important;
+        right: calc(22px + 9px + 44px + 8px) !important;   /* = 83px */
     }
     .sidebar #rankingsBtn {
         top: 14px !important;
-        right: calc(22px + 9px) !important;
+        right: calc(22px + 9px) !important;               /* = 31px */
     }
     .sidebar #sidebarThemeBtn:hover,
     .sidebar #rankingsBtn:hover {
@@ -376,13 +371,13 @@
     .sidebar-user-profile-big::after {
         content: '+' !important;
         position: absolute !important;
-        top: calc(14px + 48px + 8px) !important;
-        width: 48px !important;
-        height: 48px !important;
+        top: calc(14px + 44px + 8px) !important;
+        width: 44px !important;
+        height: 44px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
         font-weight: 700 !important;
         color: var(--text-muted, rgba(255,255,255,0.25)) !important;
         background: transparent !important;
@@ -393,23 +388,38 @@
         z-index: 4 !important;
     }
     .sidebar-user-profile-big::before {
-        right: calc(22px + 9px + 48px + 8px) !important;
+        right: calc(22px + 9px + 44px + 8px) !important;  /* = 83px */
     }
     .sidebar-user-profile-big::after {
-        right: calc(22px + 9px) !important;
+        right: calc(22px + 9px) !important;               /* = 31px */
     }
 
-    /* ── ACTIVE USERS label ── */
+    /* ── ACTIVE USERS label — bigger, cleaner ── */
     .sidebar-section-label {
         grid-area: label !important;
-        font-size: 0.8rem !important;
-        padding: 8px 22px 6px !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+        padding: 14px 22px 10px !important;
         padding-right: calc(22px + 9px) !important;
-        letter-spacing: 0.14em !important;
+        letter-spacing: 0.18em !important;
+        text-transform: uppercase !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        color: var(--text-primary) !important;
     }
     .sidebar-section-label .active-users-count {
-        font-size: 0.78rem !important;
-        padding: 2px 10px !important;
+        font-size: 0.9rem !important;
+        font-weight: 800 !important;
+        padding: 3px 12px !important;
+        border-radius: 6px !important;
+        background: linear-gradient(135deg,
+            var(--bg-elevated, rgba(255,255,255,0.1)) 0%,
+            var(--bg-hover, rgba(255,255,255,0.06)) 100%) !important;
+        color: var(--accent-cyan, #20FF62) !important;
+        border: 1px solid var(--accent-cyan, rgba(32,255,98,0.4)) !important;
+        box-shadow: 0 0 10px rgba(32,255,98,0.25) !important;
+        line-height: 1 !important;
     }
 
     /* ── USERS list — grows to fill ── */
@@ -418,7 +428,7 @@
         min-height: 0 !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
-        padding: 4px 22px 8px !important;
+        padding: 4px 22px 10px !important;
         padding-right: calc(22px + 9px) !important;
         scrollbar-width: thin !important;
         overscroll-behavior: contain !important;
@@ -471,23 +481,10 @@
     .sidebar .token-tracker.mobile-only .token-price { font-size: 1.3rem !important; }
     .sidebar .token-tracker.mobile-only .token-change { font-size: 1.2rem !important; }
 
-    /* ── STREAK strip ── */
-    .sidebar .sidebar-streak-display {
-        grid-area: streak !important;
-        display: flex !important;
-        padding: 8px 22px !important;
-        padding-right: calc(22px + 9px) !important;
-        margin: 0 !important;
-        border: none !important;
-        background: transparent !important;
-        justify-content: center !important;
-        flex-shrink: 0 !important;
-    }
-    .sidebar .sidebar-streak-display.hidden { display: none !important; }
-    .sidebar .sidebar-streak-display::before { display: none !important; }
-    .sidebar .sidebar-streak-display .fire-slot { font-size: 1.2rem !important; }
+    /* ── STREAK FIRES — hidden on mobile ── */
+    .sidebar .sidebar-streak-display { display: none !important; }
 
-    /* ── TOKEN BALANCES — only verified token + amount ── */
+    /* ── TOKEN BALANCES — verified only ── */
     .sidebar #walletTokenList {
         grid-area: tokens !important;
         background: transparent !important;
@@ -502,13 +499,10 @@
         overflow: hidden !important;
         flex-shrink: 0 !important;
     }
-    /* Hide the "Token Balances:" header row */
     .sidebar #walletTokenList > div:first-child { display: none !important; }
-    /* Hide any row that has neither ✅ nor ❌ */
     .sidebar #walletTokenList > div:not(:has(✅)):not(:has(❌)) {
         display: none !important;
     }
-    /* Show the verified token as a clean one-line row */
     .sidebar #walletTokenList > div:has(✅),
     .sidebar #walletTokenList > div:has(❌) {
         display: flex !important;
@@ -537,7 +531,7 @@
         font-size: 1rem !important;
     }
 
-    /* ── FOOTER — Connected left, wallet short right ── */
+    /* ── FOOTER — matches chat's bottom bar ── */
     .sidebar-footer {
         grid-area: footer !important;
         display: flex !important;
@@ -546,14 +540,16 @@
         flex-wrap: nowrap !important;
         white-space: nowrap !important;
         overflow: hidden !important;
-        padding: 12px 22px !important;
+        padding: 14px 22px !important;
         padding-right: calc(22px + 9px) !important;
-        padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
         margin: 0 !important;
-        min-height: 0 !important;
-        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        min-height: 56px !important;
+        border-top: 2px solid var(--border-default, #70442D) !important;
+        background: var(--bg-panel, #111827) !important;
         font-size: 0.85rem !important;
         flex-shrink: 0 !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.35) !important;
     }
     .sidebar-footer .status-dot-sm {
         width: 8px !important;
@@ -579,20 +575,24 @@
         font-variant-numeric: tabular-nums !important;
     }
 
-    /* ── No color transitions (theme-swap flicker) ── */
+    /* No color transitions (theme-swap flicker) */
     .sidebar .sidebar-users,
     .sidebar .sidebar-footer,
     .sidebar .token-tracker.mobile-only,
-    .sidebar .sidebar-streak-display,
     .sidebar #walletTokenList,
     .sidebar-user-item,
     .sidebar-user-item * { transition: none !important; }
 }
 
-/* ── Rail shimmer animation (outside media query so it compiles) ── */
+/* ── Rail shimmer ── */
 @keyframes railShimmer {
     0%, 100% { background-position: 0% 0%; }
     50%      { background-position: 0% 100%; }
+}
+
+/* ── BACK TO CHAT — never on desktop ── */
+@media (min-width: 769px) {
+    .sidebar-back-btn { display: none !important; }
 }
 
 /* ═════════════════════════════════════════════════════
@@ -634,14 +634,6 @@
     padding: 0 !important;
     overflow: visible !important;
 }
-@media (min-width: 769px) {
-    .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
-    .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble,
-    .msg-wrapper:has(blockquote.twitter-tweet) .msg-bubble {
-        max-width: 100% !important;
-        overflow: visible !important;
-    }
-}
 @media (max-width: 768px) {
     .msg-wrapper:has(.twitter-tweet-rendered) .msg-bubble,
     .msg-wrapper:has(iframe[id^="twitter-widget"]) .msg-bubble,
@@ -650,11 +642,5 @@
         width: 100% !important;
         min-width: 0 !important;
         overflow: visible !important;
-    }
-    .msg-bubble .twitter-tweet-rendered,
-    .msg-bubble iframe[id^="twitter-widget"] {
-        max-width: 100% !important;
-        width: 100% !important;
-        min-width: 0 !important;
     }
 }
