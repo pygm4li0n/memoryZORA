@@ -21,24 +21,33 @@
     <link rel="dns-prefetch" href="https://platform.twitter.com">
     <link rel="dns-prefetch" href="https://cdn.syndication.twimg.com">
 
+    <!-- ⚑ Prefetch every theme so switching is instant (no FOUC).
+         Runs in the background after first paint. -->
+    <link rel="prefetch" href="style.css" as="style">
+    <link rel="prefetch" href="orange-theme.css" as="style">
+    <link rel="prefetch" href="cherry-theme.css" as="style">
+    <link rel="prefetch" href="gold-theme.css" as="style">
+    <link rel="prefetch" href="indu-theme.css" as="style">
+    <link rel="prefetch" href="science-theme.css" as="style">
+    <link rel="prefetch" href="theme-winamp.css" as="style">
+
     <!-- ⚑ FIX: Theme bootstrap MUST run before the stylesheet link.
-         Previously the page always loaded style.css first, then the
-         inline script at the bottom swapped to the saved theme —
-         causing a visible flash of the wrong theme on every load.
-         Now we insert the correct <link> synchronously during parse.
-         document.write is intentional here: it's the only way to
-         inject a blocking stylesheet from inline head JS. -->
+         Injects the correct <link> synchronously during parse so the
+         right theme is present from the very first paint.
+         IMPORTANT: theme URLs here MUST match the ones in the bottom
+         theme-switching script — otherwise the browser downloads
+         duplicates and the switch flickers. -->
     <script>
         (function () {
             var THEME_KEY = 'msn_theme';
             var themes = {
-                original: 'style.css?v=73',
-                orange:   'orange-theme.css?v=69',
-                cherry:   'cherry-theme.css?v=69',
-                gold:     'gold-theme.css?v=69',
-                indu:     'indu-theme.css?v=69',
-                science:  'science-theme.css?v=69',
-                winamp:   'theme-winamp.css?v=69'
+                original: 'style.css',
+                orange:   'orange-theme.css',
+                cherry:   'cherry-theme.css',
+                gold:     'gold-theme.css',
+                indu:     'indu-theme.css',
+                science:  'science-theme.css',
+                winamp:   'theme-winamp.css'
             };
             var saved = localStorage.getItem(THEME_KEY) || 'original';
             var href = themes[saved] || themes.original;
@@ -55,10 +64,7 @@
     <!-- Twitter Widgets for X/Twitter embeds -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-    <!-- ⚑ FIX: remove the .booting guard after the first stable frame.
-         Double rAF ensures we've painted at least once before releasing
-         the freeze. This is what stops the initial chromeShimmer /
-         statusPulse / typingDot flash on Phantom and desktop. -->
+    <!-- ⚑ FIX: remove the .booting guard after the first stable frame. -->
     <script>
         requestAnimationFrame(function () {
             requestAnimationFrame(function () {
@@ -175,10 +181,24 @@
             background: rgba(255, 92, 124, 0.3);
             box-shadow: 0 0 10px rgba(255, 92, 124, 0.4);
         }
+
+        /* ⚑ Fast fade overlay to cover theme swaps (kills FOUC) */
+        #themeSwitchOverlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 99998;
+            transition: opacity 120ms ease;
+        }
     </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
+
+    <!-- ⚑ Theme-swap cover (toggled by the script at the bottom) -->
+    <div id="themeSwitchOverlay"></div>
 
     <!-- Name Entry Overlay -->
     <div class="overlay-full" id="nameOverlay">
@@ -429,34 +449,56 @@
     <script src="rank-badge-fix.js"></script>
 
     <!-- ⚑ FIX: Theme switching script.
-         Removed the initial setTheme(saved) call — that's now handled
-         synchronously in <head> before the stylesheet loads, so the
-         correct theme is present from the very first paint.
-         This script now only wires up the overlay + buttons. -->
+         theme map MUST match the <head> bootstrap above.
+         Wrapped in a fade overlay to hide the swap. -->
     <script>
         (function () {
             const themeLink = document.getElementById('themeStylesheet');
             const THEME_KEY = 'msn_theme';
+            const overlay = document.getElementById('themeSwitchOverlay');
 
             const themes = {
-                original: 'style.css?v=73',
-                orange:   'orange-theme.css?v=69',
-                cherry:   'cherry-theme.css?v=69',
-                gold:     'gold-theme.css?v=69',
-                indu:     'indu-theme.css?v=69',
-                science:  'science-theme.css?v=69',
-                winamp:   'theme-winamp.css?v=70'
+                original: 'style.css',
+                orange:   'orange-theme.css',
+                cherry:   'cherry-theme.css',
+                gold:     'gold-theme.css',
+                indu:     'indu-theme.css',
+                science:  'science-theme.css',
+                winamp:   'theme-winamp.css'
             };
 
-            function setTheme(themeId) {
+            let pendingTheme = null;
+
+            function applyTheme(themeId) {
                 if (!themes[themeId]) themeId = 'original';
                 themeLink.setAttribute('href', themes[themeId]);
                 localStorage.setItem(THEME_KEY, themeId);
                 highlightCurrentTheme();
             }
 
-            // NOTE: initial theme is already applied by the <head> bootstrap.
-            // Do NOT call setTheme() here — it would force a redundant swap.
+            function setTheme(themeId) {
+                if (!themes[themeId]) themeId = 'original';
+
+                const currentHref = themeLink.getAttribute('href');
+                if (currentHref === themes[themeId]) return;   /* no change */
+
+                /* Fast fade-in, swap, fade-out — hides FOUC */
+                if (overlay) {
+                    overlay.style.opacity = '0.9';
+                    pendingTheme = themeId;
+                    setTimeout(() => {
+                        applyTheme(themeId);
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                overlay.style.opacity = '0';
+                                pendingTheme = null;
+                            });
+                        });
+                    }, 80);
+                } else {
+                    applyTheme(themeId);
+                }
+            }
 
             const headerThemeBtn = document.getElementById('headerThemeBtn');
             const sidebarThemeBtn = document.getElementById('sidebarThemeBtn');
@@ -527,10 +569,8 @@
                         sidebar.classList.remove('open');
                     });
 
-                    // Place as the first child so it lands in the "back" grid row
                     sidebar.insertBefore(btn, sidebar.firstChild);
                 } else if (!MQ.matches && existing) {
-                    // Desktop: never show the back button
                     existing.remove();
                 }
             }
