@@ -47,7 +47,7 @@
 
     <!-- Separate fixes: Phantom toast + token contrast -->
     <link rel="stylesheet" href="theme-fixes.css?v=70">
-    <link rel="stylesheet" href="mobile-sidebar.css?v=1">
+    <link rel="stylesheet" href="mobile-sidebar.css?v=2">
     <link rel="stylesheet" href="chat-texture.css?v=2">
 
     <!-- Twitter Widgets for X/Twitter embeds -->
@@ -491,6 +491,44 @@
 
             window.setTheme = setTheme;
             window.getCurrentTheme = () => localStorage.getItem(THEME_KEY) || 'original';
+        })();
+    </script>
+
+    <!-- ⚑ MOBILE: inject "BACK TO CHAT" bar at top of the sidebar.
+         Runs after script.js so the sidebar exists and isn't rebuilt. -->
+    <script>
+        (function () {
+            function addBackBtn() {
+                var sidebar = document.getElementById('sidebar');
+                if (!sidebar || document.getElementById('sidebarBackBtn')) return;
+
+                var btn = document.createElement('button');
+                btn.id = 'sidebarBackBtn';
+                btn.className = 'sidebar-back-btn';
+                btn.type = 'button';
+                btn.setAttribute('aria-label', 'Back to chat');
+                btn.innerHTML = '<span class="arrow">←</span><span class="label">BACK TO CHAT</span>';
+
+                btn.addEventListener('click', function () {
+                    sidebar.classList.remove('open');
+                });
+
+                // Place as the first child so it lands in the "back" grid row
+                sidebar.insertBefore(btn, sidebar.firstChild);
+            }
+
+            addBackBtn();
+            document.addEventListener('DOMContentLoaded', addBackBtn);
+            window.addEventListener('load', addBackBtn);
+
+            // Safety net: re-add if something removes it
+            var mo = new MutationObserver(function () {
+                if (!document.getElementById('sidebarBackBtn')) addBackBtn();
+            });
+            document.addEventListener('DOMContentLoaded', function () {
+                var sidebar = document.getElementById('sidebar');
+                if (sidebar) mo.observe(sidebar, { childList: true });
+            });
         })();
     </script>
 </body>
