@@ -1,11 +1,11 @@
 /* ═════════════════════════════════════════════════════
    MOBILE SIDEBAR — PHANTOM EDITION (≤768px only)
-   – Header: ☰ LEFT + centered big LOGO + Phantom RIGHT
-   – Sidebar fills whole scene, footer matches chat bottom
+   – Header: ☰ LEFT + centered BIG LOGO + Phantom RIGHT
+   – Sidebar fills whole scene
    – Profile: avatar | info | 2×2 function grid
+   – Tracker follows the icons grid
    – Streak fires removed
-   – Active users: larger, cleaner
-   – Theme-adaptive rail on right edge
+   – Footer bar pinned to bottom of sidebar
    Desktop (≥769px) untouched.
 ═════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
@@ -42,15 +42,15 @@
         left: 50% !important;
         top: 50% !important;
         transform: translate(-50%, -50%) !important;
-        height: 54px !important;
+        height: 60px !important;             /* bigger than default */
         width: auto !important;
-        max-width: 160px !important;
+        max-width: 200px !important;
         object-fit: contain !important;
         margin: 0 !important;
         opacity: 1 !important;
         visibility: visible !important;
         filter:
-            drop-shadow(0 2px 4px rgba(0,0,0,0.6))
+            drop-shadow(0 2px 4px rgba(0,0,0,0.65))
             drop-shadow(0 0 12px rgba(32,255,98,0.4)) !important;
         z-index: 2 !important;
         flex-shrink: 0 !important;
@@ -143,19 +143,19 @@
         grid-template-columns: 1fr !important;
         grid-template-rows:
             auto               /* back */
-            auto               /* profile */
-            auto               /* label */
-            1fr                /* users — grows */
+            auto               /* profile + 2×2 grid */
             auto               /* tracker */
-            auto               /* tokens */
-            auto               /* footer */
+            auto               /* ACTIVE USERS label */
+            1fr                /* users — grows */
+            auto               /* token balances */
+            auto               /* footer — pinned bottom */
             !important;
         grid-template-areas:
             "back"
             "profile"
+            "tracker"
             "label"
             "users"
-            "tracker"
             "tokens"
             "footer" !important;
         gap: 0 !important;
@@ -231,10 +231,7 @@
         display: inline-block !important;
         transition: transform 0.2s ease !important;
     }
-    .sidebar-back-btn .label {
-        display: inline-block !important;
-        line-height: 1 !important;
-    }
+    .sidebar-back-btn .label { display: inline-block !important; line-height: 1 !important; }
     .sidebar-back-btn:hover,
     .sidebar-back-btn:focus-visible {
         color: var(--accent-cyan, #20FF62) !important;
@@ -394,7 +391,33 @@
         right: calc(22px + 9px) !important;               /* = 31px */
     }
 
-    /* ── ACTIVE USERS label — bigger, cleaner ── */
+    /* ── TOKEN TRACKER — follows the icons grid ── */
+    .sidebar .token-tracker.mobile-only {
+        grid-area: tracker !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding: 14px 22px !important;
+        padding-right: calc(22px + 9px) !important;
+        gap: 12px !important;
+        font-size: 1.35rem !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
+        background: transparent !important;
+        flex-shrink: 0 !important;
+    }
+    .sidebar .token-tracker.mobile-only.hidden { display: none !important; }
+    .sidebar .token-tracker.mobile-only .token-logo {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    .sidebar .token-tracker.mobile-only .token-name { font-size: 1.3rem !important; }
+    .sidebar .token-tracker.mobile-only .token-price { font-size: 1.3rem !important; }
+    .sidebar .token-tracker.mobile-only .token-change { font-size: 1.2rem !important; }
+
+    /* ── ACTIVE USERS label ── */
     .sidebar-section-label {
         grid-area: label !important;
         font-size: 1rem !important;
@@ -455,32 +478,6 @@
         text-align: center !important;
     }
 
-    /* ── TOKEN TRACKER — centered, 2× bigger ── */
-    .sidebar .token-tracker.mobile-only {
-        grid-area: tracker !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        margin: 0 !important;
-        padding: 14px 22px !important;
-        padding-right: calc(22px + 9px) !important;
-        gap: 12px !important;
-        font-size: 1.35rem !important;
-        font-weight: 700 !important;
-        border: none !important;
-        border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08)) !important;
-        background: transparent !important;
-        flex-shrink: 0 !important;
-    }
-    .sidebar .token-tracker.mobile-only.hidden { display: none !important; }
-    .sidebar .token-tracker.mobile-only .token-logo {
-        width: 28px !important;
-        height: 28px !important;
-    }
-    .sidebar .token-tracker.mobile-only .token-name { font-size: 1.3rem !important; }
-    .sidebar .token-tracker.mobile-only .token-price { font-size: 1.3rem !important; }
-    .sidebar .token-tracker.mobile-only .token-change { font-size: 1.2rem !important; }
-
     /* ── STREAK FIRES — hidden on mobile ── */
     .sidebar .sidebar-streak-display { display: none !important; }
 
@@ -531,25 +528,33 @@
         font-size: 1rem !important;
     }
 
-    /* ── FOOTER — matches chat's bottom bar ── */
+    /* ── FOOTER — full-width bar pinned to the bottom edge ── */
     .sidebar-footer {
         grid-area: footer !important;
+        justify-self: stretch !important;
+        align-self: end !important;
         display: flex !important;
         align-items: center !important;
+        justify-content: space-between !important;
         gap: 10px !important;
         flex-wrap: nowrap !important;
         white-space: nowrap !important;
-        overflow: hidden !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
         padding: 14px 22px !important;
         padding-right: calc(22px + 9px) !important;
         padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-        margin: 0 !important;
-        min-height: 56px !important;
+        box-sizing: border-box !important;
+        border: none !important;
         border-top: 2px solid var(--border-default, #70442D) !important;
+        border-radius: 0 !important;
         background: var(--bg-panel, #111827) !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.35) !important;
+        overflow: hidden !important;
+        min-height: 56px !important;
         font-size: 0.85rem !important;
         flex-shrink: 0 !important;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.35) !important;
     }
     .sidebar-footer .status-dot-sm {
         width: 8px !important;
@@ -563,8 +568,9 @@
         font-size: 0.85rem !important;
     }
     .sidebar-footer .wallet-address {
-        flex: 1 1 auto !important;
+        flex: 0 1 auto !important;
         min-width: 0 !important;
+        max-width: 140px !important;
         display: inline !important;
         margin-left: auto !important;
         text-align: right !important;
