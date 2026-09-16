@@ -37,7 +37,7 @@
                 cherry:   'cherry-theme.css?v=69',
                 gold:     'gold-theme.css?v=69',
                 indu:     'indu-theme.css?v=69',
-                science:  'science-theme.css?v=70'
+                science:  'science-theme.css?v=69'
             };
             var saved = localStorage.getItem(THEME_KEY) || 'original';
             var href = themes[saved] || themes.original;
@@ -48,6 +48,7 @@
     <!-- Separate fixes: Phantom toast + token contrast -->
     <link rel="stylesheet" href="theme-fixes.css?v=70">
     <link rel="stylesheet" href="theme-revamp.css?v=1">
+    <link rel="stylesheet" href="theme-winamp.css?v=1">
     <link rel="stylesheet" href="mobile-sidebar.css?v=3">
     <link rel="stylesheet" href="chat-texture.css?v=2">
 
@@ -362,6 +363,10 @@
                     <span class="emoji">🎨</span>
                     <span class="theme-name">OG</span>
                 </button>
+                <button class="theme-option" data-theme="winamp">
+                    <span class="emoji">🎺</span>
+                    <span class="theme-name">OG</span>
+                </button>
                 <button class="theme-option" data-theme="orange">
                     <span class="emoji">🟠</span>
                     <span class="theme-name">Orange</span>
@@ -439,7 +444,8 @@
                 cherry:   'cherry-theme.css?v=69',
                 gold:     'gold-theme.css?v=69',
                 indu:     'indu-theme.css?v=69',
-                science:  'science-theme.css?v=70'
+                science:  'science-theme.css?v=69',
+                winamp:   'theme-winamp.css?v=69'
             };
 
             function setTheme(themeId) {
