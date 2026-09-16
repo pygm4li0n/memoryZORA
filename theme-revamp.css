@@ -3,62 +3,67 @@
    ─────────────────────────────────────────────────────
    Loaded AFTER the theme CSS + theme-fixes.css.
    Works on every theme automatically via CSS vars.
-   Adds: deeper shadows, stronger glows, better contrast,
-   cleaner chrome, richer hover/focus, more depth.
+
+   Philosophy:
+   • Edge lights, not halos. Small radius, low alpha.
+   • Contrast from dark backing shadows, not colored glows.
+   • Secondary text (times, dates, statuses) explicitly lifted
+     so it stays readable on every theme.
+   • Per-theme accents kept, but dialed to ~40% intensity.
 ═════════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════
    1) UNIVERSAL UPGRADES — apply to every theme
 ═══════════════════════════════════════════════ */
 
-/* ── Outer shell — thicker rim, deeper shadow, inner glow ── */
+/* ── Outer shell — firm rim, deep shadow, no bloom ── */
 .app-shell {
     border-width: 2px !important;
     box-shadow:
-        inset 0 2px 8px rgba(255,255,255,0.10),
-        inset 0 -4px 10px rgba(0,0,0,0.65),
-        inset 3px 0 8px rgba(255,255,255,0.05),
-        inset -3px 0 8px rgba(0,0,0,0.55),
-        0 10px 30px rgba(0,0,0,0.85),
-        0 0 60px var(--accent-cyan, rgba(57, 255, 20, 0.25)) !important;
+        inset 0 2px 6px rgba(255,255,255,0.10),
+        inset 0 -4px 8px rgba(0,0,0,0.70),
+        inset 3px 0 6px rgba(255,255,255,0.05),
+        inset -3px 0 6px rgba(0,0,0,0.55),
+        0 8px 24px rgba(0,0,0,0.85),
+        0 0 20px var(--accent-cyan, rgba(57, 255, 20, 0.12)) !important;
 }
 
-/* ── Sidebar — stronger inset, cleaner edge ── */
+/* ── Sidebar — clean edge, tight shadow ── */
 .sidebar {
     box-shadow:
-        inset 2px 0 8px rgba(255,255,255,0.08),
-        inset -4px 0 10px rgba(0,0,0,0.65),
-        inset 0 2px 6px rgba(255,255,255,0.06),
-        inset 0 -2px 6px rgba(0,0,0,0.5),
-        2px 0 16px var(--accent-cyan, rgba(57, 255, 20, 0.22)) !important;
+        inset 2px 0 6px rgba(255,255,255,0.08),
+        inset -4px 0 8px rgba(0,0,0,0.65),
+        inset 0 2px 4px rgba(255,255,255,0.06),
+        inset 0 -2px 4px rgba(0,0,0,0.5),
+        2px 0 10px var(--accent-cyan, rgba(57, 255, 20, 0.10)) !important;
 }
 
-/* ── Chat panel — deeper CRT well ── */
+/* ── Chat panel — deep CRT well ── */
 .chat-panel {
     box-shadow:
-        inset 0 0 40px rgba(0,0,0,0.98),
-        inset 0 0 90px var(--accent-cyan, rgba(57, 255, 20, 0.08)),
-        inset 0 2px 4px rgba(255,255,255,0.04) !important;
+        inset 0 0 30px rgba(0,0,0,0.98),
+        inset 0 0 60px var(--accent-cyan, rgba(57, 255, 20, 0.05)),
+        inset 0 2px 4px rgba(255,255,255,0.03) !important;
 }
 
-/* ── Header bar — chrome + glow ── */
+/* ── Header bar — chrome lip, tight shadow ── */
 .chat-header-bar {
     border-bottom-width: 3px !important;
     box-shadow:
-        inset 0 4px 8px rgba(255,255,255,0.10),
-        inset 0 -4px 8px rgba(0,0,0,0.55),
-        0 3px 14px var(--accent-cyan, rgba(57, 255, 20, 0.28)) !important;
+        inset 0 4px 6px rgba(255,255,255,0.10),
+        inset 0 -4px 6px rgba(0,0,0,0.55),
+        0 3px 8px var(--accent-cyan, rgba(57, 255, 20, 0.12)) !important;
 }
 
-/* ── Input bar — stronger top border, cleaner shadow ── */
+/* ── Input bar — clean top edge ── */
 .input-area-bar {
     border-top-width: 2px !important;
     box-shadow:
-        inset 0 4px 8px rgba(255,255,255,0.06),
-        0 -3px 14px var(--accent-cyan, rgba(57, 255, 20, 0.25)) !important;
+        inset 0 4px 6px rgba(255,255,255,0.05),
+        0 -3px 8px var(--accent-cyan, rgba(57, 255, 20, 0.10)) !important;
 }
 
-/* ── Buttons — cleaner depth + hover bloom ── */
+/* ── Buttons — depth not bloom ── */
 .btn-icon,
 .send-btn-main,
 .sidebar-toggle,
@@ -76,9 +81,10 @@
 .sidebar-toggle:hover {
     transform: translateY(-1px);
     box-shadow:
-        inset 0 1px 3px rgba(255,255,255,0.08),
-        inset 0 -1px 3px rgba(0,0,0,0.3),
-        0 0 20px var(--accent-cyan, rgba(57, 255, 20, 0.7)) !important;
+        inset 0 1px 2px rgba(255,255,255,0.10),
+        inset 0 -1px 2px rgba(0,0,0,0.35),
+        0 0 10px var(--accent-cyan, rgba(57, 255, 20, 0.35)),
+        0 2px 4px rgba(0,0,0,0.5) !important;
 }
 
 .btn-icon:active,
@@ -86,33 +92,33 @@
     transform: translateY(0) scale(0.97);
 }
 
-/* ── Message bubbles — richer edges, cleaner shadow ── */
+/* ── Message bubbles — clean edges, strong grounding shadow ── */
 .msg-bubble {
     border-width: 1.5px !important;
     box-shadow:
-        0 0 12px var(--accent-cyan, rgba(57, 255, 20, 0.5)),
-        0 2px 8px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.06),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 6px var(--accent-cyan, rgba(57, 255, 20, 0.28)),
+        0 2px 6px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 
 .msg-wrapper.own .msg-bubble {
     box-shadow:
-        0 0 18px var(--accent-cyan, rgba(57, 255, 20, 0.65)),
-        0 3px 10px rgba(0,0,0,0.55),
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 8px var(--accent-cyan, rgba(57, 255, 20, 0.38)),
+        0 2px 8px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 
 .msg-bubble:hover {
     box-shadow:
-        0 0 24px var(--accent-cyan, rgba(57, 255, 20, 0.85)),
-        0 3px 12px rgba(0,0,0,0.6),
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 12px var(--accent-cyan, rgba(57, 255, 20, 0.48)),
+        0 3px 10px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 
-/* ── Inputs — stronger focus ring ── */
+/* ── Inputs — clean focus ring, not a fog ── */
 #messageInput:focus,
 .overlay-card input:focus,
 .overlay-card textarea:focus,
@@ -121,19 +127,29 @@
 #modSettingsOverlay textarea:focus,
 #modSettingsOverlay select:focus {
     box-shadow:
-        inset 0 3px 10px rgba(0,0,0,0.95),
-        0 0 30px var(--accent-cyan, rgba(57, 255, 20, 0.95)) !important;
+        inset 0 3px 8px rgba(0,0,0,0.95),
+        0 0 0 1px var(--accent-cyan, #39FF14),
+        0 0 12px var(--accent-cyan, rgba(57, 255, 20, 0.40)) !important;
 }
 
-/* ── Send button — extra chrome + shine ── */
+/* ── Send button — glossy chrome, tight shine ── */
 button.send-btn-main {
     border-width: 1.5px !important;
     box-shadow:
-        inset 0 2px 4px rgba(255,255,255,0.35),
-        inset 0 -2px 4px rgba(0,0,0,0.45),
-        0 3px 16px var(--accent-cyan, rgba(57, 255, 20, 0.85)) !important;
+        inset 0 2px 3px rgba(255,255,255,0.35),
+        inset 0 -2px 3px rgba(0,0,0,0.45),
+        0 2px 8px rgba(0,0,0,0.6),
+        0 0 10px var(--accent-cyan, rgba(57, 255, 20, 0.45)) !important;
     position: relative;
     overflow: hidden;
+}
+
+button.send-btn-main:hover {
+    box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.42),
+        inset 0 -2px 3px rgba(0,0,0,0.35),
+        0 2px 10px rgba(0,0,0,0.65),
+        0 0 16px var(--accent-cyan, rgba(57, 255, 20, 0.65)) !important;
 }
 
 button.send-btn-main::before {
@@ -144,9 +160,9 @@ button.send-btn-main::before {
     height: 100%;
     background: linear-gradient(90deg,
         transparent 0%,
-        rgba(255,255,255,0.35) 50%,
+        rgba(255,255,255,0.25) 50%,
         transparent 100%);
-    animation: sendBtnShine 3.5s ease-in-out infinite;
+    animation: sendBtnShine 4s ease-in-out infinite;
     pointer-events: none;
 }
 
@@ -155,21 +171,21 @@ button.send-btn-main::before {
     50%      { left: 130%; }
 }
 
-/* ── Reaction buttons — cleaner pills ── */
+/* ── Reaction buttons — small, clean, alive ── */
 .reaction-btn {
     border-width: 1px !important;
     transition: all 0.2s ease !important;
 }
 .reaction-btn:hover {
-    transform: translateY(-1px) scale(1.05);
+    transform: translateY(-1px) scale(1.04);
 }
 .reaction-btn.active {
     box-shadow:
-        inset 0 1px 3px rgba(255,255,255,0.3),
-        0 0 16px var(--accent-cyan, rgba(57, 255, 20, 0.9)) !important;
+        inset 0 1px 2px rgba(255,255,255,0.28),
+        0 0 8px var(--accent-cyan, rgba(57, 255, 20, 0.55)) !important;
 }
 
-/* ── Scrollbars — themed and cleaner ── */
+/* ── Scrollbars — themed, clean thumb ── */
 .messages-container::-webkit-scrollbar-thumb,
 .sidebar-users::-webkit-scrollbar-thumb,
 #walletTokenList::-webkit-scrollbar-thumb,
@@ -178,10 +194,10 @@ button.send-btn-main::before {
     background: linear-gradient(180deg,
         var(--border-default, #B25E22) 0%,
         var(--accent-cyan, #39FF14) 100%) !important;
-    box-shadow: 0 0 8px var(--accent-cyan, rgba(57, 255, 20, 0.5)) !important;
+    box-shadow: 0 0 4px var(--accent-cyan, rgba(57, 255, 20, 0.30)) !important;
 }
 
-/* ── Sidebar user rows — cleaner hover + depth ── */
+/* ── Sidebar user rows — crisp hover, no bloom ── */
 .sidebar-user-item {
     border-width: 1.5px !important;
     transition: all 0.2s ease !important;
@@ -189,28 +205,28 @@ button.send-btn-main::before {
 .sidebar-user-item:hover {
     transform: translateX(2px);
     box-shadow:
-        inset 0 1px 3px rgba(255,255,255,0.10),
-        inset 0 -1px 3px rgba(0,0,0,0.5),
-        0 0 22px var(--accent-cyan, rgba(57, 255, 20, 0.6)) !important;
+        inset 0 1px 2px rgba(255,255,255,0.10),
+        inset 0 -1px 2px rgba(0,0,0,0.5),
+        0 0 10px var(--accent-cyan, rgba(57, 255, 20, 0.28)) !important;
 }
 
-/* ── Overlays — deeper blur, richer card ── */
+/* ── Overlays — deeper blur, contained glow ── */
 .request-overlay,
 .overlay-full {
     backdrop-filter: blur(6px) !important;
-    background: rgba(0, 0, 0, 0.85) !important;
+    background: rgba(0, 0, 0, 0.88) !important;
 }
 .request-card,
 .overlay-card {
     border-width: 2px !important;
     box-shadow:
-        0 20px 60px rgba(0,0,0,0.9),
-        inset 0 2px 8px rgba(255,255,255,0.10),
-        inset 0 -2px 8px rgba(0,0,0,0.5),
-        0 0 60px var(--accent-cyan, rgba(57, 255, 20, 0.45)) !important;
+        0 16px 40px rgba(0,0,0,0.9),
+        inset 0 2px 6px rgba(255,255,255,0.10),
+        inset 0 -2px 6px rgba(0,0,0,0.5),
+        0 0 24px var(--accent-cyan, rgba(57, 255, 20, 0.18)) !important;
 }
 
-/* ── Theme option cards in the picker — extra polish ── */
+/* ── Theme picker cards — clean lift ── */
 #themeOverlay .theme-option {
     transition:
         border-color 0.25s ease,
@@ -222,187 +238,242 @@ button.send-btn-main::before {
     transform: translateY(-2px) !important;
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.06),
-        0 0 26px currentColor !important;
+        0 0 14px currentColor !important;
 }
 
 /* ═══════════════════════════════════════════════
-   2) PER-THEME ENHANCEMENTS
+   2) PER-THEME ENHANCEMENTS — accent kept, bloom cut
 ═══════════════════════════════════════════════ */
 
-/* ── OG — deep navy + cyan, cleaner chrome ── */
+/* ── OG — deep navy + cyan ── */
 body.og-theme .app-shell,
 html[data-theme="original"] .app-shell {
     box-shadow:
-        inset 0 2px 8px rgba(1, 225, 234, 0.08),
-        inset 0 -4px 10px rgba(0,0,0,0.75),
-        0 10px 30px rgba(0,0,0,0.9),
-        0 0 70px rgba(1, 225, 234, 0.35) !important;
+        inset 0 2px 6px rgba(1, 225, 234, 0.08),
+        inset 0 -4px 8px rgba(0,0,0,0.75),
+        0 8px 24px rgba(0,0,0,0.9),
+        0 0 24px rgba(1, 225, 234, 0.18) !important;
 }
 body.og-theme .msg-bubble,
 html[data-theme="original"] .msg-bubble {
     border-color: rgba(1, 225, 234, 0.85) !important;
     box-shadow:
-        0 0 14px rgba(1, 225, 234, 0.6),
-        0 2px 8px rgba(0,0,0,0.55),
-        inset 0 1px 0 rgba(1, 225, 234, 0.15),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 6px rgba(1, 225, 234, 0.35),
+        0 2px 6px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(1, 225, 234, 0.12),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 
-/* ── ORANGE — dark amber + orange, hot chrome ── */
+/* ── ORANGE — dark amber + orange ── */
 body.orange-theme .app-shell,
 html[data-theme="orange"] .app-shell {
     box-shadow:
-        inset 0 2px 8px rgba(255, 140, 0, 0.10),
-        inset 0 -4px 10px rgba(0,0,0,0.75),
-        0 10px 30px rgba(0,0,0,0.9),
-        0 0 70px rgba(255, 140, 0, 0.4) !important;
+        inset 0 2px 6px rgba(255, 140, 0, 0.10),
+        inset 0 -4px 8px rgba(0,0,0,0.75),
+        0 8px 24px rgba(0,0,0,0.9),
+        0 0 24px rgba(255, 140, 0, 0.20) !important;
 }
 body.orange-theme .msg-bubble,
 html[data-theme="orange"] .msg-bubble {
     border-color: rgba(255, 140, 0, 0.9) !important;
     box-shadow:
-        0 0 14px rgba(255, 140, 0, 0.6),
-        0 2px 8px rgba(0,0,0,0.55),
-        inset 0 1px 0 rgba(255, 200, 100, 0.12),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 6px rgba(255, 140, 0, 0.35),
+        0 2px 6px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255, 200, 100, 0.10),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 
-/* ── CHERRY — deep pink + crimson, warm glow ── */
+/* ── CHERRY — deep pink + crimson ── */
 body.cherry-theme .app-shell,
 html[data-theme="cherry"] .app-shell {
     box-shadow:
-        inset 0 2px 8px rgba(255, 92, 124, 0.10),
-        inset 0 -4px 10px rgba(0,0,0,0.75),
-        0 10px 30px rgba(0,0,0,0.9),
-        0 0 70px rgba(255, 92, 124, 0.4) !important;
+        inset 0 2px 6px rgba(255, 92, 124, 0.10),
+        inset 0 -4px 8px rgba(0,0,0,0.75),
+        0 8px 24px rgba(0,0,0,0.9),
+        0 0 24px rgba(255, 92, 124, 0.20) !important;
 }
 body.cherry-theme .msg-bubble,
 html[data-theme="cherry"] .msg-bubble {
     border-color: rgba(255, 92, 124, 0.9) !important;
     box-shadow:
-        0 0 14px rgba(255, 92, 124, 0.65),
-        0 2px 8px rgba(0,0,0,0.55),
-        inset 0 1px 0 rgba(255, 150, 180, 0.15),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 6px rgba(255, 92, 124, 0.35),
+        0 2px 6px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255, 150, 180, 0.12),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 
-/* ── GOLD — bronze + gold, luxe shine ── */
+/* ── GOLD — bronze + gold ── */
 body.gold-theme .app-shell,
 html[data-theme="gold"] .app-shell {
     box-shadow:
-        inset 0 2px 8px rgba(255, 213, 74, 0.12),
-        inset 0 -4px 10px rgba(0,0,0,0.75),
-        0 10px 30px rgba(0,0,0,0.9),
-        0 0 70px rgba(255, 213, 74, 0.45) !important;
+        inset 0 2px 6px rgba(255, 213, 74, 0.12),
+        inset 0 -4px 8px rgba(0,0,0,0.75),
+        0 8px 24px rgba(0,0,0,0.9),
+        0 0 24px rgba(255, 213, 74, 0.22) !important;
 }
 body.gold-theme .msg-bubble,
 html[data-theme="gold"] .msg-bubble {
     border-color: rgba(255, 213, 74, 0.9) !important;
     box-shadow:
-        0 0 16px rgba(255, 213, 74, 0.7),
-        0 2px 8px rgba(0,0,0,0.55),
-        inset 0 1px 0 rgba(255, 240, 180, 0.2),
-        inset 0 0 10px rgba(0,0,0,0.6) !important;
+        0 0 6px rgba(255, 213, 74, 0.40),
+        0 2px 6px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255, 240, 180, 0.16),
+        inset 0 0 8px rgba(0,0,0,0.55) !important;
 }
 body.gold-theme button.send-btn-main,
 html[data-theme="gold"] button.send-btn-main {
     box-shadow:
-        inset 0 2px 4px rgba(255, 255, 200, 0.5),
-        inset 0 -2px 4px rgba(0,0,0,0.5),
-        0 3px 20px rgba(255, 213, 74, 1) !important;
+        inset 0 2px 3px rgba(255, 255, 200, 0.45),
+        inset 0 -2px 3px rgba(0,0,0,0.45),
+        0 2px 8px rgba(0,0,0,0.6),
+        0 0 12px rgba(255, 213, 74, 0.55) !important;
 }
 
-/* ── INDUSTRIAL — phosphor green + copper, toxic radiance ── */
+/* ── INDUSTRIAL — phosphor green + copper ── */
 body.indu-theme .app-shell,
 html[data-theme="indu"] .app-shell {
     box-shadow:
-        inset 0 2px 8px rgba(57, 255, 20, 0.12),
-        inset 0 -4px 10px rgba(0,0,0,0.8),
-        0 10px 30px rgba(0,0,0,0.9),
-        0 0 80px rgba(57, 255, 20, 0.45) !important;
+        inset 0 2px 6px rgba(57, 255, 20, 0.12),
+        inset 0 -4px 8px rgba(0,0,0,0.80),
+        0 8px 24px rgba(0,0,0,0.9),
+        0 0 24px rgba(57, 255, 20, 0.22) !important;
 }
 body.indu-theme .msg-bubble,
 html[data-theme="indu"] .msg-bubble {
     border-color: rgba(57, 255, 20, 0.9) !important;
     box-shadow:
-        0 0 16px rgba(57, 255, 20, 0.75),
-        0 2px 8px rgba(0,0,0,0.6),
-        inset 0 1px 0 rgba(182, 255, 26, 0.18),
-        inset 0 0 10px rgba(0,0,0,0.65) !important;
+        0 0 6px rgba(57, 255, 20, 0.40),
+        0 2px 6px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(182, 255, 26, 0.14),
+        inset 0 0 8px rgba(0,0,0,0.6) !important;
 }
 body.indu-theme .chat-panel,
 html[data-theme="indu"] .chat-panel {
     box-shadow:
-        inset 0 0 45px rgba(0,0,0,0.98),
-        inset 0 0 100px rgba(57, 255, 20, 0.10),
-        inset 0 2px 4px rgba(182, 255, 26, 0.05) !important;
+        inset 0 0 30px rgba(0,0,0,0.98),
+        inset 0 0 60px rgba(57, 255, 20, 0.06),
+        inset 0 2px 4px rgba(182, 255, 26, 0.04) !important;
 }
 
-/* ── SCIENCE — deep space + electric blue, cosmic ── */
+/* ── SCIENCE — deep space + electric blue ── */
 body.science-theme .app-shell,
 html[data-theme="science"] .app-shell {
     box-shadow:
-        inset 0 2px 8px rgba(0, 212, 255, 0.12),
-        inset 0 -4px 10px rgba(0,0,0,0.8),
-        0 10px 30px rgba(0,0,0,0.9),
-        0 0 80px rgba(0, 212, 255, 0.45) !important;
+        inset 0 2px 6px rgba(0, 212, 255, 0.12),
+        inset 0 -4px 8px rgba(0,0,0,0.80),
+        0 8px 24px rgba(0,0,0,0.9),
+        0 0 24px rgba(0, 212, 255, 0.22) !important;
 }
 body.science-theme .msg-bubble,
 html[data-theme="science"] .msg-bubble {
     border-color: rgba(0, 212, 255, 0.9) !important;
     box-shadow:
-        0 0 16px rgba(0, 212, 255, 0.75),
-        0 2px 8px rgba(0,0,0,0.6),
-        inset 0 1px 0 rgba(120, 220, 255, 0.2),
-        inset 0 0 10px rgba(0,0,0,0.65) !important;
+        0 0 6px rgba(0, 212, 255, 0.40),
+        0 2px 6px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(120, 220, 255, 0.16),
+        inset 0 0 8px rgba(0,0,0,0.6) !important;
 }
 
 /* ═══════════════════════════════════════════════
-   3) ANIMATED MICRO-DETAILS — same on every theme
+   3) CONTRAST LIFT — muted text readable everywhere
+   Dark backing shadow instead of glow.
 ═══════════════════════════════════════════════ */
 
-/* Status dots — subtle pulse */
+/* Timestamps & edited markers */
+.msg-time,
+.msg-edited {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.95 !important;
+    font-weight: 500 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.95) !important;
+}
+
+/* "Online" status under sidebar users */
+.sidebar-user-item .user-status-text {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.92 !important;
+    font-weight: 500 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Sidebar footer status + wallet address */
+.sidebar-footer #sidebarStatusText {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.95) !important;
+}
+.sidebar-footer .wallet-address {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.92 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Profile "● Online" line */
+.big-status {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.95 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Rank details in leaderboard */
+#rankingsOverlay .rank-detail {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.95 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Reply preview quotes */
+.reply-ref-block .r-text {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.95 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Empty chat hint + no-users line */
+.empty-chat-hint,
+.no-users-sidebar {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.92 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Deleted messages */
+.msg-text.deleted {
+    color: var(--text-secondary, #9fb0a0) !important;
+    opacity: 0.85 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   4) MICRO-DETAILS — clean, no pulse
+═══════════════════════════════════════════════ */
+
+/* Status dots — small LED, no pulsing beacon */
 .big-status .status-dot,
 .online-indicator,
 .sidebar-footer .status-dot-sm {
-    animation: revPulse 2.2s ease-in-out infinite;
-}
-@keyframes revPulse {
-    0%, 100% {
-        box-shadow:
-            0 0 10px var(--accent-cyan, rgba(57, 255, 20, 1)),
-            0 0 20px var(--accent-cyan, rgba(57, 255, 20, 0.6));
-    }
-    50% {
-        box-shadow:
-            0 0 16px var(--accent-cyan, rgba(57, 255, 20, 1)),
-            0 0 34px var(--accent-cyan, rgba(57, 255, 20, 0.85));
-    }
+    box-shadow:
+        0 0 4px var(--accent-cyan, rgba(57, 255, 20, 0.8)),
+        0 0 8px var(--accent-cyan, rgba(57, 255, 20, 0.35)) !important;
+    /* animation removed — no pulse */
+    animation: none !important;
 }
 
-/* Header shimmer — richer */
-@keyframes chromeShimmer {
-    0%, 100% { left: -100%; opacity: 0.85; }
-    50%      { left: 0%;    opacity: 1; }
-}
-
-/* Text shadows on names + titles — crisper, cleaner */
+/* Text-shadow on names + titles — dark backing only */
 .big-name,
 .msg-username,
 .sidebar-section-label,
 .rankings-header h3 {
     text-shadow:
-        0 1px 2px rgba(0,0,0,0.85),
-        0 0 12px var(--accent-cyan, rgba(57, 255, 20, 0.45)) !important;
+        0 1px 1px rgba(0, 0, 0, 0.95),
+        0 0 6px var(--accent-cyan, rgba(57, 255, 20, 0.18)) !important;
 }
 
-/* Selection color — theme-aware */
+/* Selection color */
 ::selection {
     background: var(--accent-cyan, rgba(57, 255, 20, 0.5)) !important;
     color: #000 !important;
 }
 
-/* Focus rings — clean + consistent */
+/* Focus rings */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -415,9 +486,12 @@ select:focus-visible,
     outline-offset: 2px !important;
 }
 
+/* Kill any stale glow animations from other files */
+@keyframes revPulse { 0%, 100% { box-shadow: inherit; } 50% { box-shadow: inherit; } }
+@keyframes chromeShimmer { 0%, 100% { left: -100%; opacity: 0.85; } 50% { left: 0%; opacity: 1; } }
+
 /* ═════════════════════════════════════════════════════
-   ⚑ PHANTOM — remove the pulsing dot indicator
-   (icon already turns green when connected, no dot needed)
+   ⚑ PHANTOM — no pulsing dot indicator
 ═════════════════════════════════════════════════════ */
 .phantom-btn.connected::after,
 .phantom-overlay-btn.connected::after,
@@ -431,12 +505,13 @@ select:focus-visible,
     box-shadow: none !important;
 }
 
-/* Also kill any phantom-specific pulse animation still running */
-@keyframes phantomDotPulse { 
-    0%, 100% { opacity: 0; } 
-    50%      { opacity: 0; } 
-}
-@keyframes phantomPulse { 
-    0%, 100% { transform: none; opacity: 0; } 
-    50%      { transform: none; opacity: 0; } 
+@keyframes phantomDotPulse { 0%, 100% { opacity: 0; } 50% { opacity: 0; } }
+@keyframes phantomPulse    { 0%, 100% { transform: none; opacity: 0; } 50% { transform: none; opacity: 0; } }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ FALLBACK — browsers without color-mix() keep same values
+═════════════════════════════════════════════════════ */
+@supports not (color: color-mix(in srgb, red, blue)) {
+    /* Nothing to change — all values above use rgba() directly */
+    /* This block is a placeholder so future edits have a home */
 }
