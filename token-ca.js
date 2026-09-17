@@ -7,7 +7,27 @@
     'use strict';
 
     var CA = '6imhRyMYu5xoGJ5W7yveymB5o5yfyAvXxveozWpbU5ix';
-    var SHORT = CA.slice(0, 6) + '…' + CA.slice(-6);
+    var SHORT = CA.slice(0, 4) + '…' + CA.slice(-4);
+
+    /* Inject the small bit of CSS we need for the centered
+       copy emoji, so no external stylesheet is required. */
+    function injectStyles() {
+        if (document.getElementById('token-ca-styles')) return;
+        var style = document.createElement('style');
+        style.id = 'token-ca-styles';
+        style.textContent =
+            '.token-ca .ca-copy{' +
+                'display:inline-flex;' +
+                'align-items:center;' +
+                'justify-content:center;' +
+                'width:1.35em;' +
+                'height:1.35em;' +
+                'line-height:1;' +
+                'text-align:center;' +
+                'flex:0 0 auto;' +
+            '}';
+        document.head.appendChild(style);
+    }
 
     function copyText(text) {
         /* Modern API */
@@ -37,6 +57,8 @@
         var center = document.querySelector('.header-center');
         if (!center) return;
         if (center.querySelector('.token-ca')) return;
+
+        injectStyles();
 
         var el = document.createElement('div');
         el.className = 'token-ca';
