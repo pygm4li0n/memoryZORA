@@ -3,6 +3,7 @@
    – Late 1980s / early 1990s luxury audio console
    – Polished brass, brushed 24k gold, walnut, olive LCD
    – Preserves all layout & functionality
+   – Added: ONLINE USERS LED, TOKEN CA pill, gold status dots
 ===================================================== */
 
 :root {
@@ -13,7 +14,7 @@
     --gold-mid:     #D9BC63;
     --gold-light:   #E8D48A;
     --gold-bright:  #F5E6A8;
-    --gold-spec:    #FFF8DC;   /* specular hit */
+    --gold-spec:    #FFF8DC;
     --brass:        #B8943E;
     --brass-dark:   #8A6E28;
 
@@ -211,13 +212,11 @@ body {
     overflow: hidden;
     border: 3px solid #C9A84E;
     box-shadow:
-        /* brass bevel */
         inset 0 3px 0 rgba(255,248,220,0.55),
         inset 0 -4px 0 rgba(0,0,0,0.55),
         inset 3px 0 0 rgba(255,248,220,0.28),
         inset -3px 0 0 rgba(0,0,0,0.45),
         inset 0 0 30px rgba(0,0,0,0.55),
-        /* outer bloom */
         0 10px 34px rgba(0,0,0,0.75),
         0 0 60px rgba(201,168,78,0.22),
         0 0 120px rgba(201,168,78,0.08);
@@ -261,6 +260,7 @@ body {
     position: relative;
 }
 
+/* Gold rail along the sidebar right edge */
 .sidebar::before {
     content: '';
     position: absolute;
@@ -412,6 +412,41 @@ body {
     gap: 6px;
     font-family: var(--font-main);
     text-shadow: 0 1px 2px rgba(0,0,0,0.7), 0 0 10px rgba(201,168,78,0.2);
+}
+
+/* ⚑ ONLINE USERS LED — gold dot, always glowing */
+.sidebar-section-label .online-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FFF8DC 0%, #E8D48A 35%, #C9A84E 70%, #8A6E28 100%);
+    margin-right: 8px;
+    flex-shrink: 0;
+    vertical-align: middle;
+    border: 1px solid rgba(58,42,12,0.5);
+    box-shadow:
+        0 0 6px rgba(201,168,78,0.95),
+        0 0 14px rgba(201,168,78,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.45);
+    animation: goldDotPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes goldDotPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 6px rgba(201,168,78,0.95),
+            0 0 14px rgba(201,168,78,0.55),
+            inset 0 1px 0 rgba(255,255,255,0.45);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow:
+            0 0 10px rgba(201,168,78,1),
+            0 0 22px rgba(201,168,78,0.75),
+            inset 0 1px 0 rgba(255,255,255,0.6);
+        transform: scale(1.08);
+    }
 }
 
 .sidebar-section-label .active-users-count {
@@ -778,6 +813,120 @@ body {
 
 .header-right { display: flex; align-items: center; gap: 8px; z-index: 3; flex-wrap: wrap; }
 
+/* ║ TOKEN CA PILL — gold themed ║ */
+.token-ca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px 6px 10px;
+    border-radius: 6px;
+    background:
+        var(--tex-brushed),
+        linear-gradient(180deg, #2F2A18 0%, #1E1A0E 100%);
+    border: 1px solid var(--gold-dark);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--champagne);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.25s ease, transform 0.15s ease;
+    box-shadow:
+        inset 0 1px 0 rgba(255,248,220,0.10),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 1px 4px rgba(0,0,0,0.45);
+}
+.token-ca::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,248,220,0.15) 50%, transparent 100%);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+.token-ca:hover::before { left: 130%; }
+.token-ca:hover {
+    border-color: var(--gold-light);
+    color: var(--cream-bright);
+    box-shadow:
+        inset 0 1px 0 rgba(255,248,220,0.18),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 0 16px rgba(201,168,78,0.55),
+        0 1px 4px rgba(0,0,0,0.5);
+}
+.token-ca:active { transform: scale(0.97); }
+.token-ca .ca-label {
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(201,168,78,0.14);
+    border: 1px solid rgba(201,168,78,0.4);
+    color: var(--gold-light);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(201,168,78,0.7);
+    box-shadow: inset 0 0 6px rgba(201,168,78,0.12);
+}
+.token-ca .ca-value {
+    color: inherit;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+.token-ca .ca-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: 2px;
+    border-radius: 4px;
+    background: rgba(255,248,220,0.05);
+    border: 1px solid var(--gold-dark);
+    color: var(--champagne);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.token-ca:hover .ca-copy {
+    background: rgba(201,168,78,0.18);
+    border-color: var(--gold-light);
+    color: var(--gold-spec);
+}
+.token-ca.copied {
+    border-color: var(--gold-light);
+    color: var(--gold-spec);
+    box-shadow:
+        inset 0 1px 0 rgba(255,248,220,0.18),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        0 0 24px rgba(201,168,78,0.75),
+        0 1px 4px rgba(0,0,0,0.5);
+}
+.token-ca.copied .ca-value {
+    text-shadow: 0 0 10px rgba(201,168,78,0.8);
+}
+.token-ca.copied .ca-copy {
+    background: var(--grad-gold-soft);
+    border-color: var(--gold-light);
+    color: #3A2A0C;
+    transform: scale(1.05);
+}
+.token-ca:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 2px;
+}
+@media (max-width: 768px) {
+    .token-ca { display: none !important; }
+}
+
 .badge-pill {
     display: flex;
     align-items: center;
@@ -1131,8 +1280,6 @@ body {
 
 /* =====================================================
    REPLY BLOCK — DARK CONTRAST QUOTE
-   Sits inside a light cream bubble, so it goes deep
-   espresso/black with a molten gold rail.
 ===================================================== */
 .reply-ref-block {
     background:
@@ -1217,7 +1364,7 @@ body {
     white-space: nowrap;
     max-width: 220px;
     font-size: 0.7rem;
-    color: #C4B08A;
+    color: #E8D48A !important;
     font-family: var(--font-mono);
     text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
@@ -1322,7 +1469,6 @@ body {
         0 -3px 12px rgba(0,0,0,0.45);
 }
 
-/* dark indicator bars to match the quote block */
 .reply-indicator-bar, .private-indicator-bar {
     display: flex;
     align-items: center;
