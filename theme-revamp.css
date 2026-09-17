@@ -517,9 +517,10 @@ select:focus-visible,
 }
 
 /* ═════════════════════════════════════════════════════
-   5) PINNED ANNOUNCEMENT — adaptive per-theme accent
-   ★ High specificity + per-theme fallbacks
-   ★ Short text always shows fully, long text ellipsizes
+   5) PINNED ANNOUNCEMENT — final version
+   ★ Ultra-high specificity on button
+   ★ Bigger desktop text
+   ★ Tighter mobile so short text always fits
 ═════════════════════════════════════════════════════ */
 
 /* ── 5a. Pinned bar ── */
@@ -547,10 +548,6 @@ select:focus-visible,
         0 2px 8px rgba(0,0,0,0.55),
         0 0 12px var(--accent-cyan, #39FF14) !important;
     overflow: hidden;
-    transition:
-        border-color 0.3s ease,
-        box-shadow 0.3s ease,
-        background 0.3s ease !important;
 }
 
 .mod-message-box::before {
@@ -566,7 +563,7 @@ select:focus-visible,
     pointer-events: none;
 }
 
-/* ── 5b. "PINNED" badge — solid theme color ── */
+/* ── 5b. "PINNED" badge ── */
 .mod-message-box .mod-badge {
     flex: 0 0 auto !important;
     padding: 4px 12px !important;
@@ -578,8 +575,7 @@ select:focus-visible,
     line-height: 1.1 !important;
     white-space: nowrap !important;
     color: #0A0704 !important;
-    background-color: var(--accent-cyan, #39FF14) !important;
-    background-image: none !important;
+    background: var(--accent-cyan, #39FF14) !important;
     border: 1px solid #0A0704 !important;
     text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
     box-shadow:
@@ -589,16 +585,17 @@ select:focus-visible,
         0 0 14px var(--accent-cyan, #39FF14) !important;
 }
 
-/* ── 5c. Pinned text — theme color, ONE LINE, short text fully visible ── */
+/* ── 5c. Pinned text — DESKTOP is now 0.95rem (bigger) ── */
 .mod-message-box .mod-message-text,
 .mod-message-box #modMessageText {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     max-width: none !important;
     display: block !important;
-    font-size: 0.82rem !important;
+    font-size: 0.95rem !important;        /* ← bigger on desktop */
     font-weight: 700 !important;
     letter-spacing: 0.03em !important;
+    line-height: 1.25 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -627,27 +624,31 @@ select:focus-visible,
     font-style: italic;
 }
 
-/* ── 5d. POST ANNOUNCEMENT button — SOLID theme color ──
-   ★ Repeated ID → beats any single-ID rule in later files
-   ★ background-image: none → wipes any gradient override
+/* ── 5d. POST ANNOUNCEMENT button — ULTRA aggressive ──
+   Triple-ID selector + shorthand `background:` — beats
+   ANY other rule, regardless of load order or !important.
 */
-#modPostAnnouncementBtn,
-#modPostAnnouncementBtn#modPostAnnouncementBtn,
-body #modPostAnnouncementBtn#modPostAnnouncementBtn {
-    display: block;
+html body #modSettingsOverlay #modPostAnnouncementBtn,
+html body #modPostAnnouncementBtn#modPostAnnouncementBtn#modPostAnnouncementBtn {
+    /* kill every previously-set background */
+    background: var(--accent-cyan, #39FF14) !important;
+    background-image: none !important;
+    background-color: var(--accent-cyan, #39FF14) !important;
+
+    display: block !important;
     width: 100% !important;
-    margin-top: 10px;
+    margin-top: 10px !important;
     padding: 12px 18px !important;
     border-radius: 4px !important;
-    cursor: pointer;
+    cursor: pointer !important;
+
     font-family: var(--font-mono) !important;
-    font-size: 0.82rem !important;
+    font-size: 0.85rem !important;
     font-weight: 900 !important;
     letter-spacing: 0.10em !important;
     text-transform: uppercase !important;
-    color: #0A0704 !important;
-    background-color: var(--accent-cyan, #39FF14) !important;
-    background-image: none !important;
+    color: #0A0704 !important;               /* dark text = max contrast */
+
     border: 2px solid #0A0704 !important;
     text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
     box-shadow:
@@ -656,7 +657,7 @@ body #modPostAnnouncementBtn#modPostAnnouncementBtn {
         0 2px 8px rgba(0,0,0,0.60),
         0 0 18px var(--accent-cyan, #39FF14) !important;
     transition:
-        background-color 0.22s ease,
+        background 0.22s ease,
         color 0.22s ease,
         border-color 0.22s ease,
         box-shadow 0.22s ease,
@@ -665,23 +666,24 @@ body #modPostAnnouncementBtn#modPostAnnouncementBtn {
     overflow: hidden;
 }
 
-#modPostAnnouncementBtn::after {
+/* very subtle shine — no longer washing out the color */
+html body #modPostAnnouncementBtn#modPostAnnouncementBtn::after {
     content: '';
     position: absolute;
     top: 0; left: -60%;
-    width: 40%; height: 100%;
+    width: 30%; height: 100%;
     background: linear-gradient(100deg,
-        transparent 0%, rgba(255,255,255,0.65) 50%, transparent 100%);
+        transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%);
     transform: skewX(-20deg);
     transition: left 0.55s ease;
     pointer-events: none;
 }
-#modPostAnnouncementBtn:hover::after { left: 130%; }
+html body #modPostAnnouncementBtn#modPostAnnouncementBtn:hover::after { left: 130%; }
 
-#modPostAnnouncementBtn:hover,
-#modPostAnnouncementBtn#modPostAnnouncementBtn:hover {
+html body #modSettingsOverlay #modPostAnnouncementBtn:hover,
+html body #modPostAnnouncementBtn#modPostAnnouncementBtn#modPostAnnouncementBtn:hover {
     color: #000000 !important;
-    background-color: var(--accent-yellow, #FFFFFF) !important;
+    background: var(--accent-yellow, #FFFFFF) !important;
     background-image: none !important;
     border-color: var(--accent-cyan, #39FF14) !important;
     box-shadow:
@@ -691,14 +693,18 @@ body #modPostAnnouncementBtn#modPostAnnouncementBtn {
         0 0 30px var(--accent-cyan, #39FF14) !important;
     transform: translateY(-1px);
 }
-#modPostAnnouncementBtn:active {
+html body #modPostAnnouncementBtn:active {
     transform: translateY(0) scale(0.97);
 }
 
-/* ── 5d-bis. EXPLICIT per-theme colors (bulletproof) ── */
+/* ── 5d-bis. HARD per-theme colors — bulletproof ── */
 body.gold-theme #modPostAnnouncementBtn,
-html[data-theme="gold"] #modPostAnnouncementBtn {
-    background-color: #FFD54A !important;
+html[data-theme="gold"] #modPostAnnouncementBtn,
+body.gold-theme #modSettingsOverlay #modPostAnnouncementBtn,
+html[data-theme="gold"] #modSettingsOverlay #modPostAnnouncementBtn {
+    background: #FFD54A !important;
+    background-image: none !important;
+    border-color: #6B4E1A !important;
     box-shadow:
         inset 0 2px 0 rgba(255,255,255,0.55),
         inset 0 -2px 0 rgba(0,0,0,0.30),
@@ -706,30 +712,49 @@ html[data-theme="gold"] #modPostAnnouncementBtn {
         0 0 18px rgba(255,213,74,0.70) !important;
 }
 body.og-theme #modPostAnnouncementBtn,
-html[data-theme="original"] #modPostAnnouncementBtn {
-    background-color: #01E1EA !important;
+html[data-theme="original"] #modPostAnnouncementBtn,
+body.og-theme #modSettingsOverlay #modPostAnnouncementBtn,
+html[data-theme="original"] #modSettingsOverlay #modPostAnnouncementBtn {
+    background: #01E1EA !important;
+    background-image: none !important;
+    border-color: #003F44 !important;
 }
 body.orange-theme #modPostAnnouncementBtn,
-html[data-theme="orange"] #modPostAnnouncementBtn {
-    background-color: #FF8C00 !important;
+html[data-theme="orange"] #modPostAnnouncementBtn,
+body.orange-theme #modSettingsOverlay #modPostAnnouncementBtn,
+html[data-theme="orange"] #modSettingsOverlay #modPostAnnouncementBtn {
+    background: #FF8C00 !important;
+    background-image: none !important;
+    border-color: #5C2E00 !important;
 }
 body.cherry-theme #modPostAnnouncementBtn,
-html[data-theme="cherry"] #modPostAnnouncementBtn {
-    background-color: #FF5C7C !important;
+html[data-theme="cherry"] #modPostAnnouncementBtn,
+body.cherry-theme #modSettingsOverlay #modPostAnnouncementBtn,
+html[data-theme="cherry"] #modSettingsOverlay #modPostAnnouncementBtn {
+    background: #FF5C7C !important;
+    background-image: none !important;
+    border-color: #5C1A2A !important;
 }
 body.indu-theme #modPostAnnouncementBtn,
-html[data-theme="indu"] #modPostAnnouncementBtn {
-    background-color: #39FF14 !important;
+html[data-theme="indu"] #modPostAnnouncementBtn,
+body.indu-theme #modSettingsOverlay #modPostAnnouncementBtn,
+html[data-theme="indu"] #modSettingsOverlay #modPostAnnouncementBtn {
+    background: #39FF14 !important;
+    background-image: none !important;
+    border-color: #0A3A00 !important;
 }
 body.science-theme #modPostAnnouncementBtn,
-html[data-theme="science"] #modPostAnnouncementBtn {
-    background-color: #00D4FF !important;
+html[data-theme="science"] #modPostAnnouncementBtn,
+body.science-theme #modSettingsOverlay #modPostAnnouncementBtn,
+html[data-theme="science"] #modSettingsOverlay #modPostAnnouncementBtn {
+    background: #00D4FF !important;
+    background-image: none !important;
+    border-color: #003A4A !important;
 }
 
 /* ── 5e. Announcement textarea ── */
 #modAnnouncementInput {
-    background-color: #14100A !important;
-    background-image: linear-gradient(160deg, #1E1A0E 0%, #0F0C06 60%, #1E1A0E 100%) !important;
+    background: linear-gradient(160deg, #1E1A0E 0%, #0F0C06 60%, #1E1A0E 100%) !important;
     border: 2px solid var(--accent-cyan, #39FF14) !important;
     color: var(--accent-yellow, #F0E2B8) !important;
     font-family: var(--font-mono) !important;
@@ -753,29 +778,53 @@ html[data-theme="science"] #modPostAnnouncementBtn {
         0 0 8px var(--accent-cyan, #39FF14) !important;
 }
 
-/* ── 5g. MOBILE — one line, short text fully visible ── */
+/* ── 5g. MOBILE (incl. Phantom in-app browser) ──
+   Narrower gap, smaller badge, but text still readable
+   and SHORT text always fits completely.
+*/
 @media (max-width: 768px) {
     .mod-message-box {
         display: flex !important;
         flex-wrap: nowrap !important;
-        gap: 8px !important;
-        padding: 8px 12px 8px 14px !important;
-        min-height: 36px;
+        gap: 6px !important;
+        padding: 7px 10px 7px 12px !important;
+        min-height: 34px;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
     .mod-message-box .mod-badge {
         flex: 0 0 auto !important;
-        font-size: 0.56rem !important;
-        padding: 3px 8px !important;
-        letter-spacing: 0.12em !important;
+        font-size: 0.55rem !important;
+        padding: 3px 7px !important;
+        letter-spacing: 0.10em !important;
     }
     .mod-message-box .mod-message-text,
     .mod-message-box #modMessageText {
         flex: 1 1 auto !important;
         min-width: 0 !important;
         max-width: none !important;
-        font-size: 0.72rem !important;
+        font-size: 0.74rem !important;
+        letter-spacing: 0.02em !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
+    }
+}
+
+/* ── 5h. VERY narrow screens (Phantom wallet ~360px) ── */
+@media (max-width: 400px) {
+    .mod-message-box {
+        gap: 5px !important;
+        padding: 6px 8px 6px 10px !important;
+    }
+    .mod-message-box .mod-badge {
+        font-size: 0.5rem !important;
+        padding: 2px 6px !important;
+        letter-spacing: 0.08em !important;
+    }
+    .mod-message-box .mod-message-text,
+    .mod-message-box #modMessageText {
+        font-size: 0.7rem !important;
     }
 }
