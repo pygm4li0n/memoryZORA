@@ -228,7 +228,7 @@ html, body {
         z-index: 30;
     }
     .scroll-bottom-btn {
-        bottom: 65px !important;
+        bottom: 70px !important;
         right: 16px !important;
     }
     .header-right .badge-pill,
