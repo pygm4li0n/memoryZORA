@@ -195,3 +195,68 @@
 @media (max-width: 768px) {
     .token-ca { display: none !important; }
 }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ CA COPY ICON — force perfect centering
+   Handles both emoji (📋) and inline SVG icons.
+   Kills line-height, baseline offset, and font padding
+   that push the glyph off-center.
+═════════════════════════════════════════════════════ */
+.token-ca .ca-copy {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+
+    /* Lock the box so nothing shifts */
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    padding: 0 !important;
+    margin: 0 0 0 2px !important;
+    box-sizing: border-box !important;
+
+    /* Kill every baseline / line-height quirk */
+    line-height: 1 !important;
+    font-size: 0.9rem !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    /* Prevent glyph drift */
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+/* If the icon is raw text (emoji), pin it dead center */
+.token-ca .ca-copy:not(:has(svg)) {
+    /* Reset any inherited text metrics */
+    font-family: system-ui, 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif !important;
+    letter-spacing: 0 !important;
+    text-indent: 0 !important;
+    text-shadow: none !important;
+    /* Force the glyph into the middle of its line box */
+    transform: translateY(0.5px) !important;
+}
+
+/* If the icon is an SVG, center it too */
+.token-ca .ca-copy svg {
+    display: block !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin: auto !important;
+    position: static !important;
+    transform: none !important;
+    vertical-align: middle !important;
+    pointer-events: none !important;
+}
+
+/* Nudge the emoji perfectly when the box is small */
+.token-ca .ca-copy svg + *,
+.token-ca .ca-copy > *:not(svg) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    transform: none !important;
+}
