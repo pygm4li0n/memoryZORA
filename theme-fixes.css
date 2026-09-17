@@ -1577,3 +1577,110 @@ button.theme-select {
 
 /* Restore pointer-events on the toast ONLY when it's visible */
 .error-toast.visible { pointer-events: auto !important; }
+
+/* ═════════════════════════════════════════════════════
+   ⚑ TOKEN TRACKER — 2× bigger on desktop, centered,
+      with a copy-able CA pill next to it
+═════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+
+    /* Header center: row of [ tracker | CA pill ], centered */
+    .header-center {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 14px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Tracker — 2× bigger */
+    .header-center .token-tracker {
+        font-size: 1.5rem !important;
+        padding: 10px 22px !important;
+        gap: 14px !important;
+        border-radius: 4px !important;
+    }
+    .header-center .token-tracker .token-logo {
+        width: 38px !important;
+        height: 38px !important;
+    }
+    .header-center .token-tracker .token-name {
+        font-size: 1.4rem !important;
+        font-weight: 800 !important;
+    }
+    .header-center .token-tracker .token-price {
+        font-size: 1.4rem !important;
+        font-weight: 800 !important;
+    }
+    .header-center .token-tracker .token-change {
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+    }
+}
+
+/* ── CA pill — copy-able contract address ── */
+.token-ca {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    background: linear-gradient(145deg,
+        var(--bg-elevated, #1e2221) 0%,
+        var(--bg-input, #111827) 100%);
+    border: 1px solid var(--border-default, #454B4B);
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.15s ease;
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.05),
+        0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.token-ca:hover {
+    border-color: var(--accent-cyan, #20FF62);
+    color: var(--text-primary, #ffffff);
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.08),
+        0 0 14px rgba(32, 255, 98, 0.4);
+}
+.token-ca:active {
+    transform: scale(0.97);
+}
+.token-ca .ca-label {
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(32, 255, 98, 0.12);
+    color: var(--accent-cyan, #20FF62);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+}
+.token-ca .ca-value {
+    color: inherit;
+    letter-spacing: 0.04em;
+}
+.token-ca .ca-copy {
+    font-size: 0.85rem;
+    opacity: 0.75;
+    margin-left: 2px;
+}
+.token-ca.copied {
+    border-color: var(--accent-cyan, #20FF62);
+    color: var(--accent-cyan, #20FF62);
+    box-shadow: 0 0 18px rgba(32, 255, 98, 0.6);
+}
+.token-ca.copied .ca-copy { opacity: 1; }
+
+/* Mobile — hide the CA pill (keeps the header clean) */
+@media (max-width: 768px) {
+    .token-ca { display: none !important; }
+}
