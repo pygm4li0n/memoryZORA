@@ -518,13 +518,20 @@ select:focus-visible,
 
 /* ═════════════════════════════════════════════════════
    5) PINNED ANNOUNCEMENT — adaptive per-theme accent
-   Matches: .mod-message-box / .mod-badge /
-            #modMessageText / #modPostAnnouncementBtn
+   ★ High specificity + per-theme fallbacks
+   ★ Short text always shows fully, long text ellipsizes
 ═════════════════════════════════════════════════════ */
 
-/* ── 5a. Pinned bar — dark recessed strip, themed rail ── */
+/* ── 5a. Pinned bar ── */
 .mod-message-box {
     position: relative;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     padding: 10px 16px 10px 18px !important;
     background:
         var(--tex-brushed, none),
@@ -546,7 +553,6 @@ select:focus-visible,
         background 0.3s ease !important;
 }
 
-/* themed rail on the left */
 .mod-message-box::before {
     content: '';
     position: absolute;
@@ -560,9 +566,9 @@ select:focus-visible,
     pointer-events: none;
 }
 
-/* ── 5b. "PINNED" badge — solid theme color, dark text ── */
+/* ── 5b. "PINNED" badge — solid theme color ── */
 .mod-message-box .mod-badge {
-    flex-shrink: 0;
+    flex: 0 0 auto !important;
     padding: 4px 12px !important;
     border-radius: 3px !important;
     font-size: 0.62rem !important;
@@ -570,8 +576,10 @@ select:focus-visible,
     letter-spacing: 0.16em !important;
     text-transform: uppercase !important;
     line-height: 1.1 !important;
+    white-space: nowrap !important;
     color: #0A0704 !important;
-    background: var(--accent-cyan, #39FF14) !important;
+    background-color: var(--accent-cyan, #39FF14) !important;
+    background-image: none !important;
     border: 1px solid #0A0704 !important;
     text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
     box-shadow:
@@ -581,23 +589,21 @@ select:focus-visible,
         0 0 14px var(--accent-cyan, #39FF14) !important;
 }
 
-/* ── 5c. Pinned message text — theme color, ONE LINE ── */
+/* ── 5c. Pinned text — theme color, ONE LINE, short text fully visible ── */
 .mod-message-box .mod-message-text,
 .mod-message-box #modMessageText {
-    flex: 1;
-    min-width: 0;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: block !important;
     font-size: 0.82rem !important;
     font-weight: 700 !important;
     letter-spacing: 0.03em !important;
-
-    /* one line — no wrap, ellipsis if too long */
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    word-break: normal !important;
+    word-break: keep-all !important;
     overflow-wrap: normal !important;
-    display: block !important;
-
     color: var(--accent-cyan, #39FF14) !important;
     opacity: 1 !important;
     text-shadow:
@@ -615,15 +621,19 @@ select:focus-visible,
         0 1px 3px rgba(0,0,0,1) !important;
 }
 
-/* empty state — dimmer, italic, still one line */
 .mod-message-box #modMessageText:only-child {
     color: var(--accent-cyan, #39FF14) !important;
     opacity: 0.55 !important;
     font-style: italic;
 }
 
-/* ── 5d. POST ANNOUNCEMENT button — SOLID theme color ── */
-#modPostAnnouncementBtn {
+/* ── 5d. POST ANNOUNCEMENT button — SOLID theme color ──
+   ★ Repeated ID → beats any single-ID rule in later files
+   ★ background-image: none → wipes any gradient override
+*/
+#modPostAnnouncementBtn,
+#modPostAnnouncementBtn#modPostAnnouncementBtn,
+body #modPostAnnouncementBtn#modPostAnnouncementBtn {
     display: block;
     width: 100% !important;
     margin-top: 10px;
@@ -635,12 +645,10 @@ select:focus-visible,
     font-weight: 900 !important;
     letter-spacing: 0.10em !important;
     text-transform: uppercase !important;
-
-    /* dark text on bright theme color = max contrast */
     color: #0A0704 !important;
-    background: var(--accent-cyan, #39FF14) !important;
+    background-color: var(--accent-cyan, #39FF14) !important;
+    background-image: none !important;
     border: 2px solid #0A0704 !important;
-
     text-shadow: 0 1px 0 rgba(255,255,255,0.35) !important;
     box-shadow:
         inset 0 2px 0 rgba(255,255,255,0.45),
@@ -648,7 +656,7 @@ select:focus-visible,
         0 2px 8px rgba(0,0,0,0.60),
         0 0 18px var(--accent-cyan, #39FF14) !important;
     transition:
-        background 0.22s ease,
+        background-color 0.22s ease,
         color 0.22s ease,
         border-color 0.22s ease,
         box-shadow 0.22s ease,
@@ -657,7 +665,6 @@ select:focus-visible,
     overflow: hidden;
 }
 
-/* moving shine on hover */
 #modPostAnnouncementBtn::after {
     content: '';
     position: absolute;
@@ -671,9 +678,11 @@ select:focus-visible,
 }
 #modPostAnnouncementBtn:hover::after { left: 130%; }
 
-#modPostAnnouncementBtn:hover {
+#modPostAnnouncementBtn:hover,
+#modPostAnnouncementBtn#modPostAnnouncementBtn:hover {
     color: #000000 !important;
-    background: var(--accent-yellow, #FFFFFF) !important;
+    background-color: var(--accent-yellow, #FFFFFF) !important;
+    background-image: none !important;
     border-color: var(--accent-cyan, #39FF14) !important;
     box-shadow:
         inset 0 2px 0 rgba(255,255,255,0.85),
@@ -686,10 +695,41 @@ select:focus-visible,
     transform: translateY(0) scale(0.97);
 }
 
-/* ── 5e. Announcement textarea — themed focus ring ── */
+/* ── 5d-bis. EXPLICIT per-theme colors (bulletproof) ── */
+body.gold-theme #modPostAnnouncementBtn,
+html[data-theme="gold"] #modPostAnnouncementBtn {
+    background-color: #FFD54A !important;
+    box-shadow:
+        inset 0 2px 0 rgba(255,255,255,0.55),
+        inset 0 -2px 0 rgba(0,0,0,0.30),
+        0 2px 8px rgba(0,0,0,0.60),
+        0 0 18px rgba(255,213,74,0.70) !important;
+}
+body.og-theme #modPostAnnouncementBtn,
+html[data-theme="original"] #modPostAnnouncementBtn {
+    background-color: #01E1EA !important;
+}
+body.orange-theme #modPostAnnouncementBtn,
+html[data-theme="orange"] #modPostAnnouncementBtn {
+    background-color: #FF8C00 !important;
+}
+body.cherry-theme #modPostAnnouncementBtn,
+html[data-theme="cherry"] #modPostAnnouncementBtn {
+    background-color: #FF5C7C !important;
+}
+body.indu-theme #modPostAnnouncementBtn,
+html[data-theme="indu"] #modPostAnnouncementBtn {
+    background-color: #39FF14 !important;
+}
+body.science-theme #modPostAnnouncementBtn,
+html[data-theme="science"] #modPostAnnouncementBtn {
+    background-color: #00D4FF !important;
+}
+
+/* ── 5e. Announcement textarea ── */
 #modAnnouncementInput {
-    background:
-        linear-gradient(160deg, #1E1A0E 0%, #0F0C06 60%, #1E1A0E 100%) !important;
+    background-color: #14100A !important;
+    background-image: linear-gradient(160deg, #1E1A0E 0%, #0F0C06 60%, #1E1A0E 100%) !important;
     border: 2px solid var(--accent-cyan, #39FF14) !important;
     color: var(--accent-yellow, #F0E2B8) !important;
     font-family: var(--font-mono) !important;
@@ -705,7 +745,7 @@ select:focus-visible,
     outline: none !important;
 }
 
-/* ── 5f. "Official Announcement" label ── */
+/* ── 5f. Announcement label ── */
 #modAnnouncementSection label[for="modAnnouncementInput"] {
     color: var(--accent-cyan, #E8D48A) !important;
     text-shadow:
@@ -713,30 +753,29 @@ select:focus-visible,
         0 0 8px var(--accent-cyan, #39FF14) !important;
 }
 
-/* ── 5g. MOBILE — force ONE LINE, keep badge + text aligned ── */
+/* ── 5g. MOBILE — one line, short text fully visible ── */
 @media (max-width: 768px) {
     .mod-message-box {
-        padding: 8px 12px 8px 14px !important;
-        gap: 8px !important;
+        display: flex !important;
         flex-wrap: nowrap !important;
+        gap: 8px !important;
+        padding: 8px 12px 8px 14px !important;
         min-height: 36px;
     }
     .mod-message-box .mod-badge {
+        flex: 0 0 auto !important;
         font-size: 0.56rem !important;
         padding: 3px 8px !important;
         letter-spacing: 0.12em !important;
     }
     .mod-message-box .mod-message-text,
     .mod-message-box #modMessageText {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
         font-size: 0.72rem !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        max-width: 100%;
     }
-}
-
-/* ── 5h. Fallback for very old browsers ── */
-@supports not (color: color-mix(in srgb, red, blue)) {
-    /* nothing extra needed — this block now uses var() directly */
 }
