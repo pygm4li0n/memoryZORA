@@ -1768,10 +1768,11 @@ button.theme-select {
 }
 
 /* ═════════════════════════════════════════════════════
-   ⚑ PINNED ANNOUNCEMENT — badge 50% smaller,
-      message centered in the FULL container width.
-   Badge is absolutely positioned so it doesn't shift
-   the message off-center.
+   ⚑ PINNED ANNOUNCEMENT — badge slightly bigger,
+      message PERFECTLY centered in the FULL container width.
+   Badge is absolutely positioned so it doesn't shift the
+   message off-center. Symmetric padding reserves space for
+   the badge on both sides so centering stays exact.
 ═════════════════════════════════════════════════════ */
 
 /* ── Container — anchor for the absolutely-positioned badge ── */
@@ -1780,7 +1781,7 @@ html body .mod-message-box {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 16px !important;
+    gap: 0 !important; /* badge is absolute — no gap needed */
 
     width: 100% !important;
     max-width: 100% !important;
@@ -1803,16 +1804,16 @@ html body .mod-message-box {
     position: relative !important;
 }
 
-/* ── PINNED badge — 50% smaller, absolutely positioned left ── */
+/* ── PINNED badge — slightly bigger than before, absolutely positioned left ── */
 html body .mod-message-box .mod-badge {
     flex-shrink: 0 !important;
 
-    /* Was 1.1rem → now 0.55rem (50% smaller) */
-    font-size: 0.55rem !important;
+    /* Bumped up from 0.55rem → 0.75rem */
+    font-size: 0.75rem !important;
     font-weight: 900 !important;
     letter-spacing: 0.14em !important;
-    padding: 4px 10px !important;
-    border-radius: 3px !important;
+    padding: 5px 12px !important;
+    border-radius: 4px !important;
     line-height: 1 !important;
 
     background: linear-gradient(135deg,
@@ -1836,10 +1837,11 @@ html body .mod-message-box .mod-badge {
     z-index: 2 !important;
 }
 
-/* ── Message — centered in the full container width ── */
+/* ── Message — centered EXACTLY in the full container width ── */
 html body .mod-message-box .mod-message-text {
     flex: 1 1 auto !important;
     min-width: 0 !important;
+    width: 100% !important;
 
     text-align: center !important;
 
@@ -1859,10 +1861,11 @@ html body .mod-message-box .mod-message-text {
     overflow: visible !important;
     text-overflow: clip !important;
 
-    /* Reserve space on the left for the absolute badge
-       so short messages don't collide with it */
-    padding-left: 90px !important;
-    padding-right: 0 !important;
+    /* Symmetric padding reserves space for the absolute badge
+       on BOTH sides — keeps text perfectly centered while
+       preventing short messages from colliding with the badge. */
+    padding-left: 110px !important;
+    padding-right: 110px !important;
     box-sizing: border-box !important;
 }
 
@@ -1877,15 +1880,14 @@ html body .mod-message-box .mod-message-text a {
 /* ── Mobile — same layout, sizes scale ── */
 @media (max-width: 768px) {
     html body .mod-message-box {
-        gap: 12px !important;
         padding: 10px 14px !important;
         margin: 8px 0 !important;
         border-left-width: 3px !important;
     }
 
     html body .mod-message-box .mod-badge {
-        font-size: 0.5rem !important;
-        padding: 3px 8px !important;
+        font-size: 0.68rem !important;
+        padding: 4px 10px !important;
         letter-spacing: 0.12em !important;
         left: 14px !important;
     }
@@ -1894,6 +1896,9 @@ html body .mod-message-box .mod-message-text a {
         font-size: 0.92rem !important;
         font-weight: 700 !important;
         text-align: center !important;
-        padding-left: 78px !important;
+
+        /* Symmetric padding keeps the message dead-center on mobile too */
+        padding-left: 92px !important;
+        padding-right: 92px !important;
     }
 }
