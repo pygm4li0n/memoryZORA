@@ -860,6 +860,14 @@ body {
         0 0 16px rgba(201,168,78,0.55),
         0 1px 4px rgba(0,0,0,0.5);
 }
+.token-ca:hover .ca-value {
+    color: var(--gold-spec);
+    text-shadow:
+        0 0 8px rgba(255,248,220,0.9),
+        0 0 18px rgba(201,168,78,0.6),
+        0 1px 1px rgba(0,0,0,0.7);
+}
+
 .token-ca:active { transform: scale(0.97); }
 .token-ca .ca-label {
     padding: 2px 6px;
@@ -915,7 +923,11 @@ body {
         0 1px 4px rgba(0,0,0,0.5);
 }
 .token-ca.copied .ca-value {
-    text-shadow: 0 0 10px rgba(201,168,78,0.8);
+    color: var(--gold-spec);
+    text-shadow:
+        0 0 10px rgba(255,248,220,1),
+        0 0 22px rgba(201,168,78,0.75),
+        0 1px 1px rgba(0,0,0,0.7);
 }
 .token-ca.copied .ca-copy {
     background: var(--grad-gold-soft);
