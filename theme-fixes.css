@@ -1596,25 +1596,25 @@ button.theme-select {
 
     /* Tracker — 2× bigger */
     .header-center .token-tracker {
-        font-size: 1.5rem !important;
-        padding: 10px 22px !important;
-        gap: 14px !important;
+        font-size: 1.2rem !important;
+        padding: 8px 16px !important;
+        gap: 10px !important;
         border-radius: 4px !important;
     }
     .header-center .token-tracker .token-logo {
-        width: 38px !important;
-        height: 38px !important;
+        width: 30px !important;
+        height: 30px !important;
     }
     .header-center .token-tracker .token-name {
-        font-size: 1.4rem !important;
+        font-size: 1.15rem !important;
         font-weight: 800 !important;
     }
     .header-center .token-tracker .token-price {
-        font-size: 1.4rem !important;
+        font-size: 1.15rem !important;
         font-weight: 800 !important;
     }
     .header-center .token-tracker .token-change {
-        font-size: 1.25rem !important;
+        font-size: 1rem !important;
         font-weight: 800 !important;
     }
 }
