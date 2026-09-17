@@ -2216,3 +2216,12 @@ button.send-btn-main:disabled::after { display: none; }
     border-color: var(--accent-cyan);
     box-shadow: var(--glow-cyan);
 }
+
+/* ═════════════════════════════════════════════════════
+   QUOTED TEXT — same color as quoted username
+═════════════════════════════════════════════════════ */
+.reply-ref-block .r-text,
+.reply-indicator-bar .r-text {
+    color: #E8D48A !important;
+    opacity: 1 !important;
+}
