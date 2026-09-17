@@ -32,7 +32,7 @@
     /* ⚑ Overlay blend — responds clearly to opacity changes.
        (soft-light was crushing small opacity shifts on dark
        green backgrounds so the texture looked frozen.) */
-    opacity: 0.08 !important;
+    opacity: 0.04 !important;
     mix-blend-mode: overlay !important;
 
     /* Radial fade so the pattern melts toward the edges */
