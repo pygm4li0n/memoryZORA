@@ -860,10 +860,3 @@ button.send-btn-main:disabled { background: var(--bg-secondary); box-shadow: non
 @media (min-width: 769px) {
     .sidebar-theme-btn { display: none; }
 }
-
-#rankingsOverlay .rank-level.rank-streak {
-  background: rgba(249, 115, 22, 0.12);
-  border-color: rgba(249, 115, 22, 0.55);
-  color: var(--accent-orange, #f97316);
-  text-shadow: 0 0 6px rgba(249, 115, 22, 0.6);
-}
