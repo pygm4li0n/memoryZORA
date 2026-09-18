@@ -310,49 +310,27 @@
     // ═══════════════════════════════════════════════════════
     //  ACTIVITY BOARD
     // ═══════════════════════════════════════════════════════
-
-      async function loadActivity() {
+  async function loadActivity() {
     const el = document.getElementById('activityLeaderboard');
     if (!el) return;
     try {
       const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 50 });
       if (error) { el.innerHTML = '<div class="rankings-empty">Error loading</div>'; return; }
       if (!data || !data.length) { el.innerHTML = '<div class="rankings-empty">No activity yet</div>'; return; }
-
-      // Normalize — find streak under any of the common column names
-      const rows = data.map(row => {
-        const streak = Number(
-          row.streak ??
-          row.current_streak ??
-          row.login_streak ??
-          row.day_streak ??
-          row.login_streak_count ??
-          0
-        ) || 0;
+      el.innerHTML = data.map(row => {
+        const level = Number(row.level || levelFromXp(Number(row.xp || 0)));
         const xp = Number(row.xp || 0);
-        return { ...row, _streak: streak, _xp: xp };
-      });
-
-      // Primary: streak DESC. Tiebreaker: XP DESC.
-      rows.sort((a, b) => (b._streak - a._streak) || (b._xp - a._xp));
-
-      el.innerHTML = rows.slice(0, 30).map(row => {
-        const level = Number(row.level || levelFromXp(row._xp));
         const today = Number(row.xp_today || 0);
-        const streakChip = row._streak > 0
-          ? `<span class="rank-level rank-streak" title="Daily login streak">🔥 ${row._streak}</span>`
-          : '';
         return `<div class="rank-row">
           ${avatarHTML(row)}
           <div class="rank-info">
             <div class="rank-name">${esc(row.username || 'anon')}</div>
             <div class="rank-meta">
-              ${streakChip}
               <span class="rank-level">LVL ${level}</span>
               ${today > 0 ? `<span class="rank-detail">+${today} today</span>` : ''}
             </div>
           </div>
-          <div class="rank-stats"><span class="rank-score">${row._xp.toLocaleString()} XP</span></div>
+          <div class="rank-stats"><span class="rank-score">${xp.toLocaleString()} XP</span></div>
         </div>`;
       }).join('');
       fixBrokenAvatars(el);
