@@ -45,19 +45,30 @@
     } catch (e) { console.warn('XP load error:', e); }
   }
 
-  // ── Rankings overlay controls ──
-  const overlay  = document.getElementById('rankingsOverlay');
-  const openBtn  = document.getElementById('rankingsBtn');
-  const closeBtn = document.getElementById('rankingsCloseBtn');
+  // ── Rankings overlay controls (lazy lookup + event delegation) ──
+  function openRankings() {
+    const overlay = document.getElementById('rankingsOverlay');
+    if (!overlay) { console.warn('[rankings] #rankingsOverlay missing'); return; }
+    overlay.classList.remove('hidden');
+    refreshBoth();
+  }
+  function closeRankings() {
+    const overlay = document.getElementById('rankingsOverlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
 
-  function openRankings()  { if (!overlay) return; overlay.classList.remove('hidden'); refreshBoth(); }
-  function closeRankings() { if (!overlay) return; overlay.classList.add('hidden'); }
+  // Delegate from document — survives DOM moves by script.js buildRightSidebar()
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#rankingsBtn'))     { e.preventDefault(); openRankings();  return; }
+    if (e.target.closest('#rankingsCloseBtn')){ e.preventDefault(); closeRankings(); return; }
+    const overlay = document.getElementById('rankingsOverlay');
+    if (overlay && e.target === overlay) closeRankings();
+  });
 
-  openBtn?.addEventListener('click', openRankings);
-  closeBtn?.addEventListener('click', closeRankings);
-  overlay?.addEventListener('click', e => { if (e.target === overlay) closeRankings(); });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) closeRankings();
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const overlay = document.getElementById('rankingsOverlay');
+    if (overlay && !overlay.classList.contains('hidden')) closeRankings();
   });
 
   // ── Avatar helpers ──
@@ -138,7 +149,7 @@
         return;
       }
 
-      // Sort by XP descending (client-side, so we don't depend on RPC order)
+      // Sort by XP descending — independent of RPC order
       const rows = data.slice().sort((a, b) => Number(b.xp || 0) - Number(a.xp || 0));
 
       el.innerHTML = rows.map(row => {
