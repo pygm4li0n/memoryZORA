@@ -310,16 +310,23 @@
     // ═══════════════════════════════════════════════════════
     //  ACTIVITY BOARD
     // ═══════════════════════════════════════════════════════
-  async function loadActivity() {
+    async function loadActivity() {
     const el = document.getElementById('activityLeaderboard');
     if (!el) return;
     try {
       const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 50 });
-      if (error) { el.innerHTML = '<div class="rankings-empty">Error loading</div>'; return; }
-      if (!data || !data.length) { el.innerHTML = '<div class="rankings-empty">No activity yet</div>'; return; }
+      if (error) {
+        console.error('[rankings] RPC error:', error);
+        el.innerHTML = '<div class="rankings-empty">Error loading</div>';
+        return;
+      }
+      if (!data || !data.length) {
+        el.innerHTML = '<div class="rankings-empty">No activity yet</div>';
+        return;
+      }
       el.innerHTML = data.map(row => {
-        const level = Number(row.level || levelFromXp(Number(row.xp || 0)));
         const xp = Number(row.xp || 0);
+        const level = Number(row.level) || levelFromXp(xp);
         const today = Number(row.xp_today || 0);
         return `<div class="rank-row">
           ${avatarHTML(row)}
@@ -334,7 +341,10 @@
         </div>`;
       }).join('');
       fixBrokenAvatars(el);
-    } catch (e) { el.innerHTML = '<div class="rankings-empty">Error loading</div>'; }
+    } catch (e) {
+      console.error('[rankings] loadActivity threw:', e);
+      el.innerHTML = '<div class="rankings-empty">Error loading</div>';
+    }
   }
 
     function refreshBoth() { loadHoldersBoard(); loadActivityBoard(); }
