@@ -1,322 +1,135 @@
-// xp-system.js – XP badge + dual rankings overlay (FINAL v6)
+// xp-system.js — XP badge + dual leaderboards. Uses MSN.wallet + MSN.badge.
 (function () {
-    const SUPABASE_URL = 'https://uxrpjfsouwxnlcbhjilz.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_cLeBoHrdvg1b7WlnyJ-oVQ_6skjHc_H';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  'use strict';
+  const sb = window.MSN.supabase;
+  let lastWallet = null;
 
-    const TIER_EMOJI = { Whale: '🐋', Dolphin: '🐬', Crab: '🦀', Shrimp: '🦐' };
-    let lastWallet = null;
+  function esc(t) {
+    return String(t).replace(/[&<>"']/g, m =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[m]));
+  }
+  function xpForLevel(L) { return L <= 1 ? 0 : 25 * (L - 1) * L; }
+  function levelFromXp(xp) {
+    if (!xp || xp < 50) return 1;
+    return Math.max(1, Math.floor((1 + Math.sqrt(1 + (xp * 4 / 25))) / 2));
+  }
 
-    // ═══════════════════════════════════════════════════════
-    //  WALLET DETECTION — desktop + mobile Phantom
-    // ═══════════════════════════════════════════════════════
-
-    const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-
-    const KNOWN_WALLET_KEYS = [
-        'msn_cached_wallet',
-        'msn_wallet', 'msn_wallet_address', 'wallet_address', 'walletAddress',
-        'phantom_wallet', 'phantomWallet', 'sol_wallet', 'solana_wallet',
-        'user_wallet', 'connected_wallet', 'wallet', 'publicKey', 'public_key',
-        'solana_address', 'address', 'msn_wallet_public', 'phantom_public_key'
-    ];
-
-    function looksLikeWallet(v) {
-        if (!v) return false;
-        return BASE58_RE.test(String(v).trim());
+  function updateLevelBadge(level, xp, inLevel, needed) {
+    const el = document.getElementById('sidebarBigLevel');
+    if (!el) return;
+    if (!level || level < 1) { el.textContent = ''; el.classList.add('hidden'); return; }
+    if (inLevel == null || needed == null) {
+      const a = xpForLevel(level), b = xpForLevel(level + 1);
+      inLevel = (xp || 0) - a; needed = b - a;
     }
+    el.textContent = `⭐ Lv.${level}  (${inLevel}/${needed})`;
+    el.classList.remove('hidden');
+  }
 
-    function findWalletInObject(obj, depth) {
-        depth = depth || 0;
-        if (depth > 4 || !obj || typeof obj !== 'object') return null;
-        for (const k of Object.keys(obj)) {
-            const v = obj[k];
-            if (typeof v === 'string' && BASE58_RE.test(v.trim())) return v.trim();
-            if (typeof v === 'object' && v) {
-                const nested = findWalletInObject(v, depth + 1);
-                if (nested) return nested;
-            }
-        }
-        return null;
+  async function loadXp(wallet) {
+    if (!wallet) { updateLevelBadge(null, 0); return; }
+    try {
+      const { data, error } = await sb.rpc('get_xp_by_wallet', { p_wallet: wallet });
+      if (!error && data && data.length) {
+        const row = Array.isArray(data) ? data[0] : data;
+        updateLevelBadge(row.level || levelFromXp(row.xp || 0), row.xp, row.in_level, row.needed);
+        return;
+      }
+    } catch {}
+    try {
+      const { data, error } = await sb.from('profiles').select('xp')
+        .eq('wallet_address', wallet).limit(1).maybeSingle();
+      if (error || !data) { updateLevelBadge(null, 0); return; }
+      const xp = Number(data.xp || 0);
+      updateLevelBadge(levelFromXp(xp), xp);
+    } catch (e) { console.warn('XP load error:', e); }
+  }
+
+  // ── Rankings overlay controls ──
+  const overlay  = document.getElementById('rankingsOverlay');
+  const openBtn  = document.getElementById('rankingsBtn');
+  const closeBtn = document.getElementById('rankingsCloseBtn');
+
+  function openRankings()  { if (!overlay) return; overlay.classList.remove('hidden'); refreshBoth(); }
+  function closeRankings() { if (!overlay) return; overlay.classList.add('hidden'); }
+
+  openBtn?.addEventListener('click', openRankings);
+  closeBtn?.addEventListener('click', closeRankings);
+  overlay?.addEventListener('click', e => { if (e.target === overlay) closeRankings(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) closeRankings();
+  });
+
+  // ── Avatar helpers ──
+  function cacheBust(url, row) {
+    if (!url) return url;
+    const tag = row.xp ?? row.token_balance ?? row.updated_at ?? Date.now();
+    return url + (url.includes('?') ? '&' : '?') + 'v=' + encodeURIComponent(String(tag));
+  }
+  function avatarHTML(row) {
+    let url = row.avatar_url || row.avatar || row.profile_pic || row.profile_pic_url || row.pfp || null;
+    if (url && !/^https?:\/\//i.test(url) && url.includes('/')) {
+      url = 'https://uxrpjfsouwxnlcbhjilz.supabase.co/storage/v1/object/public/' +
+            url.replace(/^\/+/, '');
     }
-
-    // ⚑ Read directly from window.solana / window.phantom (mobile priority)
-    function findWalletFromProvider() {
-        try {
-            const provider = window.phantom?.solana || window.solana;
-            if (!provider) return null;
-
-            // Method 1: connected + publicKey object
-            if (provider.isConnected && provider.publicKey) {
-                const pk = provider.publicKey;
-                const s = typeof pk === 'string' ? pk : pk.toBase58?.() || pk.toString?.();
-                if (looksLikeWallet(s)) return s.trim();
-            }
-
-            // Method 2: provider.publicKey exists but not marked connected
-            if (provider.publicKey) {
-                const pk = provider.publicKey;
-                const s = typeof pk === 'string' ? pk : pk.toBase58?.() || pk.toString?.();
-                if (looksLikeWallet(s)) return s.trim();
-            }
-
-            // Method 3: deep scan provider object for a base58 string
-            const found = findWalletInObject(provider, 0);
-            if (found) return found;
-        } catch (e) {}
-        return null;
-    }
-
-    function findWallet() {
-        // 0) Provider first — this is what mobile needs
-        const fromProvider = findWalletFromProvider();
-        if (fromProvider) return fromProvider;
-
-        // 1) Known storage keys
-        try {
-            for (const k of KNOWN_WALLET_KEYS) {
-                const v = localStorage.getItem(k);
-                if (looksLikeWallet(v)) return String(v).trim();
-            }
-        } catch (e) {}
-
-        // 2) Scan every localStorage value
-        try {
-            for (let i = 0; i < localStorage.length; i++) {
-                const val = localStorage.getItem(localStorage.key(i));
-                if (looksLikeWallet(val)) return String(val).trim();
-            }
-        } catch (e) {}
-
-        // 3) SessionStorage
-        try {
-            for (let i = 0; i < sessionStorage.length; i++) {
-                const val = sessionStorage.getItem(sessionStorage.key(i));
-                if (looksLikeWallet(val)) return String(val).trim();
-            }
-        } catch (e) {}
-
-        // 4) Deep JSON scan on localStorage
-        try {
-            for (let i = 0; i < localStorage.length; i++) {
-                const raw = localStorage.getItem(localStorage.key(i));
-                if (!raw) continue;
-                const first = raw[0];
-                if (first !== '{' && first !== '[') continue;
-                try {
-                    const found = findWalletInObject(JSON.parse(raw));
-                    if (found) return found;
-                } catch (e) {}
-            }
-        } catch (e) {}
-
-        return null;
-    }
-
-    let cachedWallet = null;
-    let cachedWalletTime = 0;
-    function getWallet() {
-        const now = Date.now();
-        if (cachedWallet && (now - cachedWalletTime) < 500) return cachedWallet;
-        const w = findWallet();
-        cachedWallet = w;
-        cachedWalletTime = now;
-        return w;
-    }
-    function refreshWallet() {
-        cachedWallet = null;
-        cachedWalletTime = 0;
-        return getWallet();
-    }
-    window.msnRefreshWallet = refreshWallet;
-
-    // ═══════════════════════════════════════════════════════
-    //  HELPERS
-    // ═══════════════════════════════════════════════════════
-
-    function esc(t) {
-        return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    }
-
-    function xpForLevel(L) { return L <= 1 ? 0 : 25 * (L - 1) * L; }
-
-    function levelFromXp(xp) {
-        if (!xp || xp < 50) return 1;
-        return Math.max(1, Math.floor((1 + Math.sqrt(1 + (xp * 4.0 / 25))) / 2));
-    }
-
-    // ═══════════════════════════════════════════════════════
-    //  SIDEBAR LEVEL BADGE
-    // ═══════════════════════════════════════════════════════
-
-    function updateLevelBadge(level, xp, inLevel, needed) {
-        const el = document.getElementById('sidebarBigLevel');
-        if (!el) return;
-        if (!level || level < 1) {
-            el.textContent = '';
-            el.classList.add('hidden');
-            return;
-        }
-        if (inLevel == null || needed == null) {
-            const thisLvl = xpForLevel(level);
-            const nextLvl = xpForLevel(level + 1);
-            inLevel = (xp || 0) - thisLvl;
-            needed  = nextLvl - thisLvl;
-        }
-        el.textContent = `⭐ Lv.${level}  (${inLevel}/${needed})`;
-        el.classList.remove('hidden');
-    }
-
-    async function loadXpForWallet(wallet) {
-        if (!wallet) { updateLevelBadge(null, 0); return; }
-
-        try {
-            const { data, error } = await sb.rpc('get_xp_by_wallet', { p_wallet: wallet });
-            if (!error && data && data.length) {
-                const row = Array.isArray(data) ? data[0] : data;
-                const lvl = row.level || levelFromXp(row.xp || 0);
-                updateLevelBadge(lvl, row.xp, row.in_level, row.needed);
-                return;
-            }
-        } catch (e) {}
-
-        try {
-            const { data, error } = await sb
-                .from('profiles')
-                .select('xp')
-                .eq('wallet_address', wallet)
-                .limit(1)
-                .maybeSingle();
-            if (error || !data) { updateLevelBadge(null, 0); return; }
-            const xp = Number(data.xp || 0);
-            updateLevelBadge(levelFromXp(xp), xp);
-        } catch (err) { console.warn('XP load error:', err); }
-    }
-
-    // ═══════════════════════════════════════════════════════
-    //  OVERLAY CONTROLS
-    // ═══════════════════════════════════════════════════════
-
-    const rankingsOverlay  = document.getElementById('rankingsOverlay');
-    const rankingsBtn      = document.getElementById('rankingsBtn');
-    const rankingsCloseBtn = document.getElementById('rankingsCloseBtn');
-
-    function openRankings() {
-        if (!rankingsOverlay) return;
-        rankingsOverlay.classList.remove('hidden');
-        refreshBoth();
-    }
-    function closeRankings() {
-        if (!rankingsOverlay) return;
-        rankingsOverlay.classList.add('hidden');
-    }
-
-    if (rankingsBtn)      rankingsBtn.addEventListener('click', openRankings);
-    if (rankingsCloseBtn) rankingsCloseBtn.addEventListener('click', closeRankings);
-    if (rankingsOverlay) {
-        rankingsOverlay.addEventListener('click', (e) => {
-            if (e.target === rankingsOverlay) closeRankings();
-        });
-    }
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && rankingsOverlay && !rankingsOverlay.classList.contains('hidden')) {
-            closeRankings();
-        }
+    if (url) url = cacheBust(url, row);
+    const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
+    if (url) return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" data-initial="${esc(initial)}">`;
+    return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
+  }
+  function fixBrokenAvatars(container) {
+    container.querySelectorAll('img.rank-avatar').forEach(img => {
+      img.addEventListener('error', () => {
+        const d = document.createElement('div');
+        d.className = 'rank-avatar rank-avatar-fallback';
+        d.textContent = img.dataset.initial || '?';
+        img.replaceWith(d);
+      }, { once: true });
     });
+  }
 
-    // ═══════════════════════════════════════════════════════
-    //  AVATAR HELPERS — cache-busted
-    // ═══════════════════════════════════════════════════════
-
-    function cacheBust(url, row) {
-        if (!url) return url;
-        const tag = row.xp ?? row.token_balance ?? row.updated_at ?? Date.now();
-        const sep = url.indexOf('?') === -1 ? '?' : '&';
-        return url + sep + 'v=' + encodeURIComponent(String(tag));
+  // ── TOP HOLDERS ──
+  async function loadHolders() {
+    const el = document.getElementById('holdersLeaderboard');
+    if (!el) return;
+    try {
+      const { data, error } = await sb.rpc('get_holders_leaderboard', { p_limit: 10 });
+      if (error) {
+        console.error('[rankings] holders RPC error:', error);
+        el.innerHTML = '<div class="rankings-empty">Error loading</div>';
+        return;
+      }
+      if (!data || !data.length) {
+        el.innerHTML = '<div class="rankings-empty">No holders yet</div>';
+        return;
+      }
+      el.innerHTML = data.map(row => {
+        const tier = window.MSN.badge.fromName(row.holder_tier);
+        const bal  = Number(row.token_balance || 0).toLocaleString();
+        return `<div class="rank-row">
+          ${avatarHTML(row)}
+          <div class="rank-info">
+            <div class="rank-name">${esc(row.username || 'anon')}</div>
+            <div class="rank-meta"><span class="rank-level">${tier.emoji} ${esc(tier.name.toUpperCase())}</span></div>
+          </div>
+          <div class="rank-stats"><span class="rank-score">${bal}</span></div>
+        </div>`;
+      }).join('');
+      fixBrokenAvatars(el);
+    } catch (e) {
+      console.error('[rankings] loadHolders threw:', e);
+      el.innerHTML = '<div class="rankings-empty">Error loading</div>';
     }
+  }
 
-    function avatarHTML(row) {
-        let url = row.avatar_url || row.avatar || row.profile_pic ||
-                  row.profile_pic_url || row.pfp || null;
-
-        if (url && !/^https?:\/\//i.test(url) && url.indexOf('/') !== -1) {
-            url = 'https://uxrpjfsouwxnlcbhjilz.supabase.co/storage/v1/object/public/' +
-                  url.replace(/^\/+/, '');
-        }
-
-        if (url) url = cacheBust(url, row);
-
-        const initial = String(row.username || '?').trim().charAt(0).toUpperCase() || '?';
-        if (url) {
-            return `<img class="rank-avatar" src="${esc(url)}" alt="" loading="lazy" data-initial="${esc(initial)}">`;
-        }
-        return `<div class="rank-avatar rank-avatar-fallback">${esc(initial)}</div>`;
-    }
-
-    function fixBrokenAvatars(container) {
-        container.querySelectorAll('img.rank-avatar').forEach(img => {
-            img.addEventListener('error', () => {
-                const div = document.createElement('div');
-                div.className = 'rank-avatar rank-avatar-fallback';
-                div.textContent = img.dataset.initial || '?';
-                img.replaceWith(div);
-            }, { once: true });
-        });
-    }
-
-    // ═══════════════════════════════════════════════════════
-    //  HOLDERS BOARD
-    // ═══════════════════════════════════════════════════════
-
-    async function loadHoldersBoard() {
-        const el = document.getElementById('holdersLeaderboard');
-        if (!el) return;
-        try {
-            const { data, error } = await sb.rpc('get_holders_leaderboard', { p_limit: 10 });
-            if (error) {
-                console.warn('holders rpc:', error);
-                el.innerHTML = '<div class="rankings-empty">Error loading</div>';
-                return;
-            }
-            if (!data || !data.length) {
-                el.innerHTML = '<div class="rankings-empty">No holders yet</div>';
-                return;
-            }
-
-            el.innerHTML = data.map(row => {
-                const tier  = String(row.holder_tier || 'Shrimp').toUpperCase();
-                const emoji = TIER_EMOJI[tier] || '🦐';
-                const bal   = Number(row.token_balance || 0).toLocaleString();
-                return `<div class="rank-row">
-                    ${avatarHTML(row)}
-                    <div class="rank-info">
-                        <div class="rank-name">${esc(row.username || 'anon')}</div>
-                        <div class="rank-meta">
-                            <span class="rank-level">${emoji} ${esc(tier)}</span>
-                        </div>
-                    </div>
-                    <div class="rank-stats">
-                        <span class="rank-score">${bal}</span>
-                    </div>
-                </div>`;
-            }).join('');
-            fixBrokenAvatars(el);
-        } catch (err) {
-            console.warn('Holders board failed:', err);
-            el.innerHTML = '<div class="rankings-empty">Error loading</div>';
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════
-    //  ACTIVITY BOARD
-    // ═══════════════════════════════════════════════════════
-     async function loadActivity() {
+  // ── TOP ACTIVITY (by XP) ──
+  async function loadActivity() {
     const el = document.getElementById('activityLeaderboard');
     if (!el) return;
     try {
       const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 50 });
       if (error) {
-        console.error('[rankings] RPC error:', error);
+        console.error('[rankings] activity RPC error:', error);
         el.innerHTML = '<div class="rankings-empty">Error loading</div>';
         return;
       }
@@ -324,7 +137,11 @@
         el.innerHTML = '<div class="rankings-empty">No activity yet</div>';
         return;
       }
-      el.innerHTML = data.map(row => {
+
+      // Sort by XP descending (client-side, so we don't depend on RPC order)
+      const rows = data.slice().sort((a, b) => Number(b.xp || 0) - Number(a.xp || 0));
+
+      el.innerHTML = rows.map(row => {
         const xp    = Number(row.xp || 0);
         const level = Number(row.level) || levelFromXp(xp);
         const today = Number(row.xp_today || 0);
@@ -347,192 +164,40 @@
     }
   }
 
-    function refreshBoth() { loadHolders(); loadActivity(); }
+  function refreshBoth() {
+    loadHolders();
+    loadActivity();
+  }
 
-    // ═══════════════════════════════════════════════════════
-    //  ADD XP — wallet-keyed, works on mobile + desktop
-    // ═══════════════════════════════════════════════════════
+  // ── addXP (called by script.js after each insert) ──
+  window.addXP = async function (messageId) {
+    const wallet = window.MSN.wallet.get();
+    if (!wallet || !messageId) return null;
+    try {
+      const { data, error } = await sb.rpc('add_xp', { p_wallet: wallet, p_message_id: messageId });
+      if (error || !data || data.error) return null;
+      if (data.granted > 0) {
+        const lvl = data.level || levelFromXp(data.xp || 0);
+        updateLevelBadge(lvl, data.xp, data.in_level, data.needed);
+      }
+      if (data.leveled_up) window.MSN.toast.level(data.level);
+      return data;
+    } catch (e) { console.warn('add_xp error:', e); return null; }
+  };
 
-    window.addXP = async function (messageId) {
-        // Force a fresh wallet read — mobile may have just connected
-        refreshWallet();
-        let wallet = getWallet();
-
-        // Retry once after a tiny delay — catches mobile Phantom
-        // that writes to storage a moment after the connect callback
-        if (!wallet) {
-            await new Promise(r => setTimeout(r, 400));
-            refreshWallet();
-            wallet = getWallet();
-        }
-
-        if (!wallet) {
-            console.log('[xp] addXP: no wallet detected, skipping');
-            return null;
-        }
-        if (!messageId) return null;
-
-        try {
-            const { data, error } = await sb.rpc('add_xp', {
-                p_wallet:     wallet,
-                p_message_id: messageId
-            });
-            if (error) { console.warn('add_xp failed:', error); return null; }
-            if (!data || data.error) return null;
-
-            if (data.granted > 0) {
-                const lvl = data.level || levelFromXp(data.xp || 0);
-                updateLevelBadge(lvl, data.xp, data.in_level, data.needed);
-            }
-            if (data.leveled_up) showLevelToast(data.level);
-            return data;
-        } catch (err) {
-            console.warn('add_xp error:', err);
-            return null;
-        }
-    };
-
-    function showLevelToast(level) {
-        const toast = document.getElementById('streakToast') ||
-                      document.getElementById('errorToast');
-        if (!toast) return;
-        toast.textContent = `🎉 Level ${level} reached!`;
-        toast.classList.add('visible');
-        setTimeout(() => toast.classList.remove('visible'), 3500);
+  // ── Wallet events ──
+  window.MSN.events.on('msn:wallet-changed', ({ address }) => {
+    if (address && address !== lastWallet) {
+      lastWallet = address;
+      loadXp(address);
+    } else if (!address && lastWallet) {
+      lastWallet = null;
+      updateLevelBadge(null, 0);
     }
+  });
 
-    // ═══════════════════════════════════════════════════════
-    //  WALLET EVENT HOOKS
-    // ═══════════════════════════════════════════════════════
-
-    function tryHookPhantom() {
-        const provider = window.phantom?.solana || window.solana;
-        if (!provider || provider.__msnHooked) return false;
-        try {
-            provider.__msnHooked = true;
-
-            // Mobile Phantom emits more event types
-            ['connect', 'accountChanged', 'disconnect'].forEach(evt => {
-                provider.on?.(evt, () => {
-                    console.log('[xp] Phantom event:', evt);
-                    refreshWallet();
-                    const w = getWallet();
-                    if (w && evt !== 'disconnect') {
-                        lastWallet = w;
-                        loadXpForWallet(w);
-                    } else if (evt === 'disconnect') {
-                        lastWallet = null;
-                        updateLevelBadge(null, 0);
-                    }
-                });
-            });
-
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    tryHookPhantom();
-    let phantomTries = 0;
-    const phantomTimer = setInterval(() => {
-        phantomTries++;
-        if (tryHookPhantom() || phantomTries > 60) clearInterval(phantomTimer);
-    }, 500);
-
-    window.addEventListener('storage', (e) => {
-        if (!e.key || /wallet|phantom|sol|pubkey|address/i.test(e.key)) {
-            refreshWallet();
-            const w = getWallet();
-            if (w && w !== lastWallet) {
-                lastWallet = w;
-                loadXpForWallet(w);
-            }
-        }
-    });
-
-    window.addEventListener('msn:wallet-connected', () => {
-        refreshWallet();
-        const w = getWallet();
-        if (w) { lastWallet = w; loadXpForWallet(w); }
-    });
-
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            refreshWallet();
-            const w = getWallet();
-            if (w && w !== lastWallet) {
-                lastWallet = w;
-                loadXpForWallet(w);
-            }
-        }
-    });
-
-    const firstTouch = () => {
-        refreshWallet();
-        const w = getWallet();
-        if (w && w !== lastWallet) {
-            lastWallet = w;
-            loadXpForWallet(w);
-        }
-        ['click', 'keydown', 'touchstart'].forEach(ev =>
-            document.removeEventListener(ev, firstTouch, true));
-    };
-    ['click', 'keydown', 'touchstart'].forEach(ev =>
-        document.addEventListener(ev, firstTouch, true));
-
-    // ═══════════════════════════════════════════════════════
-    //  WALLET POLL
-    // ═══════════════════════════════════════════════════════
-
-    let startupTicks = 0;
-    const startupPoll = setInterval(() => {
-        startupTicks++;
-        const w = findWallet();
-        if (w && w !== lastWallet) {
-            lastWallet = w;
-            cachedWallet = w;
-            cachedWalletTime = Date.now();
-            loadXpForWallet(w);
-        }
-        if (startupTicks >= 60) clearInterval(startupPoll);
-    }, 500);
-
-    setInterval(() => {
-        const current = getWallet();
-        if (current && current !== lastWallet) {
-            lastWallet = current;
-            loadXpForWallet(current);
-        } else if (!current && lastWallet) {
-            lastWallet = null;
-            updateLevelBadge(null, 0);
-        }
-    }, 1500);
-
-    setTimeout(() => {
-        const w = getWallet();
-        if (w) { lastWallet = w; loadXpForWallet(w); }
-    }, 300);
-
-    // ═══════════════════════════════════════════════════════
-    //  DEBUG
-    // ═══════════════════════════════════════════════════════
-
-    window.msnXpDebug = () => ({
-        wallet: getWallet(),
-        provider: (() => {
-            try {
-                const p = window.phantom?.solana || window.solana;
-                if (!p) return 'none';
-                return {
-                    isConnected: p.isConnected,
-                    hasPublicKey: !!p.publicKey,
-                    publicKey: p.publicKey?.toString?.() || null
-                };
-            } catch (e) { return 'error'; }
-        })(),
-        lastWallet,
-        cacheAge: cachedWallet ? (Date.now() - cachedWalletTime) + 'ms' : 'none'
-    });
-    console.log('[xp-system] loaded — run msnXpDebug() to see detected wallet');
+  setTimeout(() => {
+    const w = window.MSN.wallet.get();
+    if (w) { lastWallet = w; loadXp(w); }
+  }, 400);
 })();
