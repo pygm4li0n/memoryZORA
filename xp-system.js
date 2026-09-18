@@ -45,10 +45,11 @@
     } catch (e) { console.warn('XP load error:', e); }
   }
 
-  // ── Rankings overlay controls (lazy lookup + event delegation) ──
+    // ── Rankings overlay controls ──
   function openRankings() {
     const overlay = document.getElementById('rankingsOverlay');
     if (!overlay) { console.warn('[rankings] #rankingsOverlay missing'); return; }
+    console.log('[rankings] opening');
     overlay.classList.remove('hidden');
     refreshBoth();
   }
@@ -57,13 +58,24 @@
     if (overlay) overlay.classList.add('hidden');
   }
 
-  // Delegate from document — survives DOM moves by script.js buildRightSidebar()
+  // Capture-phase delegation — runs BEFORE any other click handler can stopPropagation
   document.addEventListener('click', (e) => {
-    if (e.target.closest('#rankingsBtn'))     { e.preventDefault(); openRankings();  return; }
-    if (e.target.closest('#rankingsCloseBtn')){ e.preventDefault(); closeRankings(); return; }
+    const t = e.target;
+    if (t.closest && t.closest('#rankingsBtn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      openRankings();
+      return;
+    }
+    if (t.closest && t.closest('#rankingsCloseBtn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeRankings();
+      return;
+    }
     const overlay = document.getElementById('rankingsOverlay');
-    if (overlay && e.target === overlay) closeRankings();
-  });
+    if (overlay && t === overlay) closeRankings();
+  }, true);  // ← capture phase — this is the key change
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
