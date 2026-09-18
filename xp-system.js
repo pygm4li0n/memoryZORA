@@ -310,7 +310,7 @@
     // ═══════════════════════════════════════════════════════
     //  ACTIVITY BOARD
     // ═══════════════════════════════════════════════════════
-    async function loadActivity() {
+     async function loadActivity() {
     const el = document.getElementById('activityLeaderboard');
     if (!el) return;
     try {
@@ -325,7 +325,7 @@
         return;
       }
       el.innerHTML = data.map(row => {
-        const xp = Number(row.xp || 0);
+        const xp    = Number(row.xp || 0);
         const level = Number(row.level) || levelFromXp(xp);
         const today = Number(row.xp_today || 0);
         return `<div class="rank-row">
