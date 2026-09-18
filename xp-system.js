@@ -347,7 +347,7 @@
     }
   }
 
-    function refreshBoth() { loadHoldersBoard(); loadActivityBoard(); }
+    function refreshBoth() { loadHolders(); loadActivity(); }
 
     // ═══════════════════════════════════════════════════════
     //  ADD XP — wallet-keyed, works on mobile + desktop
