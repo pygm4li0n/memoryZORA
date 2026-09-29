@@ -38,11 +38,6 @@
     <link rel="stylesheet" href="rankings-epic.css">
     <link rel="stylesheet" href="theme-accents-fix.css">
 
-    
-    <!-- ⚑ MSN Retro Revamp — global overlay theme -->
-    <script>document.documentElement.classList.add('msn-retro');</script>
-    <link rel="stylesheet" href="msn-retro-revamp.css">
-
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
     <script>
@@ -145,6 +140,20 @@
             box-shadow: 0 0 10px rgba(255, 92, 124, 0.4);
         }
     </style>
+
+    <!-- ⚑ MSN Retro Revamp — MUST load last so it beats inline <style> and all other CSS -->
+    <script>
+        (function () {
+            var root = document.documentElement;
+            root.classList.add('msn-retro');
+            function stampBody() {
+                if (document.body) document.body.classList.add('msn-retro');
+            }
+            stampBody();
+            document.addEventListener('DOMContentLoaded', stampBody);
+        })();
+    </script>
+    <link rel="stylesheet" href="msn-retro-revamp.css?v=2">
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
@@ -384,7 +393,7 @@
     <script src="script.js?v=69"></script>
     <script src="login-tracking.js?v=69"></script>
     <script src="xp-system.js?v=69"></script>
-    <script src="token-ca.js"></script> 
+    <script src="token-ca.js"></script>
     <script src="rank-badge-fix.js"></script>
 
     <script>
