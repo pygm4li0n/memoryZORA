@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════
-   msn-retro-revamp.css — v1
+   msn-retro-revamp.css — v2
    Classic MSN Messenger 7.5 / Windows XP aesthetic applied
    across the entire MSN app.
 
    Load AFTER every other stylesheet:
 
-     <link rel="stylesheet" href="msn-retro-revamp.css?v=1">
+     <link rel="stylesheet" href="msn-retro-revamp.css?v=2">
 
    Optional opt-in toggle — add this once in <head>:
      <script>document.documentElement.classList.add('msn-retro')</script>
@@ -13,6 +13,63 @@
    Then in CSS every rule is scoped to html.msn-retro so the
    theme can be turned off by removing the class.
    ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   ▼ CHANGED — STEP 1: flip the base theme's CSS variables
+   under html.msn-retro. This alone repaints ~80% of the app
+   because style.css is entirely variable-driven.
+   ═══════════════════════════════════════════════════════════ */
+html.msn-retro {
+    /* surfaces */
+    --bg-deep:        #dfe6ee;
+    --bg-panel:       #ece9e2;
+    --bg-elevated:    #f5f2eb;
+    --bg-input:       #ffffff;
+    --bg-hover:       #d6ebfa;
+    --bg-secondary:   #d4d0c8;
+
+    /* accents — flattened XP palette */
+    --accent-cyan:    #0a4a9a;
+    --accent-blue:    #1565b8;
+    --accent-purple:  #0a4a9a;
+    --accent-pink:    #c13535;
+    --accent-magenta: #c13535;
+    --accent-yellow:  #c8a72e;
+    --accent-green:   #4aa832;
+    --accent-lime:    #4aa832;
+    --accent-orange:  #c8702e;
+    --accent-red:     #c13535;
+
+    /* glows → nothing. XP had no neon. */
+    --glow-cyan:    none;
+    --glow-purple:  none;
+    --glow-magenta: none;
+    --glow-yellow:  none;
+    --glow-green:   none;
+
+    /* text */
+    --text-primary:   #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --text-muted:     #8a8780;
+
+    /* borders */
+    --border-subtle:  #c8c4bc;
+    --border-default: #8a8780;
+    --border-strong:  #6a675f;
+    --border-glow:    rgba(10,74,154,.35);
+
+    /* shape + type */
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-xl: 8px;
+    --font-main: Tahoma, Verdana, "Segoe UI", sans-serif;
+
+    /* feedback */
+    --danger:  #c13535;
+    --success: #4aa832;
+    --warning: #c8a72e;
+}
 
 :root {
     --msn-blue-1: #0a4a9a;   /* deep  */
@@ -123,8 +180,11 @@ html.msn-retro #walletAddress {
 
 /* ═══════════════════════════════════════════════════════════
    HEADER BUTTONS — glossy glass style
+   ▼ CHANGED — exclude .header-theme-btn so it stays round.
+   The inline <style> in the HTML wants it circular (50%);
+   without :not() here the retro skin squares it off.
    ═══════════════════════════════════════════════════════════ */
-html.msn-retro .header-right .btn-icon {
+html.msn-retro .header-right .btn-icon:not(.header-theme-btn) {
     width: 34px !important;
     height: 34px !important;
     border-radius: 4px !important;
@@ -143,12 +203,12 @@ html.msn-retro .header-right .btn-icon {
     font-size: 1rem !important;
 }
 
-html.msn-retro .header-right .btn-icon:hover {
+html.msn-retro .header-right .btn-icon:not(.header-theme-btn):hover {
     filter: brightness(1.25) saturate(1.1) !important;
     transform: translateY(-1px) !important;
 }
 
-html.msn-retro .header-right .btn-icon:active {
+html.msn-retro .header-right .btn-icon:not(.header-theme-btn):active {
     transform: translateY(1px) !important;
     box-shadow:
         0 1px 3px rgba(0,0,0,.4) inset !important;
@@ -517,9 +577,15 @@ html.msn-retro .reply-ref-block .r-text {
     font-size: .74rem !important;
 }
 
-/* Message actions */
+/* Message actions
+   ▼ CHANGED — reset the base theme's position:absolute so the
+   Reply/Delete buttons sit BELOW the message, not on top of it. */
 html.msn-retro .msg-actions-container {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
     display: flex !important;
+    justify-content: flex-end !important;
     gap: 4px !important;
     margin-top: 6px !important;
     opacity: 0;
@@ -719,8 +785,10 @@ html.msn-retro .cancel-btn:hover {
 
 /* ═══════════════════════════════════════════════════════════
    BUTTONS — global glossy style
+   ▼ CHANGED — also exclude .header-theme-btn and .sidebar-theme-btn
+   so they keep their circular shape from the inline <style>.
    ═══════════════════════════════════════════════════════════ */
-html.msn-retro .btn-icon:not(.x-auth-btn):not(.sidebar-user-item .private-btn) {
+html.msn-retro .btn-icon:not(.x-auth-btn):not(.header-theme-btn):not(.sidebar-theme-btn):not(.sidebar-user-item .private-btn) {
     background: linear-gradient(180deg, #fafafa 0%, #e4e0d8 100%) !important;
     border: 1px solid var(--msn-silver-3) !important;
     border-radius: 3px !important;
@@ -730,7 +798,7 @@ html.msn-retro .btn-icon:not(.x-auth-btn):not(.sidebar-user-item .private-btn) {
         0 -1px 0 rgba(0,0,0,.06) inset !important;
     transition: all .12s ease;
 }
-html.msn-retro .btn-icon:hover:not(.x-auth-btn):not(.sidebar-user-item .private-btn) {
+html.msn-retro .btn-icon:hover:not(.x-auth-btn):not(.header-theme-btn):not(.sidebar-theme-btn):not(.sidebar-user-item .private-btn) {
     border-color: var(--msn-blue-2) !important;
     background: linear-gradient(180deg, #fff 0%, var(--msn-blue-5) 100%) !important;
     color: var(--msn-blue-1) !important;
@@ -783,8 +851,15 @@ html.msn-retro .overlay-card {
         0 0 0 4px rgba(10,74,154,.25) !important;
 }
 
-/* Fake title bar for the modal */
+/* ▼ CHANGED — fake title bar is OFF by default so it doesn't
+   stamp Rankings/Theme overlays. Re-enabled only for the
+   specific modals that should carry it. */
 html.msn-retro .overlay-card::before {
+    content: none !important;
+}
+
+html.msn-retro #nameOverlay .overlay-card::before,
+html.msn-retro #modSettingsOverlay .overlay-card::before {
     content: 'Meme Social Network';
     display: block;
     background: linear-gradient(180deg,
@@ -799,9 +874,16 @@ html.msn-retro .overlay-card::before {
     letter-spacing: .04em;
 }
 
-html.msn-retro .overlay-card > * {
+/* ▼ CHANGED — side padding only for the modals that have a title
+   bar. Rankings and Theme overlays keep their full-width headers. */
+html.msn-retro #nameOverlay .overlay-card > *,
+html.msn-retro #modSettingsOverlay .overlay-card > * {
     padding-left: 20px !important;
     padding-right: 20px !important;
+}
+html.msn-retro .rankings-card > * {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 html.msn-retro .overlay-card h3 {
@@ -1074,7 +1156,8 @@ html.msn-retro .overlay-full:not(.hidden) .overlay-card {
     html.msn-retro .overlay-card {
         border-radius: 5px !important;
     }
-    html.msn-retro .overlay-card::before {
+    html.msn-retro #nameOverlay .overlay-card::before,
+    html.msn-retro #modSettingsOverlay .overlay-card::before {
         font-size: .72rem !important;
         padding: 5px 10px !important;
     }
