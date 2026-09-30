@@ -166,17 +166,20 @@
     const sb = getSB();
     if (!sb) { el.innerHTML = '<div class="rankings-empty">No connection</div>'; return; }
     try {
-      const { data, error } = await sb.rpc('get_holders_leaderboard', { p_limit: 10 });
+      const { data, error } = await sb.rpc('get_holders_leaderboard', { p_limit: 30 });
       if (error) {
         console.error('[rankings] holders RPC error:', error);
         el.innerHTML = '<div class="rankings-empty">Error loading</div>';
         return;
       }
-      if (!data || !data.length) {
+      const rows = (data || []).filter(function (row) {
+        return Number(row.token_balance || 0) > 0;
+      });
+      if (!rows.length) {
         el.innerHTML = '<div class="rankings-empty">No holders yet</div>';
         return;
       }
-      el.innerHTML = data.map(function (row) {
+      el.innerHTML = rows.map(function (row) {
         const tier = badgeFromName(row.holder_tier);
         const bal  = Number(row.token_balance || 0).toLocaleString();
         return '<div class="rank-row">' +
@@ -202,19 +205,23 @@
     const sb = getSB();
     if (!sb) { el.innerHTML = '<div class="rankings-empty">No connection</div>'; return; }
     try {
-      const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 50 });
+      const { data, error } = await sb.rpc('get_activity_leaderboard', { p_limit: 150 });
       if (error) {
         console.error('[rankings] activity RPC error:', error);
         el.innerHTML = '<div class="rankings-empty">Error loading</div>';
         return;
       }
-      if (!data || !data.length) {
+           const rows = (data || [])
+        .filter(function (row) {
+          return Number(row.xp || 0) > 0;
+        })
+        .sort(function (a, b) {
+          return Number(b.xp || 0) - Number(a.xp || 0);
+        });
+      if (!rows.length) {
         el.innerHTML = '<div class="rankings-empty">No activity yet</div>';
         return;
       }
-      const rows = data.slice().sort(function (a, b) {
-        return Number(b.xp || 0) - Number(a.xp || 0);
-      });
       el.innerHTML = rows.map(function (row) {
         const xp    = Number(row.xp || 0);
         const level = Number(row.level) || levelFromXp(xp);
