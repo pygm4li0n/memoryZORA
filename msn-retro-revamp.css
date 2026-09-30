@@ -1180,3 +1180,27 @@ html.msn-retro .overlay-full:not(.hidden) .overlay-card {
         animation: none !important;
     }
 }
+
+html.msn-retro .messages-container {
+    background: #ffffff !important;
+    background-image: none !important;
+}
+html.msn-retro .msg-bubble {
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+}
+html.msn-retro .sidebar {
+    position: relative !important;
+    border-right: 2px solid var(--msn-silver-4) !important;
+    background: linear-gradient(180deg, #f0ede6 0%, #d4d0c8 100%) !important;
+}
+html.msn-retro .big-rank,
+html.msn-retro .big-level {
+    background: linear-gradient(180deg, #fff6c8 0%, #e8c54a 100%) !important;
+    color: #4a3a00 !important;
+    border: 1px solid #8a7200 !important;
+    box-shadow: none !important;
+}
+html.msn-retro .sidebar-footer {
+    background: linear-gradient(180deg, var(--msn-silver-2) 0%, var(--msn-silver-3) 100%) !important;
+}
