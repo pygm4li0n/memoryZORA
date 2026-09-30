@@ -75,6 +75,8 @@ html, body {
 @media (min-width: 769px) {
     .header-right .wallet-address { display: inline !important; }
 }
+.sidebar-footer .wallet-address { display: none; }
+
 @media (max-width: 768px) {
     .header-right .wallet-address { display: none !important; }
     .sidebar-footer .wallet-address {
@@ -82,7 +84,6 @@ html, body {
         font-size: 0.75rem !important;
     }
 }
-.sidebar-footer .wallet-address { display: none; }
 
 /* ── Phantom Wallet perfect fit ── */
 html, body {
@@ -256,29 +257,6 @@ html, body {
     .header-right .phantom-btn img {
         width: 24px; height: 24px;
         object-fit: contain;
-    }
-    .header-right .theme-select {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        width: 34px; height: 34px;
-        padding: 0;
-        border-radius: 50%;
-        border: 1px solid var(--border-default, #454B4B);
-        background: var(--bg-elevated, #1e2221);
-        color: var(--text-primary, #ffffff);
-        font-size: 0;
-        text-align: center;
-        cursor: pointer;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-    }
-    .header-right .theme-select option {
-        background: var(--bg-panel, #111827);
-        color: var(--text-primary, #ffffff);
-        font-size: 0.8rem;
     }
 }
 
@@ -784,15 +762,29 @@ html body .streak-toast.visible {
    ⚑ PINNED ANNOUNCEMENT
 ═════════════════════════════════════════════════════ */
 html body .mod-message-box {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
     align-self: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
     margin: 8px 0 !important;
     padding: 10px 20px !important;
     border-radius: 6px !important;
-    justify-content: center !important;
     text-align: center !important;
     box-sizing: border-box !important;
+    background: linear-gradient(145deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(0, 0, 0, 0.25) 100%) !important;
+    border: 1px solid var(--border-default, #70442D) !important;
+    border-left: 4px solid var(--accent-yellow, #EAB308) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+        0 0 14px rgba(234, 179, 8, 0.15) !important;
 }
 html body .mod-message-box .mod-message-text {
     flex: 0 1 auto !important;
@@ -1205,27 +1197,7 @@ html body .mod-message-box .mod-badge { flex-shrink: 0 !important; }
 /* ═════════════════════════════════════════════════════
    ⚑ THEME SELECTOR — emoji LEFT, text CENTERED, 2× bigger
 ═════════════════════════════════════════════════════ */
-.theme-select,
-select.theme-select,
-#themeSelect,
-#themeSelector {
-    text-align: center !important;
-    text-align-last: center !important;
-    font-size: 1.6rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.04em !important;
-    padding: 8px 12px !important;
-    height: auto !important;
-    min-height: 44px !important;
-    line-height: 1.2 !important;
-}
-.theme-select::-webkit-inner-spin-button,
-.theme-select::-webkit-calendar-picker-indicator { display: none; }
-.theme-select option {
-    font-size: 1.1rem !important;
-    text-align: center !important;
-    padding: 8px 10px !important;
-}
+
 #headerThemeBtn:not(.msn-rs-card),
 .theme-btn,
 button.theme-select {
@@ -1354,9 +1326,6 @@ button.theme-select {
 #themeModal .theme-option.selected,
 .theme-picker-overlay .theme-option.selected {
     font-weight: 800 !important;
-}
-@media (max-width: 768px) {
-    .header-right .theme-select { font-size: 0 !important; }
 }
 
 /* ═════════════════════════════════════════════════════
@@ -1492,10 +1461,6 @@ button.theme-select {
     0%, 100% { opacity: 0; } 
     50%      { opacity: 0; } 
 }
-@keyframes phantomPulse { 
-    0%, 100% { transform: none; opacity: 0; } 
-    50%      { transform: none; opacity: 0; } 
-}
 
 /* Message area — themes own the background. Neutral black text-shadow
    for legibility only. */
@@ -1503,6 +1468,8 @@ button.theme-select {
     text-shadow:
         0 1px 0 rgba(0, 0, 0, 0.9),
         0 0 1px rgba(0, 0, 0, 0.7) !important;
+}
+
 .messages-container {
     background-color: transparent !important;
     background-image:
@@ -1736,34 +1703,6 @@ button.theme-select {
    the badge on both sides so centering stays exact.
 ═════════════════════════════════════════════════════ */
 
-/* ── Container — anchor for the absolutely-positioned badge ── */
-html body .mod-message-box {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 0 !important; /* badge is absolute — no gap needed */
-
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 10px 0 !important;
-    padding: 12px 22px !important;
-
-    border-radius: 6px !important;
-    box-sizing: border-box !important;
-
-    background: linear-gradient(145deg,
-        rgba(255, 255, 255, 0.04) 0%,
-        rgba(0, 0, 0, 0.25) 100%) !important;
-    border: 1px solid var(--border-default, #70442D) !important;
-    border-left: 4px solid var(--accent-yellow, #EAB308) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-        0 0 14px rgba(234, 179, 8, 0.15) !important;
-
-    position: relative !important;
-}
 
 /* ── PINNED badge — slightly bigger than before, absolutely positioned left ── */
 html body .mod-message-box .mod-badge {
