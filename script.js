@@ -145,36 +145,8 @@
                 }
             }
 
-            /* ── Rank + XP badges ── */
-            .big-rank {
-                display: inline-block !important;
-                font-size: 0.72rem !important;
-                padding: 3px 10px !important;
-                margin-top: 5px !important;
-                border-radius: 4px !important;
-                background: linear-gradient(135deg, #C9A84E 0%, #A88A3A 100%) !important;
-                color: #1a0f00 !important;
-                font-weight: 800 !important;
-                letter-spacing: 0.06em !important;
-                text-transform: uppercase !important;
-                box-shadow: 0 0 10px rgba(201, 168, 78, 0.4) !important;
-                border: none !important;
-            }
+            /* ── Rank + XP badges — styling owned by themes ── */
             .big-rank.hidden { display: none !important; }
-            .big-level {
-                display: inline-block !important;
-                font-size: 0.72rem !important;
-                padding: 3px 9px !important;
-                margin-top: 5px !important;
-                border-radius: 4px !important;
-                background: rgba(1, 225, 234, 0.12) !important;
-                color: #01E1EA !important;
-                border: 1px solid #01E1EA !important;
-                font-weight: 700 !important;
-                letter-spacing: 0.04em !important;
-                box-shadow: 0 0 8px rgba(1, 225, 234, 0.3) !important;
-                text-shadow: 0 0 6px rgba(1, 225, 234, 0.5) !important;
-            }
             .big-level.hidden { display: none !important; }
 
             @media (max-width: 768px) {
