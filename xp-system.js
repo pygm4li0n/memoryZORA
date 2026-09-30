@@ -160,13 +160,13 @@
   }
 
   // ── TOP HOLDERS ──
-  async function loadHolders() {
+   async function loadHolders() {
     const el = document.getElementById('holdersLeaderboard');
     if (!el) return;
     const sb = getSB();
     if (!sb) { el.innerHTML = '<div class="rankings-empty">No connection</div>'; return; }
     try {
-      const { data, error } = await sb.rpc('get_holders_leaderboard', { p_limit: 30 });
+      const { data, error } = await sb.rpc('get_holders_leaderboard', { p_limit: 40 });
       if (error) {
         console.error('[rankings] holders RPC error:', error);
         el.innerHTML = '<div class="rankings-empty">Error loading</div>';
@@ -179,7 +179,7 @@
         el.innerHTML = '<div class="rankings-empty">No holders yet</div>';
         return;
       }
-      el.innerHTML = rows.map(function (row) {
+      el.innerHTML = rows.slice(0, 10).map(function (row) {
         const tier = badgeFromName(row.holder_tier);
         const bal  = Number(row.token_balance || 0).toLocaleString();
         return '<div class="rank-row">' +
@@ -199,7 +199,7 @@
   }
 
   // ── TOP ACTIVITY ──
-  async function loadActivity() {
+   async function loadActivity() {
     const el = document.getElementById('activityLeaderboard');
     if (!el) return;
     const sb = getSB();
@@ -211,13 +211,10 @@
         el.innerHTML = '<div class="rankings-empty">Error loading</div>';
         return;
       }
-           const rows = (data || [])
-        .filter(function (row) {
-          return Number(row.xp || 0) > 0;
-        })
-        .sort(function (a, b) {
-          return Number(b.xp || 0) - Number(a.xp || 0);
-        });
+      const rows = (data || [])
+        .filter(function (row) { return Number(row.xp || 0) > 0; })
+        .sort(function (a, b) { return Number(b.xp || 0) - Number(a.xp || 0); })
+        .slice(0, 50);
       if (!rows.length) {
         el.innerHTML = '<div class="rankings-empty">No activity yet</div>';
         return;
