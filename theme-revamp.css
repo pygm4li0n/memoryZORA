@@ -629,7 +629,7 @@ select:focus-visible,
    ANY other rule, regardless of load order or !important.
 */
 html body #modSettingsOverlay #modPostAnnouncementBtn,
-html body #modPostAnnouncementBtn#modPostAnnouncementBtn#modPostAnnouncementBtn {
+html body #modPostAnnouncementBtn {
     /* kill every previously-set background */
     background: var(--accent-cyan, #39FF14) !important;
     background-image: none !important;
