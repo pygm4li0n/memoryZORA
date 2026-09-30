@@ -142,20 +142,6 @@
             box-shadow: 0 0 10px rgba(255, 92, 124, 0.4);
         }
     </style>
-
-    <!-- ⚑ MSN Retro Revamp — MUST load last so it beats inline <style> and all other CSS -->
-    <script>
-        (function () {
-            var root = document.documentElement;
-            root.classList.add('msn-retro');
-            function stampBody() {
-                if (document.body) document.body.classList.add('msn-retro');
-            }
-            stampBody();
-            document.addEventListener('DOMContentLoaded', stampBody);
-        })();
-    </script>
-    <link rel="stylesheet" href="msn-retro-revamp.css?v=2">
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
@@ -413,12 +399,12 @@
             };
 
             function setTheme(themeId) {
-    if (!themes[themeId]) themeId = 'original';
-    themeLink.setAttribute('href', themes[themeId]);
-    localStorage.setItem(THEME_KEY, themeId);
-    document.documentElement.setAttribute('data-theme', themeId);
-    highlightCurrentTheme();
-}
+                if (!themes[themeId]) themeId = 'original';
+                themeLink.setAttribute('href', themes[themeId]);
+                localStorage.setItem(THEME_KEY, themeId);
+                document.documentElement.setAttribute('data-theme', themeId);
+                highlightCurrentTheme();
+            }
 
             const headerThemeBtn = document.getElementById('headerThemeBtn');
             const sidebarThemeBtn = document.getElementById('sidebarThemeBtn');
