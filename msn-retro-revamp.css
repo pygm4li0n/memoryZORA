@@ -858,7 +858,6 @@ html.msn-retro .overlay-card::before {
     content: none !important;
 }
 
-html.msn-retro #nameOverlay .overlay-card::before,
 html.msn-retro #modSettingsOverlay .overlay-card::before {
     content: 'Meme Social Network';
     display: block;
@@ -876,7 +875,6 @@ html.msn-retro #modSettingsOverlay .overlay-card::before {
 
 /* ▼ CHANGED — side padding only for the modals that have a title
    bar. Rankings and Theme overlays keep their full-width headers. */
-html.msn-retro #nameOverlay .overlay-card > *,
 html.msn-retro #modSettingsOverlay .overlay-card > * {
     padding-left: 20px !important;
     padding-right: 20px !important;
